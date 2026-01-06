@@ -33,10 +33,9 @@ ssh -i "your-key.pem" ubuntu@<your-ec2-public-ip>
     ```
 
 2.  **Run the Script**:
-    Replace `<YOUR_REPO_URL>` with your actual GitHub repository URL (e.g., https://github.com/username/hewor_project.git).
     
     ```bash
-    ./setup_server.sh <YOUR_REPO_URL>
+    ./setup_server.sh https://github.com/rajahmishra11073/hewor_project.git
     ```
 
     *This script will install Python, MySQL, Nginx, Gunicorn, clone your code, and set up the services.*
