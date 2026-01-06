@@ -1,0 +1,19 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{# Note: 500 template cannot rely on context processors if they fail, but typically base.html is fine if it doesn't #}
+{# access db too much. #}
+{# Standard practice is to keep it simple or not extend if base is complex. #}
+{# However, assuming base is safe enough: #}
+{% block content %}
+<div class="container text-center py-5"
+    style="min-height: 70vh; display: flex; flex-direction: column; justify-content: center;">
+    <h1 class="display-1 fw-bold text-danger">500</h1>
+    <h2 class="mb-4">Server Error</h2>
+    <p class="lead text-muted mb-5">
+        Something went wrong on our end. We are working to fix it. Please try again later.
+    </p>
+    <div>
+        <a href="{% url 'home' %}" class="btn btn-outline-primary btn-lg px-5">Return Home</a>
+    </div>
+</div>
+{% endblock %}

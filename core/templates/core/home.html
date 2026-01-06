@@ -1,0 +1,281 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="row align-items-center py-5" style="min-height: 80vh;">
+    <div class="col-lg-6 z-2" data-aos="fade-right">
+        <span class="badge bg-light text-primary border border-primary px-3 py-2 rounded-pill mb-3 fw-bold">🎓 Exclusive
+            for Academicians</span>
+        <h1 class="display-3 fw-bold mb-4">
+            Focus on Research.<br>We Handle the <span class="text-gradient">Grind.</span>
+        </h1>
+        <p class="lead text-muted mb-4 pe-lg-5">
+            Your dedicated <b>Academic Assistant</b>. We specialize in Book Typing, Thesis Formatting, and PPT Design
+            for Professors who value their time.
+        </p>
+
+        <div class="d-flex gap-3">
+            {% if user.is_authenticated %}
+            <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg shadow-lg">
+                <i class="fas fa-file-alt me-2"></i>Delegate Work
+            </a>
+            {% else %}
+            <a href="{% url 'signup' %}" class="btn btn-primary btn-lg shadow-lg">
+                Hire Assistant
+            </a>
+            <a href="{% url 'login' %}" class="btn btn-outline-primary">
+                Login
+            </a>
+            {% endif %}
+            <a href="#services" class="btn btn-link text-muted text-decoration-none">How it works <i
+                    class="fas fa-arrow-down ms-1"></i></a>
+        </div>
+        <!-- Removed "Fake Ratings" section as requested -->
+    </div>
+
+    <!-- 3D Model Container -->
+    <div class="col-lg-6 position-relative text-center" style="height: 600px;" data-aos="fade-left">
+
+
+        <!-- 
+            CURRENT: Robot Placeholder (Tracks Mouse)
+            
+            TO REPLACE WITH "PROFESSOR WITH BOOK":
+            1. Go to spline.design and find/create a "Professor" 3D model.
+            2. Select the Head/Eyes of the character.
+            3. Add Event: "Mouse Hover" -> Action: "Look At" -> Target: "Mouse".
+            4. Click "Export" -> "Viewer" -> Copy the "Embed URL".
+            5. Paste the URL below in the 'url' attribute.
+        -->
+        <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+            background="transparent"></spline-viewer>
+    </div>
+</div>
+
+<!-- Trust/Marquee Section (Infinite Scroll) -->
+<!-- Trust/Marquee Section (Infinite Scroll) -->
+<div class="py-4 my-5 mx-n3 overflow-hidden position-relative company-marquee" data-aos="fade-in">
+    <p class="text-center text-secondary small fw-bold mb-4 letter-spacing-2">TRUSTED BY PROFESSORS & BRANDS</p>
+
+    <div class="marquee-wrapper">
+        <div class="marquee-content d-flex align-items-center">
+            <!-- Original List -->
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-university me-2 fa-2x"></i><span class="h4 fw-bold mb-0">VJU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-graduation-cap me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IILM</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-building me-2 fa-2x"></i><span class="h4 fw-bold mb-0">GALGOTIAS</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-book-reader me-2 fa-2x"></i><span class="h4 fw-bold mb-0">NIET</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-landmark me-2 fa-2x"></i><span class="h4 fw-bold mb-0">BFGOI</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-columns me-2 fa-2x"></i><span class="h4 fw-bold mb-0">DU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-scroll me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IGNOU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-school me-2 fa-2x"></i><span class="h4 fw-bold mb-0">AMITY</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-globe-asia me-2 fa-2x"></i><span class="h4 fw-bold mb-0">JNU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-certificate me-2 fa-2x"></i><span class="h4 fw-bold mb-0">SHARDA</span></div>
+
+            <!-- Duplicate Content for Infinite Loop -->
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-university me-2 fa-2x"></i><span class="h4 fw-bold mb-0">VJU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-graduation-cap me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IILM</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-building me-2 fa-2x"></i><span class="h4 fw-bold mb-0">GALGOTIAS</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-book-reader me-2 fa-2x"></i><span class="h4 fw-bold mb-0">NIET</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-landmark me-2 fa-2x"></i><span class="h4 fw-bold mb-0">BFGOI</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-columns me-2 fa-2x"></i><span class="h4 fw-bold mb-0">DU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-scroll me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IGNOU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-school me-2 fa-2x"></i><span class="h4 fw-bold mb-0">AMITY</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-globe-asia me-2 fa-2x"></i><span class="h4 fw-bold mb-0">JNU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-certificate me-2 fa-2x"></i><span class="h4 fw-bold mb-0">SHARDA</span></div>
+
+            <!-- Duplicate Content for Infinite Loop -->
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-university me-2 fa-2x"></i><span class="h4 fw-bold mb-0">VJU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-graduation-cap me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IILM</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-building me-2 fa-2x"></i><span class="h4 fw-bold mb-0">GALGOTIAS</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-book-reader me-2 fa-2x"></i><span class="h4 fw-bold mb-0">NIET</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-landmark me-2 fa-2x"></i><span class="h4 fw-bold mb-0">BFGOI</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-columns me-2 fa-2x"></i><span class="h4 fw-bold mb-0">DU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-scroll me-2 fa-2x"></i><span class="h4 fw-bold mb-0">IGNOU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-school me-2 fa-2x"></i><span class="h4 fw-bold mb-0">AMITY</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-globe-asia me-2 fa-2x"></i><span class="h4 fw-bold mb-0">JNU</span></div>
+            <div class="mx-5 d-flex align-items-center opacity-75 branding-item"><i
+                    class="fas fa-certificate me-2 fa-2x"></i><span class="h4 fw-bold mb-0">SHARDA</span></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .marquee-wrapper {
+        width: 100%;
+        overflow: hidden;
+        white-space: nowrap;
+        mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+        -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    }
+
+    .marquee-content {
+        display: inline-block;
+        animation: marquee 30s linear infinite;
+    }
+
+    .branding-item {
+        color: var(--text-muted);
+        transition: transform 0.3s, opacity 0.3s;
+    }
+
+    [data-theme="dark"] .branding-item {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .branding-item:hover {
+        transform: scale(1.1);
+        opacity: 1 !important;
+        color: var(--primary-color) !important;
+    }
+
+    @keyframes marquee {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+</style>
+
+<!-- Services Section -->
+<div class="py-5 my-5" id="services">
+    <div class="text-center mb-5" data-aos="fade-up">
+        <span class="text-primary fw-bold letter-spacing-2">OUR SERVICES</span>
+        <h2 class="display-5 fw-bold mt-2">Premium Solutions</h2>
+    </div>
+    <div class="row g-4">
+        <!-- Card 1 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up">
+                <div class="icon-box bg-light text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-sm"
+                    style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="fas fa-file-powerpoint"></i>
+                </div>
+                <h4 class="fw-bold">PPT Design</h4>
+                <p class="text-muted mt-3">We create story-driven presentations that captivate audiences and secure high
+                    grades.</p>
+            </div>
+        </div>
+        <!-- Card 2 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up">
+                <div class="icon-box bg-light text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-sm"
+                    style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="fas fa-keyboard"></i>
+                </div>
+                <h4 class="fw-bold">Book Typing</h4>
+                <p class="text-muted mt-3">From handwritten notes to digital manuscripts. 99.9% accuracy with proper
+                    formatting.</p>
+            </div>
+        </div>
+        <!-- Card 3 -->
+        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up">
+                <div class="icon-box bg-light text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-sm"
+                    style="width: 80px; height: 80px; font-size: 2rem;">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h4 class="fw-bold">Data Entry</h4>
+                <p class="text-muted mt-3">Complex Excel sheets, web research, and data cleaning handled by experts.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Process Section -->
+<div class="py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">How It Works</h2>
+        <p class="text-muted">Simple 3-step process to get your work done.</p>
+    </div>
+    <div class="row text-center">
+        <div class="col-md-4 position-relative">
+            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
+                style="z-index: -1; opacity: 0.5;">01</div>
+            <i class="fas fa-upload fa-2x text-primary mb-3 mt-4"></i>
+            <h5>Post Requirement</h5>
+            <p class="text-muted small">Fill the form and upload your raw files.</p>
+        </div>
+        <div class="col-md-4 position-relative">
+            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
+                style="z-index: -1; opacity: 0.5;">02</div>
+            <i class="fas fa-tools fa-2x text-primary mb-3 mt-4"></i>
+            <h5>We Work</h5>
+            <p class="text-muted small">Our expert team completes your task.</p>
+        </div>
+        <div class="col-md-4 position-relative">
+            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
+                style="z-index: -1; opacity: 0.5;">03</div>
+            <i class="fas fa-check-double fa-2x text-primary mb-3 mt-4"></i>
+            <h5>Verify & Pay</h5>
+            <p class="text-muted small">Review the work, pay, and download.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-up {
+        transition: transform 0.3s;
+    }
+
+    .hover-up:hover {
+        transform: translateY(-10px);
+    }
+</style>
+
+<script>
+    // Remove "Built with Spline" badge from Shadow DOM
+    document.addEventListener('DOMContentLoaded', () => {
+        const checkSpline = setInterval(() => {
+            const viewer = document.querySelector('spline-viewer');
+            if (viewer && viewer.shadowRoot) {
+                const logo = viewer.shadowRoot.querySelector('#logo');
+                if (logo) {
+                    logo.style.display = 'none';
+                    // Optional: Stop checking once found and hidden, 
+                    // but sometimes it gets recreated, so we might want to keep the style injection strictly.
+                    // Better approach: Inject style tag once.
+                    const style = document.createElement('style');
+                    style.textContent = '#logo { display: none !important; }';
+                    viewer.shadowRoot.appendChild(style);
+                    clearInterval(checkSpline); // Stop the interval
+                }
+            }
+        }, 100); // Check every 100ms
+
+        // Safety timeout to stop checking after 10 seconds
+        setTimeout(() => clearInterval(checkSpline), 10000);
+    });
+</script>
+{% endblock %}

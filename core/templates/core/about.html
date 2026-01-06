@@ -1,0 +1,77 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">{{ setting.about_title|default:"About Hewor" }}</h1>
+            <div class="lead text-muted">
+                {% if setting.about_description %}
+                {{ setting.about_description|linebreaks }}
+                {% else %}
+                <p>Welcome to Hewor. We are a dedicated team providing top-notch digital services. From presentation
+                    design to data entry, we handle it all with precision and care.</p>
+                {% endif %}
+            </div>
+            <a href="{% url 'contact' %}" class="btn btn-primary btn-lg mt-3">Work With Us</a>
+        </div>
+        <div class="col-lg-6 text-center">
+            {% if setting.about_image %}
+            <img src="{{ setting.about_image.url }}" class="img-fluid rounded shadow-lg" alt="About Us">
+            {% else %}
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                class="img-fluid rounded shadow-lg" alt="Team">
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Trust Section -->
+    <div class="row text-center mt-5 bg-white shadow-sm py-5 rounded-4 mb-5" data-aos="fade-up">
+        <div class="col-md-4">
+            <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+            <h4>Trusted & Secure</h4>
+            <p class="text-muted">Your data is safe with us.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+            <h4>On-Time Delivery</h4>
+            <p class="text-muted">We respect your deadlines.</p>
+        </div>
+        <div class="col-md-4">
+            <i class="fas fa-user-check fa-3x text-primary mb-3"></i>
+            <h4>Expert Team</h4>
+            <p class="text-muted">Verified professionals only.</p>
+        </div>
+    </div>
+
+    <!-- Leadership Section -->
+    <div class="text-center mb-5" data-aos="fade-up">
+        <h2 class="fw-bold">Meet Our Leadership</h2>
+        <p class="text-muted">The minds behind Hewor.</p>
+    </div>
+    <div class="row justify-content-center text-center">
+        <div class="col-md-4" data-aos="zoom-in" data-aos-delay="200">
+            <div class="card glass-card border-0 h-100 hover-up">
+                <!-- Placeholder for Founder Image -->
+                <div class="card-body p-5">
+                    <div class="mb-4">
+                        <div class="d-inline-block p-1 rounded-circle border border-2 border-primary">
+                            <img src="/media/Rajesh.jpg" alt="CEO" class="rounded-circle" width="120" height="120">
+                        </div>
+                    </div>
+                    <h3 class="fw-bold">Rajesh Kumar Mishra</h3>
+                    <p class="text-primary fw-bold letter-spacing-2 small">FOUNDER & CEO</p>
+                    <p class="text-muted mt-3">"I started Hewor with a simple mission: To let students study while we
+                        handle the grunt work. We are the future of academic assistance."</p>
+
+                    <div class="mt-4">
+                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin fa-lg"></i></a>
+                        <a href="#" class="text-primary"><i class="fab fa-twitter fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

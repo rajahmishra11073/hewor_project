@@ -1,0 +1,62 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card glass-card no-tilt border-0">
+            <div class="card-body p-5">
+                <h3 class="mb-4 fw-bold">Tell Us About Your Work</h3>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">What do you need?</label>
+                        <select name="service_type" class="form-select">
+                            <option value="consultation">I want a Consultation Call First</option>
+                            <option value="presentation">Make PPT from Book/Notes</option>
+                            <option value="book_typing">Type a Book to Word/Excel</option>
+                            <option value="other">Other Custom Work</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Project Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g., Class 10 Science PPTs"
+                            required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Your Phone Number</label>
+                            <input type="text" name="phone_number" class="form-control" placeholder="+91..." required>
+                        </div>
+                        <div class="col-md-6 mb-3 pt-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="request_call" id="callCheck"
+                                    checked>
+                                <label class="form-check-label" for="callCheck">
+                                    Please call me to discuss details
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Detailed Requirements</label>
+                        <textarea name="description" class="form-control" rows="4"
+                            placeholder="Tell us specifically what you need..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Upload Sample (Optional)</label>
+                        <input type="file" name="file_upload" class="form-control">
+                        <small class="text-muted">Upload a sample chapter or image.</small>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold">Submit Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

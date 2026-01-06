@@ -1,0 +1,187 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<style>
+    /* Chat specific styles */
+    .chat-box {
+        height: 450px;
+        overflow-y: auto;
+        background-color: #e5ddd5;
+        /* WhatsApp-like background */
+        border: 1px solid #ddd;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        padding: 10px 15px;
+        border-radius: 15px;
+        position: relative;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+    }
+
+    /* User's Message (Green, Right aligned) */
+    .message-sent {
+        background-color: #dcf8c6;
+        margin-left: auto;
+        /* Pushes to right */
+        border-top-right-radius: 0;
+    }
+
+    /* Admin's Message (White, Left aligned) */
+    .message-received {
+        background-color: #ffffff;
+        margin-right: auto;
+        /* Pushes to left */
+        border-top-left-radius: 0;
+    }
+
+    .timestamp {
+        font-size: 0.7rem;
+        color: #999;
+        display: block;
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    .sender-name {
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: #555;
+        margin-bottom: 2px;
+        display: block;
+    }
+</style>
+
+<div class="container py-5">
+
+    <!-- Back Button -->
+    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary mb-4"><i class="fas fa-arrow-left"></i> Back to
+        Dashboard</a>
+
+    <div class="row">
+        <!-- LEFT SIDE: ORDER DETAILS -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">Project Details</h5>
+                </div>
+                <div class="card-body">
+                    <h4 class="fw-bold text-primary">{{ order.title }}</h4>
+                    <p class="badge bg-secondary">{{ order.get_service_type_display }}</p>
+
+                    <hr>
+
+                    <p class="text-muted mb-1">Status:</p>
+                    {% if order.status == 'completed' %}
+                    <span class="badge bg-success fs-6">Completed</span>
+                    {% elif order.status == 'in_progress' %}
+                    <span class="badge bg-info fs-6">In Progress</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark fs-6">Pending</span>
+                    {% endif %}
+
+                    <div class="mt-3">
+                        <p class="text-muted mb-1">Payment:</p>
+                        {% if order.is_paid %}
+                        <span class="text-success fw-bold"><i class="fas fa-check-circle"></i> Paid</span>
+                        {% else %}
+                        <span class="text-danger fw-bold">Unpaid</span>
+                        <a href="{% url 'payment' order.id %}" class="btn btn-sm btn-success ms-2">Pay Now</a>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <h6 class="fw-bold">Description:</h6>
+                        <p class="small text-muted bg-light p-3 rounded">{{ order.description }}</p>
+                    </div>
+
+                    {% if order.file_upload %}
+                    <div class="mt-3">
+                        <a href="{{ order.file_upload.url }}" class="btn btn-outline-primary w-100" download>
+                            <i class="fas fa-download me-2"></i>Download Your Project File
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- DELIVERY SECTION (NEW) -->
+                {% if order.delivery_file %}
+                <div class="card-footer bg-success text-white">
+                    <h5 class="fw-bold mb-2"><i class="fas fa-gift me-2"></i>Project Delivered!</h5>
+                    <p class="small mb-3">{{ order.delivery_message|default:"Here is your completed project file." }}
+                    </p>
+                    <a href="{{ order.delivery_file.url }}" class="btn btn-light text-success fw-bold w-100" download>
+                        <i class="fas fa-download me-2"></i>Download Final Project
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE: CHAT & UPDATES -->
+        <div class="col-lg-8">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-comments me-2"></i>Project Discussion</h5>
+                    <span class="badge bg-light text-dark">Official Record</span>
+                </div>
+
+                <!-- CHAT BOX AREA -->
+                <div class="card-body chat-box" id="chatContainer">
+                    {% if chats %}
+                    {% for chat in chats %}
+                    <div class="d-flex w-100">
+                        <div
+                            class="message-bubble {% if chat.sender == request.user %}message-sent{% else %}message-received{% endif %}">
+
+                            <!-- Sender Name Logic -->
+                            <span class="sender-name">
+                                {% if chat.sender.is_superuser %}
+                                <i class="fas fa-user-shield text-primary"></i> Admin Team
+                                {% elif chat.sender == request.user %}
+                                You
+                                {% else %}
+                                {{ chat.sender.first_name|default:chat.sender.username }}
+                                {% endif %}
+                            </span>
+
+                            <!-- Message Content -->
+                            {{ chat.message|linebreaksbr }}
+
+                            <!-- Time -->
+                            <span class="timestamp">{{ chat.created_at|date:"M d, H:i" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center mt-5 opacity-50">
+                        <i class="fas fa-comments fa-3x mb-3 text-muted"></i>
+                        <p class="text-muted">No messages yet. Start the discussion!</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- MESSAGE INPUT FORM -->
+                <div class="card-footer bg-white py-3">
+                    <form method="POST" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="text" name="message" class="form-control form-control-lg"
+                            placeholder="Type your message..." required autocomplete="off">
+                        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Auto Scroll Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var chatBox = document.getElementById("chatContainer");
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+</script>
+{% endblock %}

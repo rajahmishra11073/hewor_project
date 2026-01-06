@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /profile/
+Sitemap: https://www.hewor.com/sitemap.xml

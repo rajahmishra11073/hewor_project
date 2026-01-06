@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">Contact Us</h1>
+        <p class="text-muted">Have a question? We'd love to hear from you.</p>
+    </div>
+
+    <div class="row g-5">
+        <!-- Contact Info (Admin Controlled) -->
+        <div class="col-md-5">
+            <div class="card bg-primary text-white h-100 border-0 shadow">
+                <div class="card-body p-5">
+                    <h3 class="mb-4">Get In Touch</h3>
+                    
+                    <div class="d-flex mb-4 align-items-start">
+                        <i class="fas fa-map-marker-alt fa-lg mt-1 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Address</h5>
+                            <p class="mb-0 op-8">{{ setting.contact_address|default:"Tech Park, New Delhi, India" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-4 align-items-start">
+                        <i class="fas fa-envelope fa-lg mt-1 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Email</h5>
+                            <p class="mb-0 op-8">{{ setting.contact_email|default:"support@hewor.com" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex mb-4 align-items-start">
+                        <i class="fas fa-phone-alt fa-lg mt-1 me-3"></i>
+                        <div>
+                            <h5 class="mb-1">Phone</h5>
+                            <p class="mb-0 op-8">{{ setting.contact_phone|default:"+91 8797456730" }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="col-md-7">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h3 class="mb-4 fw-bold">Send Message</h3>
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Your Name</label>
+                                <input type="text" name="name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Subject</label>
+                                <input type="text" name="subject" class="form-control" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Message</label>
+                                <textarea name="message" class="form-control" rows="5" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100 py-3">Send Message</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+```
+
+### Step 6: Footer Links Update (`base.html`)
+
+Ab apne footer ke links ko update karein taaki wo in naye pages par le jayein.
+
+Apne `core/templates/core/base.html` mein **Useful Links** section dhundhein aur aise update karein:
+
+```html
+<!-- ... inside footer ... -->
+<div class="footer-widget-heading">
+    <h3>Useful Links</h3>
+</div>
+<ul>
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+    <li><a href="{% url 'create_order' %}">New Service</a></li>
+    <!-- Updated Links -->
+    <li><a href="{% url 'about' %}">About Us</a></li>
+    <li><a href="{% url 'contact' %}">Contact</a></li>
+    <li><a href="#">Terms</a></li>
+</ul>
+<!-- ... -->

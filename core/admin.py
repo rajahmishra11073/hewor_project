@@ -1,0 +1,88 @@
+from django.contrib import admin
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat
+
+# --- Admin Interface Customization ---
+admin.site.site_header = "Hewor Administration"
+admin.site.site_title = "Hewor Admin Portal"
+admin.site.index_title = "Welcome to Hewor Management Dashboard"
+
+# --- Service Order Admin (FIXED) ---
+@admin.register(ServiceOrder)
+class ServiceOrderAdmin(admin.ModelAdmin):
+    # ZARURI: 'status' aur 'is_paid' yahan hona chahiye taaki niche editable mein kaam karein
+    list_display = ('title', 'user', 'service_type', 'status', 'is_paid', 'created_at', 'is_delivered')
+    
+    # Filters
+    list_filter = ('status', 'service_type', 'is_paid', 'created_at')
+    
+    # Search
+    search_fields = ('title', 'user__username', 'description', 'transaction_id')
+    
+    # Direct Edit
+    list_editable = ('status', 'is_paid')
+    
+    list_per_page = 20
+
+    fieldsets = (
+        ('Order Details', {
+            'fields': ('user', 'service_type', 'title', 'description', 'file_upload', 'request_call', 'phone_number', 'status')
+        }),
+        ('Payment Info', {
+            'fields': ('is_paid', 'transaction_id', 'payment_screenshot')
+        }),
+        ('Project Delivery (Admin Use Only)', {
+            'fields': ('delivery_file', 'delivery_message', 'completed_at'),
+            'classes': ('collapse',),
+            'description': "Upload the final file here to deliver the project to the client."
+        }),
+        ('Timestamps', {
+            'fields': ('created_at',),
+            'classes': ('collapse',),
+        }),
+    )
+    
+    readonly_fields = ('created_at',)
+
+    def is_delivered(self, obj):
+        return bool(obj.delivery_file)
+    is_delivered.boolean = True
+    is_delivered.short_description = "Delivered?"
+
+    def save_model(self, request, obj, form, change):
+        # Auto-update status if delivered
+        if obj.delivery_file and obj.status != 'completed':
+            obj.status = 'completed'
+            from django.utils import timezone
+            if not obj.completed_at:
+                obj.completed_at = timezone.now()
+        super().save_model(request, obj, form, change)
+
+# --- Order Chat Admin ---
+@admin.register(OrderChat)
+class OrderChatAdmin(admin.ModelAdmin):
+    list_display = ('order', 'sender', 'message_preview', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('message', 'order__title', 'sender__username')
+    
+    def message_preview(self, obj):
+        return obj.message[:50] + "..." if len(obj.message) > 50 else obj.message
+    message_preview.short_description = "Message"
+
+# --- Site Settings Admin ---
+@admin.register(SiteSetting)
+class SiteSettingAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        # Sirf 1 setting object allow karein
+        if SiteSetting.objects.exists():
+            return False
+        return True
+
+# --- Contact Message Admin ---
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'sent_at')
+    readonly_fields = ('name', 'email', 'subject', 'message', 'sent_at')
+    search_fields = ('name', 'email', 'subject')
+
+# --- Profile Admin ---
+admin.site.register(Profile)

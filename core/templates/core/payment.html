@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white py-3 text-center">
+                    <h4 class="mb-0 fw-bold"><i class="fas fa-wallet me-2"></i>Complete Payment</h4>
+                </div>
+                <div class="card-body p-4 text-center">
+                    
+                    <h5 class="text-muted mb-3">Project: {{ order.title }}</h5>
+                    
+                    <!-- QR Code Section -->
+                    <!-- core/templates/core/payment.html -->
+
+<div class="border p-3 mb-4 rounded bg-light d-inline-block">
+    
+    <!-- Image Source Fix -->
+    <img src="/media/pay.jpg" 
+         alt="Paytm/GPay QR" 
+         style="width: 200px; height: 200px; object-fit: contain;">
+         
+    <p class="mt-2 mb-0 fw-bold text-dark">Scan to Pay via UPI</p>
+</div>
+
+                    <div class="alert alert-info text-start">
+                        <small><i class="fas fa-info-circle"></i> <strong>Note:</strong> After payment, please upload the screenshot or enter the Transaction ID below for verification.</small>
+                    </div>
+
+                    <hr>
+
+                    <!-- Upload Form -->
+                    <form method="POST" enctype="multipart/form-data" class="text-start">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Transaction ID </label>
+                            <input type="text" name="transaction_id" class="form-control" placeholder="e.g. UPI Ref ID: 123456789">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Upload Screenshot *</label>
+                            <input type="file" name="payment_screenshot" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                            Submit Payment Proof
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

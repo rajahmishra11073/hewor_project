@@ -1,0 +1,16 @@
+Django==5.2.7
+mysqlclient
+python-dotenv
+whitenoise
+gunicorn
+django-jazzmin==3.0.1
+Pillow==12.0.0
+requests
+beautifulsoup4
+pandas
+openpyxl
+pdf2docx
+python-docx
+PyMuPDF
+django-cleanup
+firebase-admin

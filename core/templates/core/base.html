@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hewor | Premium Service Agency</title>
+
+    <!-- CSS Links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Outfit:wght@300;500;700;900&display=swap"
+        rel="stylesheet">
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Spline 3D Viewer -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></script>
+
+    <!-- Firebase SDKs (Required for Google Auth) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd0xV6JVdIYM18OkyTN3oiyqnm_GA-xG8",
+            authDomain: "hewor-project-auth.firebaseapp.com",
+            projectId: "hewor-project-auth",
+            storageBucket: "hewor-project-auth.firebasestorage.app",
+            messagingSenderId: "34381627864",
+            appId: "1:34381627864:web:9f31b0bdc798ddacb172ad"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
+    <style>
+        /* --- GLOBAL PREMIUM STYLES --- */
+        :root {
+            /* Core Brand Colors (Constant) */
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #f72585;
+
+            /* Light Mode (Default) Variables */
+            --bg-body: #f4f7fe;
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgb(242, 246, 255) 0%, rgb(219, 228, 255) 90%);
+            --text-main: #2b2d42;
+            --text-muted: #6c757d;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --navbar-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 10px 40px -10px rgba(0, 64, 128, 0.1);
+            --nav-link-color: #444;
+            --input-bg: #fff;
+            --input-border: #ced4da;
+            --input-text: #212529;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode Variables */
+            --bg-body: #0f172a;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --text-main: #f8f9fa;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --navbar-bg: rgba(15, 23, 42, 0.85);
+            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            --nav-link-color: #cbd5e1;
+            --input-bg: #1e293b;
+            --input-border: #334155;
+            --input-text: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Outfit', 'Poppins', sans-serif;
+            background-color: var(--bg-body);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* --- INSANE COMPONENTS --- */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--card-shadow);
+            border-radius: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.4s;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+        }
+
+        .btn-outline-primary {
+            border-radius: 50px;
+            border-width: 2px;
+            font-weight: 600;
+            padding: 10px 28px;
+            color: #4361ee;
+            border-color: #4361ee;
+        }
+
+        .btn-outline-primary:hover {
+            background-color: #4361ee;
+            color: #fff;
+        }
+
+        /* Text Gradients */
+        .text-gradient {
+            background: linear-gradient(45deg, #4361ee, #f72585);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* Remove default link underlined */
+        a {
+            text-decoration: none !important;
+        }
+
+        /* Utility overrides for Dark Mode */
+        [data-theme="dark"] .text-dark {
+            color: #f8f9fa !important;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #bdc3c7 !important;
+        }
+
+        [data-theme="dark"] .text-secondary {
+            color: #adb5bd !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: var(--glass-bg) !important;
+            border: 1px solid var(--glass-border);
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            color: #fff !important;
+        }
+
+        [data-theme="dark"] .card {
+            background-color: var(--glass-bg);
+            color: var(--text-main);
+            border: 1px solid var(--glass-border);
+        }
+
+        [data-theme="dark"] .card-header,
+        [data-theme="dark"] .card-footer {
+            background-color: rgba(0, 0, 0, 0.2) !important;
+            color: var(--text-main);
+            border-color: var(--glass-border);
+        }
+
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6,
+        [data-theme="dark"] p,
+        [data-theme="dark"] li,
+        [data-theme="dark"] span,
+        [data-theme="dark"] label,
+        [data-theme="dark"] th,
+        [data-theme="dark"] td {
+            color: var(--text-main);
+        }
+
+        /* Fix Table Headers and Rows in Dark Mode */
+        [data-theme="dark"] .table,
+        [data-theme="dark"] .table tr,
+        [data-theme="dark"] .table td,
+        [data-theme="dark"] .table th,
+        [data-theme="dark"] .table thead,
+        [data-theme="dark"] .table tbody {
+            background-color: transparent !important;
+            color: var(--text-main) !important;
+        }
+
+        [data-theme="dark"] .table-hover tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        /* Fix Form Placeholders in Dark Mode */
+        [data-theme="dark"] ::placeholder {
+            color: #adb5bd !important;
+            opacity: 1 !important;
+            /* Force opacity */
+        }
+
+        [data-theme="dark"] .form-control::placeholder {
+            color: #adb5bd !important;
+            opacity: 1;
+        }
+
+        /* Chat Widget Dark Mode Specifics */
+        [data-theme="dark"] .chat-widget {
+            background-color: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .chat-footer {
+            background-color: #1e293b;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] #chat-input {
+            background-color: #0f172a;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .user-message {
+            background-color: #4361ee;
+            color: #fff;
+        }
+
+        [data-theme="dark"] .bot-message {
+            background-color: #334155;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .navbar-light .navbar-brand {
+            color: #f8f9fa !important;
+        }
+
+        [data-theme="dark"] .navbar-light .navbar-nav .nav-link {
+            color: #cbd5e1 !important;
+        }
+
+        /* Form Inputs */
+        .form-control {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--input-text);
+        }
+
+        .form-control:focus {
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            border-color: var(--primary-color);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            background: none;
+            border: none;
+            color: var(--nav-link-color);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            transition: transform 0.3s;
+        }
+
+        .theme-toggle-btn:hover {
+            transform: rotate(15deg);
+            color: var(--primary-color);
+        }
+
+        /* --- NAVBAR --- */
+        .navbar {
+            background: var(--navbar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            padding: 15px 0;
+            border-bottom: 1px solid var(--glass-border);
+            transition: background 0.3s;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: var(--text-main) !important;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-brand span {
+            color: #4361ee;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            color: var(--nav-link-color) !important;
+            margin-left: 10px;
+            margin-right: 10px;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #4361ee !important;
+        }
+
+        /* --- FOOTER STYLES --- */
+        .footer-section {
+            /* Dark Blue Gradient for Premium feel */
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            position: relative;
+            margin-top: 80px;
+        }
+
+        .footer-cta {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px 0;
+        }
+
+        .single-cta i {
+            color: #4361ee;
+            font-size: 30px;
+            float: left;
+            margin-top: 8px;
+        }
+
+        .cta-text {
+            padding-left: 15px;
+            display: inline-block;
+        }
+
+        .cta-text h4 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .cta-text span {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 2;
+            padding: 50px 0;
+        }
+
+        .footer-logo {
+            margin-bottom: 30px;
+        }
+
+        .footer-logo h3 {
+            color: #fff;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        .footer-logo h3 span {
+            color: #4361ee;
+        }
+
+        .footer-text p {
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #94a3b8;
+            line-height: 28px;
+        }
+
+        .footer-social-icon span {
+            color: #fff;
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-social-icon a {
+            color: #fff;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .footer-social-icon i {
+            height: 40px;
+            width: 40px;
+            text-align: center;
+            line-height: 38px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .footer-social-icon i:hover {
+            background: #4361ee;
+            transform: rotate(360deg);
+        }
+
+        .footer-widget-heading h3 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .footer-widget-heading h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -15px;
+            height: 2px;
+            width: 50px;
+            background: #4361ee;
+        }
+
+        .footer-widget ul li {
+            float: left;
+            width: 50%;
+            margin-bottom: 12px;
+        }
+
+        .footer-widget ul li a {
+            color: #94a3b8;
+            text-transform: capitalize;
+        }
+
+        .footer-widget ul li a:hover {
+            color: #4361ee;
+        }
+
+        .subscribe-form {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscribe-form input {
+            width: 100%;
+            padding: 14px 28px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #fff;
+        }
+
+        .subscribe-form button {
+            position: absolute;
+            right: 0;
+            background: #4361ee;
+            padding: 13px 20px;
+            border: 1px solid #4361ee;
+            top: 0;
+            color: white;
+        }
+
+        .copyright-area {
+            background: #0f172a;
+            padding: 25px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .copyright-text p {
+            margin: 0;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .copyright-text p a {
+            color: #4361ee;
+        }
+
+        /* Floating WhatsApp Button */
+        .whatsapp-float {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            bottom: 40px;
+            right: 40px;
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50px;
+            text-align: center;
+            font-size: 30px;
+            box-shadow: 2px 2px 3px #999;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .whatsapp-float:hover {
+            background-color: #128c7e;
+            transform: scale(1.1);
+            color: white;
+        }
+    </style>
+
+    <!-- Theme Script to prevent flash -->
+    <script>
+        (function () {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        })();
+    </script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <button onclick="toggleTheme()" class="theme-toggle-btn me-2 d-lg-none">
+                <i class="fas fa-moon" id="theme-icon-mobile"></i>
+            </button>
+
+            <a class="navbar-brand" href="{% url 'home' %}">Hewor<span class="text-primary">.</span></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+
+                    <!-- Common Links for Everyone -->
+                    <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
+                    <li class="nav-item"><a href="{% url 'contact' %}" class="nav-link">Contact</a></li>
+
+                    {% if user.is_authenticated %}
+                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a></li>
+                    <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link">Profile</a></li>
+                    <li class="nav-item"><a href="{% url 'create_order' %}" class="btn btn-outline-primary ms-3">Request
+                            Service</a></li>
+                    <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link text-danger ms-2">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
+                    <li class="nav-item"><a href="{% url 'signup' %}" class="btn btn-primary ms-3">Hire Assistant</a>
+                    </li>
+                    {% endif %}
+
+                    <!-- Theme Toggle (Desktop) - Moved to End -->
+                    <li class="nav-item d-none d-lg-block">
+                        <button onclick="toggleTheme()" class="theme-toggle-btn ms-3">
+                            <i class="fas fa-moon" id="theme-icon-desktop"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4" style="min-height: 60vh;">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Professional Footer -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="footer-cta">
+                <div class="row">
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div class="cta-text">
+                                <h4>Find us</h4>
+                                <span>Greater Noida, Uttar Pradesh, India</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="fas fa-phone"></i>
+                            <div class="cta-text">
+                                <h4>Call us</h4>
+                                <span>+91 87974 56730</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-4 mb-30">
+                        <div class="single-cta">
+                            <i class="far fa-envelope-open"></i>
+                            <div class="cta-text">
+                                <h4>Mail us</h4>
+                                <span>rajeshmishra11073@gmail.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-content">
+                <div class="row">
+                    <div class="col-xl-4 col-lg-4 mb-50">
+                        <div class="footer-widget">
+                            <div class="footer-logo">
+                                <h3>Hewor<span>.</span></h3>
+                            </div>
+                            <div class="footer-text">
+                                <p>Hewor is your dedicated academic assistant. We specialize in Thesis Formatting, Book
+                                    Typing, PPT Design, and Data Entry for Professors and Academicians.</p>
+                            </div>
+                            <div class="footer-social-icon">
+                                <span>Follow us</span>
+                                <a href="javascript:void(0)" onclick="alert('Social media pages coming soon!')"><i
+                                        class="fab fa-facebook-f"></i></a>
+                                <a href="javascript:void(0)" onclick="alert('Social media pages coming soon!')"><i
+                                        class="fab fa-twitter"></i></a>
+                                <a href="javascript:void(0)" onclick="alert('Social media pages coming soon!')"><i
+                                        class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
+                        <div class="footer-widget">
+                            <div class="footer-widget-heading">
+                                <h3>Useful Links</h3>
+                            </div>
+                            <ul>
+                                <li><a href="{% url 'home' %}">Home</a></li>
+
+                                <li><a href="{% url 'create_order' %}">New Service</a></li>
+                                <li><a href="{% url 'about' %}">About Us</a></li>
+                                <li><a href="{% url 'contact' %}">Contact</a></li>
+                                <li><a href="javascript:void(0)"
+                                        onclick="alert('Terms & Conditions page is under construction.')">Terms</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-lg-4 col-md-6 mb-50">
+                        <div class="footer-widget">
+                            <div class="footer-widget-heading">
+                                <h3>Subscribe</h3>
+                            </div>
+                            <div class="footer-text mb-25">
+                                <p>Don’t miss our academic updates and offers.</p>
+                            </div>
+                            <div class="subscribe-form">
+                                <form
+                                    onsubmit="event.preventDefault(); alert('Thank you for subscribing! We will keep you updated.'); this.reset();">
+                                    <input type="email" placeholder="Email Address" required>
+                                    <button type="submit"><i class="fab fa-telegram-plane"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="copyright-area">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-6 col-lg-6 text-center text-lg-start">
+                        <div class="copyright-text">
+                            <p>Copyright &copy; 2025, All Right Reserved <a href="{% url 'home' %}">Hewor Agency</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chatbot Widget -->
+    <div id="chat-widget" class="chat-widget">
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <div class="bot-avatar me-2"><i class="fas fa-robot"></i></div>
+                <div>
+                    <h6 class="mb-0 fw-bold">Oisa (AI Assistant)</h6>
+                    <span class="status-dot"></span> <small>Online</small>
+                </div>
+            </div>
+            <button onclick="toggleChat()" class="btn-close btn-close-white"></button>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <div class="message bot-message">
+                Hello! 👋 I am <b>Oisa</b>. Ask me about your project status.
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input" class="form-control" placeholder="Type a message..."
+                onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <!-- Chat Toggle Button -->
+    <button class="chat-toggle-btn" onclick="toggleChat()">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <style>
+        /* Chat Widget CSS */
+        .chat-widget {
+            position: fixed;
+            bottom: 100px;
+            right: 40px;
+            width: 350px;
+            height: 450px;
+            background: var(--input-bg);
+            border-radius: 15px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            display: none;
+            /* Hidden by default */
+            flex-direction: column;
+            overflow: hidden;
+            font-family: 'Poppins', sans-serif;
+            color: var(--text-main);
+        }
+
+        .chat-header {
+            background: #4361ee;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bot-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .bot-message {
+            background: var(--input-bg);
+            color: var(--text-main);
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color, rgba(0, 0, 0, 0.05));
+        }
+
+        .user-message {
+            background: #4361ee;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .chat-footer {
+            padding: 10px;
+            background: var(--input-bg);
+            border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-toggle-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #4361ee;
+            color: white;
+            border-radius: 50%;
+            border: none;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+            cursor: pointer;
+            z-index: 10001;
+            transition: transform 0.3s;
+        }
+
+        .chat-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+
+    <script>
+        function toggleChat() {
+            const widget = document.getElementById('chat-widget');
+            if (widget.style.display === 'none' || widget.style.display === '') {
+                widget.style.display = 'flex';
+                // Focus input
+                setTimeout(() => document.getElementById('chat-input').focus(), 100);
+            } else {
+                widget.style.display = 'none';
+            }
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function appendMessage(text, sender) {
+            const body = document.getElementById('chat-body');
+            const div = document.createElement('div');
+            div.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+            div.innerHTML = text; // Allow HTML for links
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+
+            if (!text) return;
+
+            // 1. Show User Message
+            appendMessage(text, 'user');
+            input.value = '';
+
+            // 2. Show Typing Indicator (Optional, skipping for speed)
+
+            // 3. Call API
+            // 3. Call API
+            fetch("{% url 'chatbot_api' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({ message: text })
+            })
+                .then(response => {
+                    // Check if redirected to login page (Status 200 but URL changed)
+                    if (response.redirected || response.url.includes('login')) {
+                        throw new Error("LOGIN_REQUIRED");
+                    }
+
+                    if (!response.ok) {
+                        throw new Error("HTTP_ERROR_" + response.status);
+                    }
+
+                    // Parse JSON
+                    return response.text().then(text => {
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            // Likely HTML error page
+                            console.error("Invalid JSON:", text.substring(0, 100));
+                            throw new Error("INVALID_JSON");
+                        }
+                    });
+                })
+                .then(data => {
+                    if (data && data.status === 'success') {
+                        appendMessage(data.response, 'bot');
+                    } else {
+                        appendMessage("I encountered an internal error.", 'bot');
+                    }
+                })
+                .catch(error => {
+                    console.error("Chat Error:", error);
+                    if (error.message === "LOGIN_REQUIRED" || error.message === "INVALID_JSON") {
+                        appendMessage("Please <a href='{% url 'login' %}'>login</a> to continue the chat.", 'bot');
+                    } else {
+                        appendMessage("Connection failed. Is the server running?", 'bot');
+                    }
+                });
+        }
+    </script>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AOS Animation Library JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Vanilla Tilt (3D Hover Effect) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize AOS (Animate On Scroll)
+            try {
+                AOS.init({
+                    duration: 800,
+                    once: true,
+                    offset: 50, // Reduced offset for better mobile view
+                    easing: 'ease-out-cubic'
+                });
+            } catch (e) {
+                console.warn('AOS Init Failed:', e);
+            }
+
+            // Initialize Vanilla Tilt
+            try {
+                const cards = document.querySelectorAll(".glass-card:not(.no-tilt)");
+                if (cards.length > 0) {
+                    VanillaTilt.init(cards, {
+                        max: 10,  // Reduced max tilt for subtle effect
+                        speed: 400,
+                        glare: true,
+                        "max-glare": 0.2,
+                        scale: 1.02
+                    });
+                }
+            } catch (e) {
+                console.warn('Tilt Init Failed:', e);
+            }
+        });
+    </script>
+
+    <!-- Fallback for JS Disabled -->
+    <noscript>
+        <style>
+            [data-aos] {
+                opacity: 1 !important;
+                transform: translate(0) scale(1) !important;
+            }
+        </style>
+    </noscript>
+    <!-- Theme Logic -->
+    <script>
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const iconClass = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+            const desktopIcon = document.getElementById('theme-icon-desktop');
+            const mobileIcon = document.getElementById('theme-icon-mobile');
+
+            if (desktopIcon) desktopIcon.className = `fas ${iconClass}`;
+            if (mobileIcon) mobileIcon.className = `fas ${iconClass}`;
+        }
+
+        // Initialize icon on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            updateThemeIcon(currentTheme);
+        });
+    </script>
+</body>
+
+</html>
