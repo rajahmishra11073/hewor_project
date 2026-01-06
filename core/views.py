@@ -49,18 +49,6 @@ def validate_input(email, phone):
         return False, "Invalid phone number. Must be a valid Indian mobile number."
         
     return True, ""
-    try:
-        user = User.objects.get(email=identifier)
-        return user
-    except User.DoesNotExist:
-        pass
-    
-    try:
-        profile = Profile.objects.get(phone_number=identifier)
-        return profile.user
-    except Profile.DoesNotExist:
-        pass
-    return None
 
 # --- VIEWS ---
 
