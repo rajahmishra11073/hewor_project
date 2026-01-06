@@ -21,8 +21,8 @@ class AuthenticationTests(TestCase):
         )
         Profile.objects.create(user=self.user, phone_number='8797456730')
 
-    def test_signup_otp_generation(self):
-        """Test that submitting signup form generates OTP and redirects"""
+    def test_signup_success(self):
+        """Test that submitting signup form creates user and redirects to dashboard"""
         data = {
             'full_name': 'New User',
             'email': 'new@example.com',
@@ -31,17 +31,17 @@ class AuthenticationTests(TestCase):
             'confirm_password': 'password123'
         }
         
-        # Mock random.randint so we know the OTP
-        with patch('core.views.random.randint', return_value=1234):
-            response = self.client.post(self.signup_url, data)
+        response = self.client.post(self.signup_url, data)
             
-        self.assertRedirects(response, self.verify_otp_url)
+        self.assertRedirects(response, self.dashboard_url)
         
-        # Verify session data
-        session = self.client.session
-        self.assertIn('signup_data', session)
-        self.assertEqual(session['signup_data']['otp'], 1234)
-        self.assertEqual(session['signup_data']['email'], 'new@example.com')
+        # Verify user exists
+        self.assertTrue(User.objects.filter(email='new@example.com').exists())
+        self.assertTrue(Profile.objects.filter(phone_number='9999999999').exists())
+        
+        # Verify user is logged in
+        user = User.objects.get(email='new@example.com')
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
 
     def test_signup_password_mismatch(self):
         """Test signup fails when passwords don't match"""
@@ -60,31 +60,6 @@ class AuthenticationTests(TestCase):
         # Check for error message
         messages = list(response.wsgi_request._messages)
         self.assertEqual(str(messages[0]), "Passwords do not match!")
-
-    def test_verify_otp_success(self):
-        """Test that correct OTP creates user and logs them in"""
-        # Manually set session data as if signup occurred
-        s = self.client.session
-        s['signup_data'] = {
-            'full_name': 'Verified User',
-            'email': 'verified@example.com',
-            'phone': '7777777777',
-            'password': 'password123',
-            'otp': 5555
-        }
-        s.save()
-        
-        response = self.client.post(self.verify_otp_url, {'otp': '5555'})
-        
-        # Should create user and redirect to dashboard
-        self.assertRedirects(response, self.dashboard_url)
-        
-        # Verify user exists
-        new_user = User.objects.get(email='verified@example.com')
-        self.assertTrue(Profile.objects.filter(phone_number='7777777777').exists())
-        
-        # Verify user is logged in
-        self.assertEqual(int(self.client.session['_auth_user_id']), new_user.pk)
 
     def test_login_success_email(self):
         """Test login with email"""
