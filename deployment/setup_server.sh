@@ -26,10 +26,10 @@ echo "--> configuring MySQL..."
 # We will create the DB and User.
 echo "Creating database 'hewor_db' and user 'hewor_user'..."
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS hewor_db CHARACTER SET utf8mb4;"
-sudo mysql -e "CREATE USER IF NOT EXISTS 'hewor_user'@'localhost' IDENTIFIED BY 'hewor_password_123';"
+sudo mysql -e "CREATE USER IF NOT EXISTS 'hewor_user'@'localhost' IDENTIFIED BY 'Hewor.Arti@a2025M';"
 sudo mysql -e "GRANT ALL PRIVILEGES ON hewor_db.* TO 'hewor_user'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
-echo "NOTE: Please change the database password in production!"
+echo "NOTE: Database user 'hewor_user' created."
 
 # 3. Clone Repository
 echo "--> Cloning repository..."
@@ -60,6 +60,11 @@ if [ ! -f ".env" ]; then
         echo "DEBUG=False" >> .env
         echo "SECRET_KEY=change_this_secret_key_in_production" >> .env
         echo "ALLOWED_HOSTS=hewor.in,www.hewor.in,localhost,127.0.0.1" >> .env
+        echo "DB_NAME=hewor_db" >> .env
+        echo "DB_USER=hewor_user" >> .env
+        echo "DB_PASSWORD=Hewor.Arti@a2025M" >> .env
+        echo "DB_HOST=localhost" >> .env
+        echo "DB_PORT=3306" >> .env
     fi
     echo "WARNING: You MUST edit configs/.env with your real secrets!"
 fi
