@@ -66,7 +66,21 @@ Since you allow file uploads, you must add a Volume.
 4.  It will give you a URL (e.g., `web-production-1234.up.railway.app`).
 5.  Copy this URL and update your `CSRF_TRUSTED_ORIGINS` variable in Step 4 with `https://` in front.
 
-## Step 7: Redeploy
+## Step 7: Add Custom Domain (hewor.in)
+
+1.  In your **Django App** settings on Railway, go to **"Networking"** -> **"Custom Domains"**.
+2.  Enter `hewor.in`.
+3.  Railway will provide DNS records (A Record or CNAME) to configure.
+4.  Log in to your domain registrar (where you bought `hewor.in`).
+5.  Go to **DNS Settings**.
+6.  Add/Update the records as shown by Railway.
+    *   **Type**: `CNAME` or `A` (follow Railway's specific instruction)
+    *   **Name**: `@` (for hewor.in) or `www` (for www.hewor.in)
+    *   **Value**: The target provided by Railway (e.g., `hewor-project.up.railway.app` or an IP address).
+7.  Wait for a few minutes for changes to propagate.
+8.  **Important**: Update your Railway Environment Variable `CSRF_TRUSTED_ORIGINS` to include `https://hewor.in` and `https://www.hewor.in`.
+
+## Step 8: Redeploy
 
 1.  Railway usually redeploys automatically when variables change.
 2.  If not, click **"Deployments"** -> **"Redeploy"**.
