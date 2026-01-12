@@ -50,31 +50,43 @@ This guide will help you deploy your Django project to Railway.app in less than 
 
 ## Step 5: Persistent Storage (Volumes)
 
-Since you allow file uploads, you must add a Volume.
+Since you allow file uploads, you must add a Volume. Railway's UI has changed, so the "Volumes" tab might not be visible inside the service card.
 
-1.  Click on your **Django App** card.
-2.  Go to the **"Volumes"** tab.
-3.  Click **"Add Volume"**.
-4.  Mount Path: `/home/ubuntu/hewor_project/media` (or `/app/media` depending on buildpack, try `/app/media` first if using Nixpacks).
-    *   *Note: Railway's default buildpath is usually `/app`. So try `/app/media`.*
+**Method A: Context Menu (Canvas)**
+1.  Go to the main project **Canvas** (where you see the connected cards).
+2.  **Right-click** on your **Django App** card.
+3.  Select **"Add Volume"** (or "Volume").
+4.  It will appear attached to your service. Click on the Volume to configure it.
+5.  Set the **Mount Path** to `/app/media`.
+
+**Method B: Command Palette**
+1.  Press `Cmd + K` (Mac) or `Ctrl + K` (Windows) to open the Command Palette.
+2.  Type **"Volume"**.
+3.  Select **"Volume: Add"** and choose your Django service.
+4.  Configure the **Mount Path** to `/app/media`.
 
 ## Step 6: Generate Domain
 
+## Step 6: Public Domain
+
 1.  Click on your **Django App** card.
 2.  Go to **"Settings"** -> **"Networking"**.
-3.  Click **"Generate Domain"**.
-4.  It will give you a URL (e.g., `web-production-1234.up.railway.app`).
-5.  Copy this URL and update your `CSRF_TRUSTED_ORIGINS` variable in Step 4 with `https://` in front.
+3.  Under **"Public Networking"**, checking if a domain is already there (e.g., `web-production-xxxx.up.railway.app`).
+4.  If not, click **"Generate Domain"** or **"Custom Domain"** to create one.
+5.  **Copy this URL** and update your `CSRF_TRUSTED_ORIGINS` variable in Step 4 with `https://` in front.
 
 ## Step 7: Add Custom Domain (hewor.in)
 
-1.  In your **Django App** settings on Railway, go to **"Networking"** -> **"Custom Domains"**.
-2.  Enter `hewor.in`.
-3.  Railway will provide DNS records (A Record or CNAME) to configure.
-4.  Log in to your domain registrar (where you bought `hewor.in`).
-5.  Go to **DNS Settings**.
-6.  Add/Update the records as shown by Railway.
-    *   **Type**: `CNAME` or `A` (follow Railway's specific instruction)
+1.  In your **Django App** settings on Railway, go to **"Networking"** -> **"Public Networking"**.
+2.  You likely already see `hewor.in` listed. It says **"Waiting for DNS update"**.
+3.  Click the purple link **"Show instructions"** (or the small info icon).
+4.  Railway will show you the exact DNS records (CNAME or A Record) you need.
+5.  **Log in to Hostinger/GoDaddy** (where you bought `hewor.in`).
+6.  Go to **DNS Settings**.
+7.  Add the records exactly as Railway shows.
+    *   **Type**: `CNAME` (usually)
+    *   **Name**: `@` or `www`
+    *   **Value**: `web-production-xxxx.up.railway.app` (or similar)
     *   **Name**: `@` (for hewor.in) or `www` (for www.hewor.in)
     *   **Value**: The target provided by Railway (e.g., `hewor-project.up.railway.app` or an IP address).
 7.  Wait for a few minutes for changes to propagate.

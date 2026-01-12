@@ -109,13 +109,23 @@ WSGI_APPLICATION = "hewor_project.wsgi.application"
 import dj_database_url
 import os
 
-DATABASES = {
-    
-    'default': dj_database_url.config(
-        default=f"mysql://{os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root'))}:{os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', ''))}@{os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', '127.0.0.1'))}:{os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', '3306'))}/{os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'hewor_db'))}",
-        conn_max_age=600,
-    )
-}
+if os.environ.get('MYSQLHOST') or os.environ.get('DB_HOST'):
+    # Production (Railway) - Use MySQL
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=f"mysql://{os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root'))}:{os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', ''))}@{os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', '127.0.0.1'))}:{os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', '3306'))}/{os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'hewor_db'))}",
+            conn_max_age=600,
+        )
+    }
+else:
+    # Local Development - Use SQLite
+    print("Using Local SQLite Database")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
