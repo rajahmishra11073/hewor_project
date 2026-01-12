@@ -112,7 +112,7 @@ import os
 DATABASES = {
     
     'default': dj_database_url.config(
-        default=f"mysql://{os.environ.get('MYSQLUSER', 'root')}:{os.environ.get('MYSQLPASSWORD', '')}@{os.environ.get('MYSQLHOST', '127.0.0.1')}:{os.environ.get('MYSQLPORT', '3306')}/{os.environ.get('MYSQLDATABASE', 'hewor_db')}",
+        default=f"mysql://{os.environ.get('MYSQLUSER', os.environ.get('DB_USER', 'root'))}:{os.environ.get('MYSQLPASSWORD', os.environ.get('DB_PASSWORD', ''))}@{os.environ.get('MYSQLHOST', os.environ.get('DB_HOST', '127.0.0.1'))}:{os.environ.get('MYSQLPORT', os.environ.get('DB_PORT', '3306'))}/{os.environ.get('MYSQLDATABASE', os.environ.get('DB_NAME', 'hewor_db'))}",
         conn_max_age=600,
     )
 }
