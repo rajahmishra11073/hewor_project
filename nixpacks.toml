@@ -1,0 +1,5 @@
+[phases.setup]
+nixPkgs = ["python312", "gcc", "mysql-client", "pkg-config", "mysql-dev"]
+
+[phases.build]
+cmds = ["python manage.py collectstatic --noinput"]

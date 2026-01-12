@@ -1,1 +1,1 @@
-web: gunicorn hewor_project.wsgi
+web: python manage.py migrate && gunicorn hewor_project.wsgi
