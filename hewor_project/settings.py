@@ -106,15 +106,15 @@ WSGI_APPLICATION = "hewor_project.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import dj_database_url
+import os
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME', 'hewor_db'),
-        'USER': os.environ.get('DB_USER', 'root'),
-        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-        'HOST': os.environ.get('DB_HOST', '127.0.0.1'),
-        'PORT': os.environ.get('DB_PORT', '3306'),
-    }
+    
+    'default': dj_database_url.config(
+        default=f"mysql://{os.environ.get('MYSQLUSER', 'root')}:{os.environ.get('MYSQLPASSWORD', '')}@{os.environ.get('MYSQLHOST', '127.0.0.1')}:{os.environ.get('MYSQLPORT', '3306')}/{os.environ.get('MYSQLDATABASE', 'hewor_db')}",
+        conn_max_age=600,
+    )
 }
 
 
