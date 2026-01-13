@@ -172,7 +172,16 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+# DEBUG: Print paths to debug deployment
+print(f"DEBUG: BASE_DIR is {BASE_DIR}")
+print(f"DEBUG: STATIC_ROOT is {STATIC_ROOT}")
+try:
+    print(f"DEBUG: CWD is {os.getcwd()}")
+    print(f"DEBUG: Contents of BASE_DIR: {os.listdir(BASE_DIR)}")
+except Exception as e:
+    print(f"DEBUG: Failed to list directories: {e}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
