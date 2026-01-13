@@ -9,30 +9,37 @@
     <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg"><i class="fas fa-plus me-2"></i>New Project</a>
 </div>
 
-<!-- Stats Cards -->
 <div class="row mb-5">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white p-3">
-            <h4>{{ stats.total }}</h4>
-            <span>Total Orders</span>
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="0">
+        <div class="card glass-card text-white p-4 border-0"
+            style="background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);">
+            <h3 class="fw-bold">{{ stats.total }}</h3>
+            <span class="opacity-75">Total Orders</span>
+            <i class="fas fa-cubes position-absolute end-0 bottom-0 m-3 opacity-25 fa-3x"></i>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark p-3">
-            <h4>{{ stats.pending }}</h4>
-            <span>Pending Review</span>
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="100">
+        <div class="card glass-card text-white p-4 border-0"
+            style="background: linear-gradient(135deg, #f72585 0%, #b5179e 100%);">
+            <h3 class="fw-bold">{{ stats.pending }}</h3>
+            <span class="opacity-75">Pending Review</span>
+            <i class="fas fa-clock position-absolute end-0 bottom-0 m-3 opacity-25 fa-3x"></i>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white p-3">
-            <h4>{{ stats.in_progress }}</h4>
-            <span>In Progress</span>
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="200">
+        <div class="card glass-card text-white p-4 border-0"
+            style="background: linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%);">
+            <h3 class="fw-bold">{{ stats.in_progress }}</h3>
+            <span class="opacity-75">In Progress</span>
+            <i class="fas fa-spinner position-absolute end-0 bottom-0 m-3 opacity-25 fa-3x"></i>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white p-3">
-            <h4>{{ stats.completed }}</h4>
-            <span>Completed</span>
+    <div class="col-md-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="card glass-card text-white p-4 border-0"
+            style="background: linear-gradient(135deg, #06d6a0 0%, #1b9aaa 100%);">
+            <h3 class="fw-bold">{{ stats.completed }}</h3>
+            <span class="opacity-75">Completed</span>
+            <i class="fas fa-check-circle position-absolute end-0 bottom-0 m-3 opacity-25 fa-3x"></i>
         </div>
     </div>
 </div>

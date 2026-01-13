@@ -36,99 +36,142 @@
     <style>
         /* --- GLOBAL PREMIUM STYLES --- */
         :root {
-            /* Core Brand Colors (Constant) */
-            --primary-color: #4361ee;
-            --secondary-color: #3f37c9;
+            /* Core Brand Colors (Premium HSL) */
+            --primary-color: #4ed8e0;
+            /* &Cyan */
+            --secondary-color: #4361ee;
+            /* Blue */
             --accent-color: #f72585;
+            /* Pink */
+            --dark-bg: #0f172a;
 
-            /* Light Mode (Default) Variables */
-            --bg-body: #f4f7fe;
-            --bg-gradient: radial-gradient(circle at 10% 20%, rgb(242, 246, 255) 0%, rgb(219, 228, 255) 90%);
+            /* Light Mode */
+            --bg-body: #f0f4f8;
+            --bg-gradient: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+            /* Override for a "Dark Premium" default feel even in light mode for this specific design if desired, but sticking to variables */
+            --bg-gradient-light: radial-gradient(circle at 10% 20%, rgb(242, 246, 255) 0%, rgb(230, 240, 255) 90%);
+
             --text-main: #2b2d42;
-            --text-muted: #6c757d;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --navbar-bg: rgba(255, 255, 255, 0.85);
-            --card-shadow: 0 10px 40px -10px rgba(0, 64, 128, 0.1);
-            --nav-link-color: #444;
-            --input-bg: #fff;
-            --input-border: #ced4da;
-            --input-text: #212529;
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --navbar-bg: rgba(255, 255, 255, 0.8);
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+            --input-bg: rgba(255, 255, 255, 0.9);
+            --input-border: #e2e8f0;
+            --input-text: #1e293b;
         }
 
         [data-theme="dark"] {
-            /* Dark Mode Variables */
-            --bg-body: #0f172a;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --text-main: #f8f9fa;
+            --bg-body: #0b0f19;
+            /* Deep Space */
+            --bg-gradient: radial-gradient(circle at 50% -10%, #1e293b 0%, #0b0f19 50%);
+            --text-main: #edf2f4;
             --text-muted: #94a3b8;
-            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-bg: rgba(30, 41, 59, 0.6);
             --glass-border: rgba(255, 255, 255, 0.08);
-            --navbar-bg: rgba(15, 23, 42, 0.85);
-            --card-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-            --nav-link-color: #cbd5e1;
-            --input-bg: #1e293b;
+            --navbar-bg: rgba(11, 15, 25, 0.85);
+            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+            --input-bg: rgba(30, 41, 59, 0.8);
             --input-border: #334155;
-            --input-text: #f8f9fa;
+            --input-text: #f1f5f9;
         }
 
         body {
-            font-family: 'Outfit', 'Poppins', sans-serif;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
             background-color: var(--bg-body);
             background-image: var(--bg-gradient);
+            background-attachment: fixed;
+            /* Parallax feel */
             color: var(--text-main);
             overflow-x: hidden;
-            transition: background-color 0.3s, color 0.3s;
+            transition: all 0.4s ease;
         }
 
         /* --- INSANE COMPONENTS --- */
         .glass-card {
             background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             box-shadow: var(--card-shadow);
-            border-radius: 20px;
+            border-radius: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.25);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
             border: none;
             border-radius: 50px;
-            padding: 12px 30px;
-            font-weight: 600;
+            padding: 14px 32px;
+            font-weight: 700;
             letter-spacing: 0.5px;
-            transition: all 0.4s;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
             color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn-primary:hover::after {
+            left: 100%;
         }
 
         .btn-outline-primary {
             border-radius: 50px;
-            border-width: 2px;
+            border: 2px solid #4361ee;
             font-weight: 600;
-            padding: 10px 28px;
+            padding: 12px 30px;
             color: #4361ee;
-            border-color: #4361ee;
+            background: transparent;
+            transition: all 0.3s;
         }
 
         .btn-outline-primary:hover {
-            background-color: #4361ee;
+            background: #4361ee;
             color: #fff;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
         }
 
         /* Text Gradients */
         .text-gradient {
-            background: linear-gradient(45deg, #4361ee, #f72585);
+            background: linear-gradient(to right, #4361ee, #f72585, #4ed8e0);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: textShine 5s linear infinite;
             font-weight: 800;
+        }
+
+        @keyframes textShine {
+            to {
+                background-position: 200% center;
+            }
         }
 
         /* Remove default link underlined */
