@@ -187,64 +187,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-# STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
-# Trust the X-Forwarded-Proto header for SSL (Required for Railway/Heroku)
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-# Redirect to home or login
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'dashboard'
-LOGOUT_REDIRECT_URL = 'home'
-
-# Security Settings
-# Security Settings
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-
-# Allow Google Auth Popups to communicate with the main window
-SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
-
-
-# --- JAZZMIN SETTINGS (Admin Theme) ---
-JAZZMIN_SETTINGS = {
-    "site_title": "Hewor Admin",
-    "site_header": "Hewor Manager",
-    "site_brand": "Hewor",
-    "welcome_sign": "Welcome to Hewor Admin Panel",
-    "copyright": "Hewor Freelancing Ltd",
-    "search_model": "core.ServiceOrder",
-    
-    # Left Menu Customization
-    "topmenu_links": [
-        {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-        {"name": "View Site", "url": "/", "new_window": True},
-    ],
-    "show_ui_builder": False,
-}
+# ... (omitted)
 
 JAZZMIN_UI_TWEAKS = {
-    "theme": "flatly",   # Options: cerulean, cosmo, cyborg, darkly, flatly, journal, litera, lumen, lux
+    "theme": "solar",
     "navbar": "navbar-dark",
+    "theme_body": "dark",
 }
 
 
