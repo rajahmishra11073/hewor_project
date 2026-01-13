@@ -17,8 +17,9 @@
 
                     <div class="border p-3 mb-4 rounded bg-light d-inline-block">
 
-                        <!-- Image Source Fix -->
-                        <img src="/media/payment_qr.jpg" alt="Paytm/GPay QR"
+                        <!-- Image Source Fix (Static) -->
+                        {% load static %}
+                        <img src="{% static 'core/assets/payment_qr.jpg' %}" alt="Paytm/GPay QR"
                             style="width: 200px; height: 200px; object-fit: contain;">
 
                         <p class="mt-2 mb-0 fw-bold text-dark">Scan to Pay via UPI</p>
