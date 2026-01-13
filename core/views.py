@@ -226,8 +226,10 @@ def create_order(request):
 def profile_view(request):
     if request.method == 'POST':
         user = request.user
-        user.first_name = request.POST.get('full_name')
-        user.email = request.POST.get('email')
+        if request.POST.get('full_name'):
+            user.first_name = request.POST.get('full_name')
+        if request.POST.get('email'):
+            user.email = request.POST.get('email')
         user.save()
 
         profile, created = Profile.objects.get_or_create(user=user)
