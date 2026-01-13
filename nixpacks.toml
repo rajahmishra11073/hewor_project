@@ -2,4 +2,7 @@
 nixPkgs = ["python312", "gcc", "mysql-client", "pkg-config", "mysql-dev"]
 
 [phases.build]
-cmds = ["python manage.py collectstatic --noinput"]
+cmds = ["mkdir -p staticfiles", "python manage.py collectstatic --noinput"]
+
+[start]
+cmd = "gunicorn hewor_project.wsgi --bind 0.0.0.0:$PORT"
