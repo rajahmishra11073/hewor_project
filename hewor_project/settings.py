@@ -60,11 +60,16 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-changeme'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*'] # Reset to allow all for debugging 502, then restrict later.
-# ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
-# ALLOWED_HOSTS.extend(['hewor.in', 'www.hewor.in', '.railway.app', '.up.railway.app'])
+ALLOWED_HOSTS = ['*'] # Default fallback
+if not DEBUG:
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '.railway.app,hewor.in').split(',')
+
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1,http://localhost').split(',')
 CSRF_TRUSTED_ORIGINS.extend(['https://hewor.in', 'https://www.hewor.in'])
+
+# ... (omitted app config) ...
+
+# Remove debug prints for production security
 
 
 
@@ -190,15 +195,6 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Trust the X-Forwarded-Proto header for SSL (Required for Railway/Heroku)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# DEBUG: Print paths to debug deployment
-print(f"DEBUG: BASE_DIR is {BASE_DIR}")
-print(f"DEBUG: STATIC_ROOT is {STATIC_ROOT}")
-try:
-    print(f"DEBUG: CWD is {os.getcwd()}")
-    print(f"DEBUG: Contents of BASE_DIR: {os.listdir(BASE_DIR)}")
-except Exception as e:
-    print(f"DEBUG: Failed to list directories: {e}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
