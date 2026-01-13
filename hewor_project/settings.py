@@ -34,13 +34,19 @@ FIREBASE_ADMIN_CREDENTIALS_ENV = os.environ.get('FIREBASE_ADMIN_CREDENTIALS')
 if not firebase_admin._apps:
     if FIREBASE_ADMIN_CREDENTIALS_ENV:
         # Load from Environment Variable (Best for Heroku/Render)
-        cred_dict = json.loads(FIREBASE_ADMIN_CREDENTIALS_ENV)
-        cred = credentials.Certificate(cred_dict)
-        firebase_admin.initialize_app(cred)
+        try:
+            cred_dict = json.loads(FIREBASE_ADMIN_CREDENTIALS_ENV)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+            print(f"ERROR: Failed to initialize Firebase from environment variable: {e}")
     elif os.path.exists(FIREBASE_CREDENTIALS_PATH):
         # Load from File (Best for Local Dev)
-        cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
-        firebase_admin.initialize_app(cred)
+        try:
+            cred = credentials.Certificate(FIREBASE_CREDENTIALS_PATH)
+            firebase_admin.initialize_app(cred)
+        except Exception as e:
+             print(f"ERROR: Failed to initialize Firebase from file: {e}")
     else:
         print(f"WARNING: Firebase credentials not found. Google Auth will fail.")
 
@@ -55,6 +61,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-changeme'
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
+ALLOWED_HOSTS.extend(['hewor.in', 'www.hewor.in', '.railway.app'])
 CSRF_TRUSTED_ORIGINS = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1,http://localhost').split(',')
 CSRF_TRUSTED_ORIGINS.extend(['https://hewor.in', 'https://www.hewor.in'])
 
@@ -110,7 +117,7 @@ WSGI_APPLICATION = "hewor_project.wsgi.application"
 import dj_database_url
 import os
 
-if os.environ.get('MYSQLHOST') or os.environ.get('DB_HOST'):
+if os.environ.get('DATABASE_URL') or os.environ.get('MYSQLHOST') or os.environ.get('DB_HOST'):
     # Production (Railway) - Use MySQL
     DATABASES = {
         'default': dj_database_url.config(
