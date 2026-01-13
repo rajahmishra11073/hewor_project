@@ -27,32 +27,32 @@ jobs:
         python-version: ["3.12", "3.13"]
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        
-    - name: Install System Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config libgl1 libjpeg-dev zlib1g-dev
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-libmysqlclient-dev build-essential pkg-config libgl1 libjpeg-dev zlib1g-dev
 
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        
-    - name: Run Tests
-      # We define environment variables that match the settings.py requirement
-      env:
-        SECRET_KEY: 'django-insecure-test-key'
-        DEBUG: 'True'
-        DB_NAME: hewor_db
-        DB_USER: root
-        DB_PASSWORD: password
-        DB_HOST: 127.0.0.1
-        DB_PORT: 3306
-      run: |
-        python manage.py test core
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run Tests
+        # We define environment variables that match the settings.py requirement
+        env:
+          SECRET_KEY: 'django-insecure-test-key'
+          DEBUG: 'True'
+          DB_NAME: hewor_db
+          DB_USER: root
+          DB_PASSWORD: password
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+        run: |
+          python manage.py test core
