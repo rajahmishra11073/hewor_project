@@ -185,6 +185,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+WHITENOISE_KEEP_ONLY_HASHED_FILES = True
 
 # Trust the X-Forwarded-Proto header for SSL (Required for Railway/Heroku)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

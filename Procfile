@@ -1,1 +1,1 @@
-web: mkdir -p staticfiles && python manage.py collectstatic --noinput && gunicorn hewor_project.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: gunicorn hewor_project.wsgi --workers 1 --threads 8 --timeout 60 --bind 0.0.0.0:$PORT
