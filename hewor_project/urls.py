@@ -23,12 +23,15 @@ from django.conf.urls.static import static
 
 from django.http import JsonResponse
 
+from django.shortcuts import redirect
+
 def health(request):
     return JsonResponse({'status': 'ok'})
 
 urlpatterns = [
     path('health/', health),
-    path('secret-staff-portal/', admin.site.urls),
+    path('accounts/profile/', lambda request: redirect('dashboard')), # Fix for default login redirect
+    path('admin/', admin.site.urls),
     path('', include('core.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
