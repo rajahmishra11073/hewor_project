@@ -57,8 +57,12 @@ if not firebase_admin._apps:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-default-key-changeme')
 
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+# Allow Google Sign-In popups to communicate with the main window
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin-allow-popups'
 
 ALLOWED_HOSTS = ['*'] # Default fallback
 if not DEBUG:
