@@ -20,6 +20,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
+from core.sitemaps import StaticViewSitemap
 
 from django.http import JsonResponse
 
@@ -28,7 +30,12 @@ from django.shortcuts import redirect
 def health(request):
     return JsonResponse({'status': 'ok'})
 
+sitemaps = {
+    'static': StaticViewSitemap,
+}
+
 urlpatterns = [
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('health/', health),
     path('accounts/profile/', lambda request: redirect('dashboard')), # Fix for default login redirect
     path('admin/', admin.site.urls),

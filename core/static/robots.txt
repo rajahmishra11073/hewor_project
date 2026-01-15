@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://hewor.in/sitemap.xml
