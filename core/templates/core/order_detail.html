@@ -2,13 +2,13 @@
 
 {% block content %}
 <style>
-    /* Chat specific styles */
+    /* Chat specific styles - Dark Mode Optimized */
     .chat-box {
         height: 450px;
         overflow-y: auto;
-        background-color: #e5ddd5;
-        /* WhatsApp-like background */
-        border: 1px solid #ddd;
+        background-color: #0b1120;
+        /* Very Dark Blue */
+        border: 1px solid #334155;
     }
 
     .message-bubble {
@@ -17,39 +17,43 @@
         border-radius: 15px;
         position: relative;
         font-size: 0.95rem;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        margin-bottom: 15px;
+        color: #f1f5f9;
+        /* Light Text */
     }
 
-    /* User's Message (Green, Right aligned) */
+    /* User's Message (Right aligned) - Brand Blue */
     .message-sent {
-        background-color: #dcf8c6;
+        background: linear-gradient(135deg, #4361ee, #3a0ca3);
         margin-left: auto;
-        /* Pushes to right */
         border-top-right-radius: 0;
     }
 
-    /* Admin's Message (White, Left aligned) */
+    /* Admin's Message (Left aligned) - Dark Slate */
     .message-received {
-        background-color: #ffffff;
+        background-color: #1e293b;
         margin-right: auto;
-        /* Pushes to left */
         border-top-left-radius: 0;
+        border: 1px solid #334155;
     }
 
     .timestamp {
         font-size: 0.7rem;
-        color: #999;
+        color: #cbd5e1;
+        /* Light Slate */
         display: block;
         text-align: right;
-        margin-top: 4px;
+        margin-top: 5px;
+        opacity: 0.8;
     }
 
     .sender-name {
         font-size: 0.75rem;
         font-weight: bold;
-        color: #555;
-        margin-bottom: 2px;
+        color: #94a3b8;
+        /* Slate 400 */
+        margin-bottom: 4px;
         display: block;
     }
 </style>
