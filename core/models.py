@@ -54,6 +54,10 @@ class ServiceOrder(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.title}"
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('order_detail', kwargs={'order_id': self.pk})
+
 # --- 3. DYNAMIC PAGES SETTINGS ---
 class SiteSetting(models.Model):
     about_title = models.CharField(max_length=200, default="About Hewor")
