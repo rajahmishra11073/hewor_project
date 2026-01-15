@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat
+from django.utils.html import format_html
+from django.urls import reverse
 
 # --- Admin Interface Customization ---
 admin.site.site_header = "Hewor Administration"
@@ -10,7 +12,7 @@ admin.site.index_title = "Welcome to Hewor Management Dashboard"
 @admin.register(ServiceOrder)
 class ServiceOrderAdmin(admin.ModelAdmin):
     # ZARURI: 'status' aur 'is_paid' yahan hona chahiye taaki niche editable mein kaam karein
-    list_display = ('title', 'user', 'service_type', 'status', 'is_paid', 'created_at', 'is_delivered')
+    list_display = ('title', 'user', 'service_type', 'status', 'is_paid', 'open_chat', 'is_delivered')
     
     # Filters
     list_filter = ('status', 'service_type', 'is_paid', 'created_at')
@@ -47,6 +49,11 @@ class ServiceOrderAdmin(admin.ModelAdmin):
         return bool(obj.delivery_file)
     is_delivered.boolean = True
     is_delivered.short_description = "Delivered?"
+
+    def open_chat(self, obj):
+        url = reverse('order_detail', args=[obj.pk])
+        return format_html('<a class="button" href="{}" target="_blank" style="background-color: #4361ee; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">Open Chat 💬</a>', url)
+    open_chat.short_description = "Reply to User"
 
     def save_model(self, request, obj, form, change):
         # Auto-update status if delivered
