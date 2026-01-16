@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}FAQs | Hewor Agency{% endblock %}
+{% block meta_description %}Frequently asked questions about Hewor Agency's services, payments, and policies.{% endblock
+%}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center mb-5" data-aos="fade-up">
+        <div class="col-lg-8 text-center">
+            <h1 class="display-4 fw-bold mb-3">Frequently Asked <span class="text-gradient">Questions</span></h1>
+            <p class="lead text-muted">Find answers to common questions about our services and processes.</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="accordion custom-accordion" id="faqAccordion" data-aos="fade-up" data-aos-delay="100">
+
+                <!-- Q1 -->
+                <div class="accordion-item glass-card mb-3 border-0">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false"
+                            aria-controls="collapseOne">
+                            <span class="fw-bold fs-5">How do I place an order?</span>
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                        data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Placing an order is simple. Just create an account or log in, navigate to your Dashboard,
+                            and click on "Request Service". Fill in the details, upload your files, and submit. We will
+                            review it and get back to you with a quote or confirmation.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="accordion-item glass-card mb-3 border-0">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false"
+                            aria-controls="collapseTwo">
+                            <span class="fw-bold fs-5">What payment methods do you accept?</span>
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                        data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Currently, we accept payments via UPI (GPay, PhonePe, Paytm). After your order is confirmed,
+                            you will receive payment details. You can upload a screenshot of your transaction in the
+                            order section to verify payment.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="accordion-item glass-card mb-3 border-0">
+                    <h2 class="accordion-header" id="headingThree">
+                        <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false"
+                            aria-controls="collapseThree">
+                            <span class="fw-bold fs-5">Is my data secure and confidential?</span>
+                        </button>
+                    </h2>
+                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                        data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Absolutely. We take confidentiality very seriously. Your thesis, manuscripts, and data are
+                            never shared with third parties and are deleted from our systems 30 days after project
+                            completion.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="accordion-item glass-card mb-3 border-0">
+                    <h2 class="accordion-header" id="headingFour">
+                        <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="false"
+                            aria-controls="collapseFour">
+                            <span class="fw-bold fs-5">Do you offer free revisions?</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFour" class="accordion-collapse collapse" aria-labelledby="headingFour"
+                        data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Yes, we offer revisions to ensure the final output meets your initial requirements. However,
+                            major changes that deviate from the original instructions may incur an additional fee.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="accordion-item glass-card mb-3 border-0">
+                    <h2 class="accordion-header" id="headingFive">
+                        <button class="accordion-button collapsed bg-transparent shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapseFive" aria-expanded="false"
+                            aria-controls="collapseFive">
+                            <span class="fw-bold fs-5">What is the typical turnaround time?</span>
+                        </button>
+                    </h2>
+                    <div id="collapseFive" class="accordion-collapse collapse" aria-labelledby="headingFive"
+                        data-bs-parent="#faqAccordion">
+                        <div class="accordion-body text-muted">
+                            Turnaround time depends on the project size and complexity. Small tasks can be done in 24-48
+                            hours, while full thesis formatting might take 3-5 days. We will provide an estimated
+                            delivery date when we confirm your order.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Custom Accordion Styling for Premium Feel */
+    .accordion-button:not(.collapsed) {
+        color: var(--primary-color);
+        background-color: transparent;
+        box-shadow: none;
+    }
+
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: rgba(0, 0, 0, .125);
+    }
+
+    .accordion-body {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    [data-theme="dark"] .accordion-button {
+        color: var(--text-main);
+    }
+
+    [data-theme="dark"] .accordion-button:not(.collapsed) {
+        color: var(--primary-color);
+    }
+</style>
+{% endblock %}

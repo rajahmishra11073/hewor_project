@@ -1,0 +1,111 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Case Studies | Hewor Agency{% endblock %}
+{% block meta_description %}See how Hewor Agency has helped clients achieve success with professional thesis formatting
+and PPT design services.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row text-center mb-5" data-aos="fade-up">
+        <div class="col-lg-8 mx-auto">
+            <h1 class="display-4 fw-bold mb-3">Client <span class="text-gradient">Success Stories</span></h1>
+            <p class="lead text-muted">Real results for real clients. Discover how we help academicians and
+                professionals stand out.</p>
+        </div>
+    </div>
+
+    <!-- Case Study 1 -->
+    <div class="glass-card mb-5 p-4" data-aos="fade-up">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-4 mb-md-0">
+                <div class="bg-dark rounded-4 d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <i class="fas fa-graduation-cap fa-5x text-secondary opacity-50"></i>
+                </div>
+            </div>
+            <div class="col-md-7 ps-md-4">
+                <span class="badge bg-primary mb-2">Thesis Formatting</span>
+                <h3 class="fw-bold">PhD Thesis Acceptance - Delhi University</h3>
+                <p class="text-muted mt-3">
+                    <strong>Challenge:</strong> A PhD scholar was struggling with intricate APA citation rules and
+                    complex table alignments just days before the submission deadline.
+                </p>
+                <p class="text-muted">
+                    <strong>Solution:</strong> Our team restructured the entire document, automated the Table of
+                    Contents, and corrected over 150+ citations within 48 hours.
+                </p>
+                <div class="d-flex align-items-center mt-4">
+                    <div class="me-3">
+                        <h4 class="fw-bold text-success mb-0">100%</h4>
+                        <small>Compliance</small>
+                    </div>
+                    <div class="border-start ps-3">
+                        <h4 class="fw-bold text-primary mb-0">48 Hrs</h4>
+                        <small>Turnaround</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Case Study 2 -->
+    <div class="glass-card mb-5 p-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="row align-items-center flex-md-row-reverse">
+            <div class="col-md-5 mb-4 mb-md-0">
+                <div class="bg-dark rounded-4 d-flex align-items-center justify-content-center" style="height: 250px;">
+                    <i class="fas fa-chart-pie fa-5x text-danger opacity-50"></i>
+                </div>
+            </div>
+            <div class="col-md-7 pe-md-4">
+                <span class="badge bg-danger mb-2">PPT Design</span>
+                <h3 class="fw-bold">International Conference Presentation</h3>
+                <p class="text-muted mt-3">
+                    <strong>Challenge:</strong> A professor needed to present complex research data at an international
+                    conference but had a text-heavy, uninspiring slide deck.
+                </p>
+                <p class="text-muted">
+                    <strong>Solution:</strong> We redesigned the deck using modern infographics, clean typography, and
+                    subtle animations to make the data digestible and engaging.
+                </p>
+                <div class="d-flex align-items-center mt-4">
+                    <div class="me-3">
+                        <h4 class="fw-bold text-success mb-0">High</h4>
+                        <small>Engagement</small>
+                    </div>
+                    <div class="border-start ps-3">
+                        <h4 class="fw-bold text-primary mb-0">20+</h4>
+                        <small>Slides Designed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="row g-4 mt-5" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <h2 class="display-4 fw-bold text-primary">500+</h2>
+                <p class="text-muted">Projects Completed</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <h2 class="display-4 fw-bold text-secondary">98%</h2>
+                <p class="text-muted">Client Satisfaction</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <h2 class="display-4 fw-bold text-accent">24/7</h2>
+                <p class="text-muted">Support Available</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5 pt-4">
+        <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg">Start Your Success Story</a>
+    </div>
+
+</div>
+{% endblock %}

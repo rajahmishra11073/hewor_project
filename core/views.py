@@ -284,6 +284,18 @@ def contact_view(request):
         
     return render(request, 'core/contact.html', {'setting': setting})
 
+def services_view(request):
+    return render(request, 'core/services.html')
+
+def faqs_view(request):
+    return render(request, 'core/faqs.html')
+
+def case_studies_view(request):
+    return render(request, 'core/case_studies.html')
+
+def terms_view(request):
+    return render(request, 'core/terms.html')
+
 # --- NEW ORDER DETAIL & CHAT VIEW (UPDATED) ---
 @login_required
 def order_detail(request, order_id):
