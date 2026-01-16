@@ -1,7 +1,17 @@
 import re
 import random
+import os
 from django.db.models import Q
 from .models import ServiceOrder, SiteSetting
+import google.generativeai as genai
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Configure Gemini
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 class OisaAssistant:
     def __init__(self, user):
@@ -10,39 +20,97 @@ class OisaAssistant:
     def respond(self, message):
         """
         Main entry point for Oisa's logic.
-        Detects intent and routes to the appropriate handler.
+        1. Checks for database-dependent queries (Order Status).
+        2. Tries Gemini AI for intelligent responses.
+        3. Falls back to Regex if Gemini fails or is not configured.
         """
         message = message.lower().strip()
         
-        # Priority 1: Identity & Greetings
+        # --- Priority 1: Database Dependent Logic (Order Status) ---
+        # Matches: "status of my order", "how is my project", "update on work"
+        if self._check_intent(message, [r'status', r'order', r'project', r'work', r'update', r'progress']):
+             # We handle this locally because Gemini doesn't have DB access
+             return self._order_status_response()
+
+        # --- Priority 2: Gemini AI ---
+        if GEMINI_API_KEY:
+            try:
+                ai_response = self._get_gemini_response(message)
+                if ai_response:
+                    return ai_response
+            except Exception as e:
+                logger.error(f"Gemini API Error: {e}")
+                # Fall through to specific fallback logic
+
+        # --- Priority 3: Simple Regex Fallback (If AI fails) ---
+        # Identity
         if self._check_intent(message, [r'who are you', r'your name', r'real person']):
             return self._identity_response()
             
-        if self._check_intent(message, [r'\bhi\b', r'\bhello\b', r'\bhey\b', r'good morning', r'good evening']):
+        # Greetings
+        if self._check_intent(message, [r'\bhi\b', r'\bhello\b', r'\bhey\b', r'good morning']):
             return self._greeting_response()
 
-        # Priority 2: Order Status (Most common user query)
-        # Matches: "status of my order", "how is my project", "update on work"
-        if self._check_intent(message, [r'status', r'order', r'project', r'work', r'update', r'progress']):
-            return self._order_status_response()
-
-        # Priority 3: Services & Pricing
-        if self._check_intent(message, [r'service', r'price', r'cost', r'do for me', r'offer', r'make']):
+        # Services
+        if self._check_intent(message, [r'service', r'price', r'cost', r'do for me', r'offer']):
             return self._services_response()
             
-        # Priority 4: Support / Handover to Human
-        if self._check_intent(message, [r'help', r'support', r'contact', r'human', r'phone', r'call', r'speak']):
+        # Support
+        if self._check_intent(message, [r'help', r'support', r'contact', r'human', r'phone']):
             return self._support_response()
             
-        # Priority 5: Small Talk
-        if self._check_intent(message, [r'how are you', r'doing well']):
-            return "I am functioning at 100% capacity and ready to assist! 🚀 How can I help you today?"
-        
-        if self._check_intent(message, [r'thank', r'thx']):
-            return "You are very welcome! Let me know if you need anything else. 😊"
-
-        # Priority 6: Fallback
+        # Generic Fallback
         return self._fallback_response()
+
+    def _get_gemini_response(self, user_message):
+        """
+        Calls Gemini API with system context.
+        """
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        # Build System Context
+        user_name = self.user.first_name if (self.user.is_authenticated and self.user.first_name) else "Guest"
+        
+        setting = SiteSetting.objects.first()
+        contact_phone = setting.contact_phone if setting else "+91 8797456730"
+        
+        system_prompt = f"""
+        You are Oisa, the AI assistant for Hewor Agency (hewor.in).
+        Your persona: Professional, friendly, helpful, and efficient. You are an AI, but you have "personality".
+        User Name: {user_name}
+        
+        About Hewor Agency:
+        We provide premium academic and professional services to save time for professors and researchers.
+        
+        Services:
+        1. Presentation Design (PPT): High-impact pitch decks and conference slides.
+        2. Book Typing & Formatting: Digitizing handwritten notes, formatting for publishing.
+        3. Data Entry & Analysis: Excel work, cleaning data, web research.
+        4. Web Scraping: Custom data extraction.
+        
+        Contact Support:
+        Phone: {contact_phone}
+        Hours: 9 AM - 6 PM IST.
+        
+        Instructions:
+        - Answer the user's question based on the info above.
+        - If they ask about specific order details but are not asking "status", look at the context.
+        - Keep answers concise (max 3 sentences) unless they ask for details.
+        - Use emojis occasionally.
+        - If they ask something outside your scope, polite decline or steer back to services.
+        - Do NOT mention "I am a large language model". You are Oisa.
+        - Format important terms in <b>bold</b>.
+        """
+        
+        chat = model.start_chat(history=[])
+        response = chat.send_message(f"System: {system_prompt}\nUser: {user_message}")
+        
+        # Gemini usually returns text. Convert markdown bold **text** to HTML <b>text</b> for our frontend if needed,
+        # but our frontend might handle generic HTML. Let's do simple replace.
+        text = response.text.replace("**", "<b>").replace(" **", "</b>") # Simple approximation, or just leave as markdown if frontend supports it. 
+        # Better: simple regex for bold
+        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response.text)
+        return text
 
     def _check_intent(self, message, patterns):
         """Helper to check if any regex pattern matches the message."""
@@ -52,82 +120,37 @@ class OisaAssistant:
         return False
 
     def _identity_response(self):
-        return (
-            "I am <b>Oisa</b>, your personal AI assistant at Hewor. "
-            "I help manage your projects, answer questions, and keep things organized while our human experts build your dreams! 🤖✨"
-        )
+        return "I am <b>Oisa</b>, your personal AI assistant at Hewor! 🤖✨"
 
     def _greeting_response(self):
-        if self.user.is_authenticated and self.user.first_name:
-            name = self.user.first_name
-        else:
-            name = "there"
-            
-        greetings = [
-            f"Hello {name}! Oisa here. How can I help you with your project today?",
-            f"Hi {name}! Ready to get to work? Ask me about your order status or our services.",
-            f"Greetings! I'm Oisa. What can I do for you right now?"
-        ]
-        return random.choice(greetings)
+        return "Hello! Oisa here. How can I help you today? 😊"
 
     def _order_status_response(self):
         if not self.user.is_authenticated:
-            return "I'd love to give you an update, but I need to know who you are first! Please <b>login</b> to check your order status."
+            return "I can't check your orders unless you're logged in! Please <a href='/login/'>login</a> to check your status."
             
         orders = ServiceOrder.objects.filter(user=self.user).order_by('-created_at')[:5]
         if not orders.exists():
-            return (
-                "I looked through our records, but I don't see any active projects for you yet. 📂<br>"
-                "Would you like to start a new one? Just visit the <b>New Project</b> page!"
-            )
+            return "You don't have any active projects yet. Ready to start one? 🚀"
         
-        response = "Here is the latest status on your projects:<br><br>"
+        response = "Here are your recent projects:<br><br>"
         for order in orders:
-            # Emoji mapping for status
             status_map = {
-                'pending': "🟠 <b>Pending Review</b>",
-                'contacted': "🔵 <b>Client Contacted</b>",
-                'in_progress': "🟢 <b>Work in Progress</b>",
-                'completed': "✅ <b>Delivered</b>"
+                'pending': "🟠 Pending", 'contacted': "🔵 Contacted",
+                'in_progress': "🟢 In Progress", 'completed': "✅ Delivered"
             }
-            status_text = status_map.get(order.status, f"<b>{order.get_status_display()}</b>")
-            
-            response += f"• {order.title}: {status_text}<br>"
-            
-        response += "<br>Let me know if you need specific details on any of these!"
+            response += f"• {order.title}: {status_map.get(order.status, order.status)}<br>"
         return response
 
     def _services_response(self):
-        return (
-            "We offer a suite of premium digital services to help you scale:<br><br>"
-            "1. <b>Presentation Design (PPT)</b> - Professional, high-impact pitch decks.<br>"
-            "2. <b>Book Typing & Formatting</b> - For authors and publishers.<br>"
-            "3. <b>Data Entry & Analysis</b> - Accurate and fast.<br>"
-            "4. <b>Web Scraping</b> - Custom data extraction solutions.<br><br>"
-            "You can start any of these from your Dashboard."
-        )
+        return "We offer PPT Design, Book Typing, Data Entry, and Web Scraping. Check the Services page for more! 💼"
 
     def _support_response(self):
-        setting = SiteSetting.objects.first()
-        phone = setting.contact_phone if setting else "+91 8797456730"
-        return (
-            "Sometimes you just need a human touch! 🧑‍💻<br>"
-            f"You can contact our support team directly at <b>{phone}</b>.<br>"
-            "They are available from 9 AM to 6 PM to handle complex queries."
-        )
+        return f"You can reach our human support team at <b>+91 8797456730</b> (9 AM - 6 PM). 📞"
 
     def _fallback_response(self):
-        return (
-            "I'm still learning and didn't quite catch that. 🤔<br><br>"
-            "You can ask me things like:<br>"
-            "• <i>'What is the status of my order?'</i><br>"
-            "• <i>'What services do you offer?'</i><br>"
-            "• <i>'I need to talk to support'</i>"
-        )
+        return "I'm not sure about that. Try asking about our services or your order status! 🤔"
 
 def get_chatbot_response(user, message):
-    """
-    Wrapper function to maintain compatibility with views.py
-    """
     assistant = OisaAssistant(user)
     return assistant.respond(message)
