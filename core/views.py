@@ -338,7 +338,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .chatbot_logic import get_chatbot_response
 
-# @login_required removed for public access
+@csrf_exempt
 def chatbot_api(request):
     if request.method == 'POST':
         try:

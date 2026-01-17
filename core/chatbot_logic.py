@@ -66,7 +66,7 @@ class OisaAssistant:
         """
         Calls Gemini API with system context.
         """
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-flash-latest')
         
         # Build System Context
         user_name = self.user.first_name if (self.user.is_authenticated and self.user.first_name) else "Guest"
