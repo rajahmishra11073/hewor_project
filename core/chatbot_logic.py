@@ -9,10 +9,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Configure Gemini
+from dotenv import load_dotenv
+load_dotenv() # Ensure env vars are loaded
+
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+
 client = None
 if GEMINI_API_KEY:
-    client = genai.Client(api_key=GEMINI_API_KEY)
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+    except Exception as e:
+        logger.error(f"Failed to init Gemini Client: {e}")
 
 class OisaAssistant:
     def __init__(self, user):
@@ -21,21 +28,15 @@ class OisaAssistant:
     def respond(self, message):
         """
         Main entry point for Oisa's logic.
-        1. Checks for database-dependent queries (Order Status).
-        2. Tries Gemini AI for intelligent responses.
-        3. Falls back to Regex if Gemini fails or is not configured.
         """
         message = message.lower().strip()
         
         # --- Priority 1: Database Dependent Logic (Order Status) ---
-        # Matches: "status of my order", "how is my project", "update on work"
-        # Refined to avoid blocking general questions like "How does it work?"
         status_patterns = [
             r'status of my', r'my order', r'my project', r'track order', 
             r'project status', r'work update', r'how is my order'
         ]
         if self._check_intent(message, status_patterns):
-             # We handle this locally because Gemini doesn't have DB access
              return self._order_status_response()
 
         # --- Priority 2: Gemini AI ---
@@ -71,13 +72,22 @@ class OisaAssistant:
     def _get_gemini_response(self, user_message):
         """
         Calls Gemini API with system context.
+        Tries multiple models in case of 404 or Rate Limits.
         """
         if not client:
             return None
         
-        # Create a chat session with the model
-        chat = client.chats.create(model='gemini-1.5-flash')
-        
+        # List of models to try in order of preference/stability
+        # Updated based on available models in the project (Gemini 2.x available, 1.5 missing)
+        models_to_try = [
+            'gemini-2.0-flash',
+            'gemini-2.0-flash-lite',
+            'gemini-flash-latest',
+            'gemini-2.5-flash',
+            'gemini-2.0-flash-exp',
+            'gemini-1.5-flash', # Kept just in case
+        ]
+
         # Build System Context
         user_name = self.user.first_name if (self.user.is_authenticated and self.user.first_name) else "Guest"
         
@@ -141,14 +151,26 @@ class OisaAssistant:
         7. Format important terms in <b>bold</b>.
         """
         
-        response = chat.send_message(message=f"System: {system_prompt}\nUser: {user_message}")
+        # Prepare prompt
+        full_message = f"System: {system_prompt}\nUser: {user_message}"
+
+        for model_name in models_to_try:
+            try:
+                # Create chat and send
+                chat = client.chats.create(model=model_name)
+                response = chat.send_message(message=full_message)
+                
+                # If successful, process and return
+                text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response.text)
+                return text
+            except Exception as e:
+                # Log error and try next model
+                logger.warning(f"Gemini Model {model_name} failed: {e}")
+                continue
         
-        # Gemini usually returns text. Convert markdown bold **text** to HTML <b>text</b> for our frontend if needed,
-        # but our frontend might handle generic HTML. Let's do simple replace.
-        text = response.text.replace("**", "<b>").replace(" **", "</b>") # Simple approximation, or just leave as markdown if frontend supports it. 
-        # Better: simple regex for bold
-        text = re.sub(r'\*\*(.*?)\*\*', r'<b>\1</b>', response.text)
-        return text
+        # If all failed
+        logger.error("All Gemini models failed.")
+        return None
 
     def _check_intent(self, message, patterns):
         """Helper to check if any regex pattern matches the message."""
