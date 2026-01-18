@@ -1311,21 +1311,24 @@
                 console.warn('AOS Init Failed:', e);
             }
 
-            // Initialize Vanilla Tilt
+            // Initialize Vanilla Tilt (Desktop Only)
             try {
-                const cards = document.querySelectorAll(".glass-card:not(.no-tilt)");
-                if (cards.length > 0) {
-                    VanillaTilt.init(cards, {
-                        max: 10,  // Reduced max tilt for subtle effect
-                        speed: 400,
-                        glare: true,
-                        "max-glare": 0.2,
-                        scale: 1.02
-                    });
+                if (window.innerWidth > 991) {
+                    const cards = document.querySelectorAll(".glass-card:not(.no-tilt)");
+                    if (cards.length > 0) {
+                        VanillaTilt.init(cards, {
+                            max: 10,
+                            speed: 400,
+                            glare: true,
+                            "max-glare": 0.2,
+                            scale: 1.02
+                        });
+                    }
                 }
             } catch (e) {
                 console.warn('Tilt Init Failed:', e);
             }
+
         });
     </script>
 
