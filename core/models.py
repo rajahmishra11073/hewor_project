@@ -90,3 +90,15 @@ class OrderChat(models.Model):
 
     def __str__(self):
         return f"Chat on {self.order.title} by {self.sender.username}"
+
+# --- 5. CLIENT REVIEW MODEL ---
+class Review(models.Model):
+    name = models.CharField(max_length=100)
+    position = models.CharField(max_length=100, help_text="Job Title (e.g., Head of Customer Experience)")
+    review_text = models.TextField()
+    profile_image = models.ImageField(upload_to='reviews/', blank=True, null=True)
+    rating = models.IntegerField(default=5, help_text="Rating from 1 to 5")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} - {self.rating} Stars"

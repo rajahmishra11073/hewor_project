@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review
 from django.conf import settings
 import random
 import logging
@@ -55,7 +55,8 @@ def validate_input(email, phone):
 def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    return render(request, 'core/home.html')
+    reviews = Review.objects.all().order_by('-created_at')
+    return render(request, 'core/home.html', {'reviews': reviews})
 
 def signup_view(request):
     if request.method == 'POST':

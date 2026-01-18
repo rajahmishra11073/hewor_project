@@ -353,6 +353,58 @@
     </div>
 </div>
 
+<!-- Testimonials Section -->
+<div class="py-5 pos-relative" id="testimonials">
+    <div class="text-center mb-5">
+        <h2 class="display-5 fw-bold">What <span class="text-primary">Our Clients</span> Say</h2>
+        <p class="text-muted">Hear Directly From Our Satisfied Partners</p>
+    </div>
+
+    {% if reviews %}
+    <div class="row g-4">
+        {% for review in reviews %}
+        <div class="col-md-4">
+            <div class="card glass-card h-100 p-4 border-0 position-relative">
+                <i class="fas fa-quote-left fa-3x text-primary opacity-25 position-absolute top-0 start-0 m-3"></i>
+
+                <div class="mb-3 mt-4">
+                    {% with ''|center:review.rating as range %}
+                    {% for _ in range %}
+                    <i class="fas fa-star text-warning small"></i>
+                    {% endfor %}
+                    {% endwith %}
+                </div>
+
+                <p class="card-text text-muted mb-4" style="font-size: 0.95rem; line-height: 1.6;">
+                    {{ review.review_text }}
+                </p>
+
+                <div class="d-flex align-items-center mt-auto">
+                    {% if review.profile_image %}
+                    <img src="{{ review.profile_image.url }}" alt="{{ review.name }}"
+                        class="rounded-circle me-3 object-fit-cover" style="width: 50px; height: 50px;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center me-3"
+                        style="width: 50px; height: 50px;">
+                        <span class="fw-bold text-muted">{{ review.name|slice:":1" }}</span>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ review.name }}</h6>
+                        <small class="text-muted">{{ review.position }}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <p class="text-muted">No reviews yet. Check back soon!</p>
+    </div>
+    {% endif %}
+</div>
+
 <style>
     .hover-up {
         transition: transform 0.3s;
@@ -486,6 +538,19 @@
             opacity: 0,
             stagger: 0.1,
             ease: "power3.out"
+        });
+
+        // 4. Testimonials Section
+        gsap.from('#testimonials .card', {
+            scrollTrigger: {
+                trigger: '#testimonials',
+                start: "top 80%",
+            },
+            duration: 0.8,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "back.out(1.2)"
         });
     });
 </script>

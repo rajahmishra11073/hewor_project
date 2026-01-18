@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review
 from django.utils.html import format_html
 from django.urls import reverse
 
@@ -93,3 +93,22 @@ class ContactMessageAdmin(admin.ModelAdmin):
 
 # --- Profile Admin ---
 admin.site.register(Profile)
+
+# --- Review Admin ---
+@admin.register(Review)
+class ReviewAdmin(admin.ModelAdmin):
+    list_display = ('name', 'position', 'rating', 'review_image_preview', 'delete_action', 'created_at')
+    list_filter = ('rating', 'created_at')
+    search_fields = ('name', 'review_text', 'position')
+    readonly_fields = ('created_at',)
+
+    def review_image_preview(self, obj):
+        if obj.profile_image:
+            return format_html('<img src="{}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 5px;" />', obj.profile_image.url)
+        return "No Image"
+    review_image_preview.short_description = "Profile Image"
+
+    def delete_action(self, obj):
+        url = reverse('admin:core_review_delete', args=[obj.pk])
+        return format_html('<a class="button" href="{}" style="background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-weight: bold;">Delete</a>', url)
+    delete_action.short_description = "Delete"
