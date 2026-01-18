@@ -3,15 +3,16 @@ import random
 import os
 from django.db.models import Q
 from .models import ServiceOrder, SiteSetting
-import google.generativeai as genai
+from google import genai
 import logging
 
 logger = logging.getLogger(__name__)
 
 # Configure Gemini
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+client = None
 if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
 class OisaAssistant:
     def __init__(self, user):
@@ -33,7 +34,7 @@ class OisaAssistant:
              return self._order_status_response()
 
         # --- Priority 2: Gemini AI ---
-        if GEMINI_API_KEY:
+        if client:
             try:
                 ai_response = self._get_gemini_response(message)
                 if ai_response:
@@ -66,7 +67,11 @@ class OisaAssistant:
         """
         Calls Gemini API with system context.
         """
-        model = genai.GenerativeModel('gemini-flash-latest')
+        if not client:
+            return None
+        
+        # Create a chat session with the model
+        chat = client.chats.create(model='gemini-1.5-flash')
         
         # Build System Context
         user_name = self.user.first_name if (self.user.is_authenticated and self.user.first_name) else "Guest"
@@ -102,8 +107,7 @@ class OisaAssistant:
         - Format important terms in <b>bold</b>.
         """
         
-        chat = model.start_chat(history=[])
-        response = chat.send_message(f"System: {system_prompt}\nUser: {user_message}")
+        response = chat.send_message(message=f"System: {system_prompt}\nUser: {user_message}")
         
         # Gemini usually returns text. Convert markdown bold **text** to HTML <b>text</b> for our frontend if needed,
         # but our frontend might handle generic HTML. Let's do simple replace.

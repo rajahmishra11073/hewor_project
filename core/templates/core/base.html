@@ -33,30 +33,20 @@
     <!-- CSS Links -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Outfit:wght@300;500;700;900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;500;700;800&display=swap"
         rel="stylesheet">
     <!-- Font Awesome 6.5.1 (CDN) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    <!-- Spline 3D Viewer -->
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></script>
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://www.gstatic.com">
 
-    <!-- Firebase SDKs (Required for Google Auth) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBd0xV6JVdIYM18OkyTN3oiyqnm_GA-xG8",
-            authDomain: "hewor-project-auth.firebaseapp.com",
-            projectId: "hewor-project-auth",
-            storageBucket: "hewor-project-auth.firebasestorage.app",
-            messagingSenderId: "34381627864",
-            appId: "1:34381627864:web:9f31b0bdc798ddacb172ad"
-        };
-        firebase.initializeApp(firebaseConfig);
-    </script>
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -77,57 +67,104 @@
     <style>
         /* --- GLOBAL PREMIUM STYLES --- */
         :root {
-            /* Core Brand Colors (Premium HSL) */
-            --primary-color: #4ed8e0;
-            /* &Cyan */
-            --secondary-color: #4361ee;
-            /* Blue */
-            --accent-color: #f72585;
-            /* Pink */
-            --dark-bg: #0f172a;
+            /* Core Brand Colors (Midnight Luxury) */
+            --primary-color: #6366f1;
+            /* Indigo 500 */
+            --secondary-color: #8b5cf6;
+            /* Violet 500 */
+            --accent-color: #ec4899;
+            /* Pink 500 */
+            --dark-bg: #020617;
+            /* Slate 950 */
 
-            /* Light Mode */
-            --bg-body: #f0f4f8;
-            --bg-gradient: radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
-            /* Override for a "Dark Premium" default feel even in light mode for this specific design if desired, but sticking to variables */
-            --bg-gradient-light: radial-gradient(circle at 10% 20%, rgb(242, 246, 255) 0%, rgb(230, 240, 255) 90%);
+            /* Light Mode (Soft & Clean) */
+            --bg-body: #f8fafc;
+            /* Slate 50 */
+            --bg-gradient: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0, transparent 50%), radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.15) 0, transparent 50%);
 
-            --text-main: #2b2d42;
-            --glass-bg: rgba(255, 255, 255, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.4);
-            --navbar-bg: rgba(255, 255, 255, 0.8);
-            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            --text-main: #0f172a;
+            /* Slate 900 */
+            --text-muted: #64748b;
+            /* Slate 500 */
+
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --navbar-bg: rgba(255, 255, 255, 0.85);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 
             --input-bg: rgba(255, 255, 255, 0.9);
             --input-border: #e2e8f0;
-            --input-text: #1e293b;
+            --input-text: #0f172a;
         }
 
         [data-theme="dark"] {
-            --bg-body: #0b0f19;
-            /* Deep Space */
-            --bg-gradient: radial-gradient(circle at 50% -10%, #1e293b 0%, #0b0f19 50%);
-            --text-main: #edf2f4;
-            --text-muted: #94a3b8;
-            --glass-bg: rgba(30, 41, 59, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --navbar-bg: rgba(11, 15, 25, 0.85);
-            --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --bg-body: #020617;
+            /* Deep Slate */
+            /* Premium Aurora Gradient */
+            --bg-gradient:
+                radial-gradient(circle at 15% 50%, rgba(79, 70, 229, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
 
-            --input-bg: rgba(30, 41, 59, 0.8);
-            --input-border: #334155;
+            --text-main: #f8fafc;
+            /* Slate 50 */
+            --text-muted: #94a3b8;
+            /* Slate 400 */
+
+            --glass-bg: rgba(15, 23, 42, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            /* Subtle etching */
+            --navbar-bg: rgba(2, 6, 23, 0.8);
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+            --input-bg: rgba(15, 23, 42, 0.8);
+            --input-border: #1e293b;
             --input-text: #f1f5f9;
         }
 
         body {
-            font-family: 'Outfit', 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
             background-color: var(--bg-body);
             background-image: var(--bg-gradient);
             background-attachment: fixed;
-            /* Parallax feel */
             color: var(--text-main);
             overflow-x: hidden;
             transition: all 0.4s ease;
+            cursor: none;
+            /* Hide default cursor */
+        }
+
+        /* Custom Cursor Styles */
+        .cursor-dot,
+        .cursor-dot-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+        }
+
+        .cursor-dot-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(67, 97, 238, 0.5);
+            transition: transform 0.2s ease-out;
+        }
+
+        /* Hover Text Primary */
+        .hover-primary {
+            transition: color 0.3s ease;
+        }
+
+        .hover-primary:hover {
+            color: var(--primary-color) !important;
         }
 
         /* --- INSANE COMPONENTS --- */
@@ -147,66 +184,104 @@
             border-color: rgba(255, 255, 255, 0.6);
         }
 
+        /* --- SUPER PREMIUM BUTTONS --- */
         .btn-primary {
-            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            /* Indigo to Violet */
             border: none;
-            border-radius: 50px;
+            border-radius: 12px;
+            /* Slightly squarer for tech look */
             padding: 14px 32px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: 0.3px;
             color: #fff;
             position: relative;
             overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .btn-primary::after {
+        .btn-primary::before {
             content: '';
             position: absolute;
             top: 0;
-            left: -100%;
+            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: 0.5s;
+            background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+            /* Reverse gradient */
+            z-index: -1;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .btn-primary:hover::before {
+            opacity: 1;
         }
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.6);
-            filter: brightness(1.1);
-        }
-
-        .btn-primary:hover::after {
-            left: 100%;
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.23);
+            color: white;
         }
 
         .btn-outline-primary {
             border-radius: 50px;
-            border: 2px solid #4361ee;
-            font-weight: 600;
-            padding: 12px 30px;
+            border: 2px solid transparent;
+            background-image: linear-gradient(var(--bg-body), var(--bg-body)), linear-gradient(135deg, #4361ee, #f72585);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            box-shadow: 2px 1000px 1px var(--bg-body) inset;
             color: #4361ee;
-            background: transparent;
-            transition: all 0.3s;
+            font-weight: 700;
+            padding: 14px 32px;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        [data-theme="dark"] .btn-outline-primary {
+            box-shadow: 2px 1000px 1px #0f172a inset;
+            background-image: linear-gradient(#0f172a, #0f172a), linear-gradient(135deg, #4361ee, #f72585);
+            color: #fff;
         }
 
         .btn-outline-primary:hover {
-            background: #4361ee;
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+            box-shadow: none;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
         }
 
-        /* Text Gradients */
+        /* Text Gradients & Premium Headings */
+        /* Text Gradients & Premium Headings */
         .text-gradient {
-            background: linear-gradient(to right, #4361ee, #f72585, #4ed8e0);
+            background: linear-gradient(to right, #6366f1, #a855f7, #ec4899);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
             background-size: 200% auto;
-            animation: textShine 5s linear infinite;
+            animation: textShine 4s linear infinite;
             font-weight: 800;
+        }
+
+        .premium-heading {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            /* text-shadow removed for cleaner gradient rendering */
+        }
+
+        [data-theme="light"] .premium-heading {
+            background: linear-gradient(135deg, #1e293b 0%, #4361ee 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         @keyframes textShine {
@@ -365,13 +440,19 @@
 
         /* --- NAVBAR --- */
         .navbar {
+            background: transparent;
+            padding: 20px 0;
+            border-bottom: 1px solid transparent;
+            transition: all 0.4s ease;
+        }
+
+        .navbar-scrolled {
             background: var(--navbar-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-            padding: 15px 0;
+            padding: 12px 0;
             border-bottom: 1px solid var(--glass-border);
-            transition: background 0.3s;
         }
 
         .navbar-brand {
@@ -587,6 +668,179 @@
             transform: scale(1.1);
             color: white;
         }
+
+        /* Bubble Navigation (Desktop) */
+        @media (min-width: 992px) {
+            .nav-bubble {
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 50px;
+                padding: 0.5rem 0.5rem;
+                display: flex;
+                gap: 0.5rem;
+                /* Premium Glow Effect */
+                box-shadow: 0 0 20px rgba(118, 75, 162, 0.2), 0 4px 30px rgba(0, 0, 0, 0.1);
+                transition: box-shadow 0.3s ease;
+            }
+
+            .nav-bubble:hover {
+                box-shadow: 0 0 30px rgba(118, 75, 162, 0.4), 0 8px 40px rgba(0, 0, 0, 0.15);
+            }
+
+            .nav-bubble .nav-link {
+                color: var(--text-body);
+                padding: 0.5rem 1.2rem;
+                border-radius: 25px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                font-weight: 500;
+            }
+
+            .nav-bubble .nav-link:hover,
+            .nav-bubble .nav-link.active {
+                background: rgba(118, 75, 162, 0.1);
+                color: #764ba2 !important;
+                transform: translateY(-2px);
+                text-shadow: 0 0 1px rgba(118, 75, 162, 0.3);
+            }
+
+            /* Center the bubble precisely */
+            .navbar .container {
+                position: relative;
+            }
+        }
+
+        .btn-premium {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            background-color: #667eea !important;
+            color: #ffffff !important;
+            border: none;
+            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+            transition: all 0.3s ease;
+            position: relative;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 10 !important;
+            min-width: 120px;
+            /* Force width */
+            animation: glow-pulse 3s infinite;
+        }
+
+        @keyframes glow-pulse {
+            0% {
+                box-shadow: 0 0 5px rgba(118, 75, 162, 0.5);
+                transform: scale(1);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(118, 75, 162, 0.8), 0 0 10px rgba(118, 75, 162, 0.4);
+                transform: scale(1.05);
+            }
+
+            100% {
+                box-shadow: 0 0 5px rgba(118, 75, 162, 0.5);
+                transform: scale(1);
+            }
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            /* Stronger colored glow on hover */
+            box-shadow: 0 0 25px rgba(118, 75, 162, 0.6), 0 5px 15px rgba(0, 0, 0, 0.1);
+            color: #ffffff !important;
+        }
+
+        .floating-badge {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* MOBILE OPTIMIZATIONS */
+        @media (max-width: 991px) {
+
+            /* Resize massive headings for mobile */
+            .display-3 {
+                font-size: 2.5rem !important;
+                line-height: 1.2 !important;
+            }
+
+            /* Adjust lead text size */
+            .lead {
+                font-size: 1rem !important;
+            }
+
+            /* Navbar Mobile Menu Styling */
+            .navbar-collapse {
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(10px);
+                border-radius: 12px;
+                padding: 1rem;
+                margin-top: 1rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            /* Center mobile nav items */
+            .navbar-nav {
+                text-align: center;
+            }
+
+            .navbar-nav .nav-link {
+                padding: 0.75rem 0;
+            }
+
+            /* Stack buttons in navbar on mobile */
+            .d-flex.flex-column.flex-lg-row {
+                width: 100%;
+            }
+
+            /* Ensure buttons take full width for easier tapping */
+            .d-flex.flex-column.flex-lg-row .btn {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+
+            /* Footer Mobile Optimization */
+            footer .row {
+                text-align: center !important;
+            }
+
+            footer .col-lg-3,
+            footer .col-md-6 {
+                margin-bottom: 2rem;
+            }
+
+            footer h5 {
+                margin-top: 1rem;
+            }
+        }
+
+        .btn-premium:active,
+        .btn-premium:focus {
+            color: #ffffff !important;
+            box-shadow: 0 0 15px rgba(118, 75, 162, 0.8);
+        }
+
+        /* Floating Animation */
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .floating-badge {
+            animation: float 4s ease-in-out infinite;
+        }
     </style>
 
     <!-- Theme Script to prevent flash -->
@@ -599,44 +853,74 @@
 </head>
 
 <body>
+    <!-- Custom Cursor Element -->
+    <div class="cursor-dot-outline"></div>
+    <div class="cursor-dot"></div>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg sticky-top">
-        <div class="container">
-            <button onclick="toggleTheme()" class="theme-toggle-btn me-2 d-lg-none">
-                <i class="fas fa-moon" id="theme-icon-mobile"></i>
-            </button>
+    <nav class="navbar navbar-expand-lg sticky-top"
+        style="background-color: transparent !important; backdrop-filter: blur(5px);">
+        <div class="container position-relative">
+            <!-- 1. LEFT: Brand -->
+            <a class="navbar-brand fw-bold fs-3" href="{% url 'home' %}">Hewor<span class="text-primary">.</span></a>
 
-            <a class="navbar-brand" href="{% url 'home' %}">Hewor<span class="text-primary">.</span></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav align-items-center">
+            <!-- Mobile Toggles -->
+            <div class="d-flex align-items-center d-lg-none gap-2">
+                <button onclick="toggleTheme()" class="theme-toggle-btn">
+                    <i class="fas fa-moon" id="theme-icon-mobile"></i>
+                </button>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
 
-                    <!-- Common Links for Everyone -->
-                    <li class="nav-item"><a href="{% url 'about' %}" class="nav-link">About</a></li>
-                    <li class="nav-item"><a href="{% url 'contact' %}" class="nav-link">Contact</a></li>
+            <div class="collapse navbar-collapse" id="navbarNav">
 
-                    {% if user.is_authenticated %}
-                    <li class="nav-item"><a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a></li>
-                    <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link">Profile</a></li>
-                    <li class="nav-item"><a href="{% url 'create_order' %}" class="btn btn-outline-primary ms-3">Request
-                            Service</a></li>
-                    <li class="nav-item"><a href="{% url 'logout' %}" class="nav-link text-danger ms-2">Logout</a></li>
-                    {% else %}
-                    <li class="nav-item"><a href="{% url 'login' %}" class="nav-link">Login</a></li>
-                    <li class="nav-item"><a href="{% url 'signup' %}" class="btn btn-primary ms-3">Hire Assistant</a>
+                <!-- 2. CENTER: Bubble Menu (Desktop) -->
+                <!-- We use mx-auto to push it to the visually center, or absolute positioning for true center -->
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 nav-bubble">
+                    <li class="nav-item">
+                        <a href="{% url 'home' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
                     </li>
-                    {% endif %}
-
-                    <!-- Theme Toggle (Desktop) - Moved to End -->
-                    <li class="nav-item d-none d-lg-block">
-                        <button onclick="toggleTheme()" class="theme-toggle-btn ms-3">
-                            <i class="fas fa-moon" id="theme-icon-desktop"></i>
-                        </button>
+                    <li class="nav-item">
+                        <a href="{% url 'services' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}">Our
+                            Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'case_studies' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'case_studies' %}active{% endif %}">Case
+                            Studies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'about' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'contact' %}"
+                            class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contact</a>
                     </li>
                 </ul>
+
+                <!-- 3. RIGHT: Actions (Auth + Theme) -->
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-4 mt-3 mt-lg-0">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="nav-link p-0">Dashboard</a>
+                    <a href="{% url 'logout' %}" class="text-danger text-decoration-none small">Logout</a>
+                    <a href="{% url 'create_order' %}" class="btn btn-outline-primary btn-sm rounded-pill px-4">Request
+                        Service</a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="nav-link p-0 fw-semibold">Login</a>
+                    <a href="{% url 'signup' %}" class="btn btn-premium rounded-pill px-4 fw-bold">Hire Assistant</a>
+                    {% endif %}
+
+                    <!-- Theme Toggle (Desktop) -->
+                    <button onclick="toggleTheme()" class="theme-toggle-btn d-none d-lg-block ms-2">
+                        <i class="fas fa-moon" id="theme-icon-desktop"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
@@ -655,106 +939,95 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- Professional Footer -->
-    <footer class="footer-section">
-        <div class="container">
-            <div class="footer-cta">
-                <div class="row">
-                    <div class="col-xl-4 col-md-4 mb-30">
-                        <div class="single-cta">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <div class="cta-text">
-                                <h4>Find us</h4>
-                                <span>Greater Noida, Uttar Pradesh, India</span>
-                            </div>
-                        </div>
+    <!-- Modern Glass Footer -->
+    <footer class="container py-5 mt-5 position-relative" style="z-index: 10;">
+        <div class="glass-card no-tilt p-5">
+            <div class="row justify-content-between">
+                <!-- Brand Column -->
+                <div class="col-lg-4 mb-5 mb-lg-0">
+                    <div class="d-flex align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">Hewor<span class="text-primary">.</span></h3>
                     </div>
-                    <div class="col-xl-4 col-md-4 mb-30">
-                        <div class="single-cta">
-                            <i class="fas fa-phone"></i>
-                            <div class="cta-text">
-                                <h4>Call us</h4>
-                                <span>+91 87974 56730</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-4 col-md-4 mb-30">
-                        <div class="single-cta">
-                            <i class="far fa-envelope-open"></i>
-                            <div class="cta-text">
-                                <h4>Mail us</h4>
-                                <span>hewor.work@gmail.com</span>
-                            </div>
-                        </div>
+                    <p class="text-muted mb-4">
+                        Hewor empowers professors and researchers to transform raw work into polished excellence.
+                        Making academic life easier, one task at a time.
+                    </p>
+                    <div class="d-flex gap-3">
+                        <a href="https://www.instagram.com/hewor.in/" target="_blank" class="social-btn">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="https://www.facebook.com/hewor.in/" target="_blank" class="social-btn">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <!-- Added more icons as per reference -->
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" class="social-btn">
+                            <i class="fab fa-github"></i>
+                        </a>
                     </div>
                 </div>
-            </div>
-            <div class="footer-content">
-                <div class="row">
-                    <div class="col-xl-4 col-lg-4 mb-50">
-                        <div class="footer-widget">
-                            <div class="footer-logo">
-                                <h3>Hewor<span>.</span></h3>
-                            </div>
-                            <div class="footer-text">
-                                <p>Hewor is your dedicated academic assistant. We specialize in Thesis Formatting, Book
-                                    Typing, PPT Design, and Data Entry for Professors and Academicians.</p>
-                            </div>
-                            <div class="footer-social-icon">
-                                <span>Follow us</span>
-                                <a class="btn btn-primary btn-square mr-2" href="https://www.facebook.com/hewor.in/"
-                                    target="_blank"><i class="fab fa-facebook-f"></i></a>
-                                <a href="javascript:void(0)" onclick="alert('Social media pages coming soon!')"><i
-                                        class="fab fa-x-twitter"></i></a>
-                                <a class="btn btn-primary btn-square mr-2" href="https://www.instagram.com/hewor.in/"
-                                    target="_blank"><i class="fab fa-instagram"></i></a>
-                            </div>
+
+                <!-- Links Columns -->
+                <div class="col-lg-7">
+                    <div class="row">
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <h6 class="fw-bold mb-4">Services</h6>
+                            <ul class="list-unstyled text-muted small d-flex flex-column gap-2">
+                                <li><a href="{% url 'services' %}"
+                                        class="text-decoration-none text-reset hover-primary">PPT Design</a></li>
+                                <li><a href="{% url 'services' %}"
+                                        class="text-decoration-none text-reset hover-primary">Book Typing</a></li>
+                                <li><a href="{% url 'services' %}"
+                                        class="text-decoration-none text-reset hover-primary">Data Entry</a></li>
+                                <li><a href="{% url 'services' %}"
+                                        class="text-decoration-none text-reset hover-primary">Thesis Formatting</a></li>
+                            </ul>
                         </div>
-                    </div>
-                    <div class="col-xl-4 col-lg-4 col-md-6 mb-30">
-                        <div class="footer-widget">
-                            <div class="footer-widget-heading">
-                                <h3>Useful Links</h3>
-                            </div>
-                            <ul>
-                                <li><a href="{% url 'home' %}">Home</a></li>
-                                <li><a href="{% url 'services' %}">Our Services</a></li>
-                                <li><a href="{% url 'case_studies' %}">Case Studies</a></li>
-                                <li><a href="{% url 'faqs' %}">FAQs</a></li>
-                                <li><a href="{% url 'about' %}">About Us</a></li>
-                                <li><a href="{% url 'contact' %}">Contact</a></li>
-                                <li><a href="{% url 'terms' %}">Terms & Ethics</a></li>
+                        <div class="col-md-4 mb-4 mb-md-0">
+                            <h6 class="fw-bold mb-4">Quick Links</h6>
+                            <ul class="list-unstyled text-muted small d-flex flex-column gap-2">
+                                <li><a href="{% url 'case_studies' %}"
+                                        class="text-decoration-none text-reset hover-primary">Case Studies</a></li>
+                                <li><a href="{% url 'faqs' %}"
+                                        class="text-decoration-none text-reset hover-primary">FAQs</a></li>
+                                <li><a href="#" class="text-decoration-none text-reset hover-primary">Pricing Plans</a>
+                                </li>
+                                <li><a href="{% url 'contact' %}"
+                                        class="text-decoration-none text-reset hover-primary">Support</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="fw-bold mb-4">Company</h6>
+                            <ul class="list-unstyled text-muted small d-flex flex-column gap-2">
+                                <li><a href="{% url 'about' %}"
+                                        class="text-decoration-none text-reset hover-primary">About Us</a></li>
+                                <li><a href="{% url 'contact' %}"
+                                        class="text-decoration-none text-reset hover-primary">Contact</a></li>
+                                <li><a href="{% url 'terms' %}"
+                                        class="text-decoration-none text-reset hover-primary">Terms & Ethics</a></li>
+                                <li><a href="{% url 'privacy' %}"
+                                        class="text-decoration-none text-reset hover-primary">Privacy Policy</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div class="col-xl-4 col-lg-4 col-md-6 mb-50">
-                        <div class="footer-widget">
-                            <div class="footer-widget-heading">
-                                <h3>Subscribe</h3>
-                            </div>
-                            <div class="footer-text mb-25">
-                                <p>Don’t miss our academic updates and offers.</p>
-                            </div>
-                            <div class="subscribe-form">
-                                <form
-                                    onsubmit="event.preventDefault(); alert('Thank you for subscribing! We will keep you updated.'); this.reset();">
-                                    <input type="email" placeholder="Email Address" required>
-                                    <button type="submit"><i class="fab fa-telegram-plane"></i></button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </div>
-        <div class="copyright-area">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xl-6 col-lg-6 text-center text-lg-start">
-                        <div class="copyright-text">
-                            <p>Copyright &copy; 2026, All Right Reserved <a href="{% url 'home' %}">Hewor Agency</a></p>
-                        </div>
-                    </div>
+
+            <hr class="my-5" style="border-color: var(--text-muted); opacity: 0.1;">
+
+            <div class="row align-items-center small text-muted">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    &copy; 2026 Hewor Agency. All rights reserved.
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <a href="{% url 'privacy' %}" class="text-reset text-decoration-none me-4 hover-primary">Privacy
+                        Policy</a>
+                    <a href="{% url 'terms' %}" class="text-reset text-decoration-none me-4 hover-primary">Terms of
+                        Service</a>
+                    <a href="{% url 'privacy' %}#cookies" class="text-reset text-decoration-none hover-primary">Cookies
+                        Settings</a>
                 </div>
             </div>
         </div>
@@ -988,6 +1261,35 @@
         }
     </script>
 
+    <!-- OPTIMIZED SCRIPTS LOCATED IN FOOTER -->
+
+    <!-- Spline 3D Viewer -->
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></script>
+
+    <!-- GSAP Animation Library (Core + ScrollTrigger) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script>
+        // Register ScrollTrigger ensuring GSAP is loaded
+        gsap.registerPlugin(ScrollTrigger);
+    </script>
+
+    <!-- Firebase SDKs (Required for Google Auth) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBd0xV6JVdIYM18OkyTN3oiyqnm_GA-xG8",
+            authDomain: "hewor-project-auth.firebaseapp.com",
+            projectId: "hewor-project-auth",
+            storageBucket: "hewor-project-auth.firebasestorage.app",
+            messagingSenderId: "34381627864",
+            appId: "1:34381627864:web:9f31b0bdc798ddacb172ad"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+
     <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- AOS Animation Library JS -->
@@ -1060,6 +1362,72 @@
         document.addEventListener('DOMContentLoaded', () => {
             const currentTheme = localStorage.getItem('theme') || 'light';
             updateThemeIcon(currentTheme);
+        });
+    </script>
+    <!-- GSAP Global Animations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // gsap.registerPlugin(ScrollTrigger); // Moved to head for early init
+
+            // 1. Remove Navbar Reveal Animation for Stability
+            // Navbar is visible by CSS default.
+
+            // 2. Page Content Fade In
+            gsap.from('.container.mt-4', {
+                duration: 1,
+                y: 30,
+                opacity: 0,
+                delay: 0.3,
+                ease: 'power3.out'
+            });
+
+            // 3. Custom Cursor Logic
+            const cursorOutline = document.querySelector('.cursor-dot-outline');
+            const cursorDot = document.querySelector('.cursor-dot');
+
+            if (window.matchMedia("(pointer: fine)").matches) { // Only on desktop
+                window.addEventListener('mousemove', (e) => {
+                    const posX = e.clientX;
+                    const posY = e.clientY;
+
+                    // Dot follows instantly
+                    cursorDot.style.left = `${posX}px`;
+                    cursorDot.style.top = `${posY}px`;
+
+                    // Outline follows with lag (managed by CSS transition or GSAP)
+                    // Using animate() for smoother performance
+                    cursorOutline.animate({
+                        left: `${posX}px`,
+                        top: `${posY}px`
+                    }, { duration: 500, fill: "forwards" });
+                });
+
+                // Hover effects
+                document.querySelectorAll('a, button, .glass-card').forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        cursorOutline.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                        cursorOutline.style.borderColor = 'var(--primary-color)';
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        cursorOutline.style.transform = 'translate(-50%, -50%) scale(1)';
+                        cursorOutline.style.borderColor = 'rgba(67, 97, 238, 0.5)';
+                    });
+                });
+            } else {
+                // Hide on touch devices
+                cursorOutline.style.display = 'none';
+                cursorDot.style.display = 'none';
+            }
+
+            // Navbar Scroll Effect
+            window.addEventListener('scroll', function () {
+                const navbar = document.querySelector('.navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('navbar-scrolled');
+                } else {
+                    navbar.classList.remove('navbar-scrolled');
+                }
+            });
         });
     </script>
 </body>

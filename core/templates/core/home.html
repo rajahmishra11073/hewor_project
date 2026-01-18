@@ -2,8 +2,46 @@
 
 {% block content %}
 <!-- Hero Section -->
-<div class="row align-items-center py-5" style="min-height: 80vh;">
-    <div class="col-lg-6 z-2" data-aos="fade-right">
+<style>
+    @media (max-width: 991px) {
+
+        /* Mobile Hero Layout */
+        .hero-row {
+            text-align: center;
+            min-height: auto !important;
+            padding-top: 6rem !important;
+            /* Space for navbar */
+        }
+
+        .hero-buttons-container {
+            justify-content: center;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .hero-buttons-container .btn {
+            width: 100%;
+            /* Full width buttons */
+            min-width: 0 !important;
+            /* Override inline min-width */
+        }
+
+        .hero-model-container {
+            display: none !important;
+        }
+
+        .service-highlights {
+            justify-content: center;
+        }
+
+        /* Adjust badges/text spacing */
+        .hero-text-col {
+            padding-right: 0 !important;
+        }
+    }
+</style>
+<div class="row align-items-center py-5 hero-row" style="min-height: 80vh;">
+    <div class="col-lg-6 z-2 hero-text-col" data-aos="fade-right">
         <span class="badge glass-card px-3 py-2 rounded-pill mb-3 fw-bold text-primary border-0"
             style="backdrop-filter: blur(20px);">
             <i class="fas fa-graduation-cap me-2"></i>Exclusive for Academicians
@@ -14,31 +52,62 @@
         </h1>
         <p class="lead text-muted mb-5 pe-lg-5" style="font-size: 1.25rem;">
             Your dedicated <b>Academic Assistant</b>. We specialize in <span class="text-primary">Book Typing</span>,
-            <span class="text-primary">Thesis Formatting</span>, and <span class="text-primary">PPT Design</span>
-            for Professors who value their time.
+            <span class="text-primary">Thesis Formatting</span>, and <span class="text-primary">PPT Design</span>.
+            Focus on your research while we handle the document formatting, typing, and design perfection you
+            deserve.<br><br>
+            We adhere to strict university guidelines and professional standards to ensure your work stands out with
+            precision and clarity.
         </p>
 
-        <div class="d-flex gap-3">
+        <div class="d-flex gap-3 position-relative hero-buttons-container" style="z-index: 10;">
             {% if user.is_authenticated %}
-            <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg shadow-lg">
+            <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg shadow-lg px-4 py-3"
+                style="min-width: 180px;">
                 <i class="fas fa-file-alt me-2"></i>Delegate Work
             </a>
             {% else %}
-            <a href="{% url 'signup' %}" class="btn btn-primary btn-lg shadow-lg">
+            <a href="{% url 'signup' %}" class="btn btn-premium btn-lg px-4 py-3 fw-bold" style="min-width: 180px;">
                 Hire Assistant
             </a>
-            <a href="{% url 'login' %}" class="btn btn-outline-primary">
+            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-3 fw-bold"
+                style="min-width: 140px;">
                 Login
             </a>
             {% endif %}
-            <a href="#services" class="btn btn-link text-muted text-decoration-none">How it works <i
+            <a href="#services" class="btn btn-link text-muted text-decoration-none align-self-center">How it works <i
                     class="fas fa-arrow-down ms-1"></i></a>
+        </div>
+
+        <!-- Service Highlights (Premium Addition) -->
+        <div class="d-flex flex-wrap gap-4 mt-5 pt-2 service-highlights" data-aos="fade-up" data-aos-delay="200">
+            <div class="d-flex align-items-center text-muted">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 32px; height: 32px;">
+                    <i class="fas fa-user-secret text-primary small"></i>
+                </div>
+                <span class="small fw-semibold">100% Confidential</span>
+            </div>
+            <div class="d-flex align-items-center text-muted">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 32px; height: 32px;">
+                    <i class="fas fa-check-circle text-primary small"></i>
+                </div>
+                <span class="small fw-semibold">Experts team</span>
+            </div>
+            <div class="d-flex align-items-center text-muted">
+                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 32px; height: 32px;">
+                    <i class="fas fa-clock text-primary small"></i>
+                </div>
+                <span class="small fw-semibold">On-Time Delivery</span>
+            </div>
         </div>
         <!-- Removed "Fake Ratings" section as requested -->
     </div>
 
     <!-- 3D Model Container -->
-    <div class="col-lg-6 position-relative text-center" style="height: 600px;" data-aos="fade-left">
+    <div class="col-lg-6 position-relative text-center hero-model-container" style="height: 600px;"
+        data-aos="fade-left">
 
 
         <!-- 
@@ -53,6 +122,21 @@
         -->
         <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
             background="transparent"></spline-viewer>
+
+        <!-- Floating Trust Badge -->
+        <div class="glass-card position-absolute top-50 end-0 translate-middle-y p-3 rounded-4 shadow-lg d-none d-lg-block floating-badge"
+            style="right: -20px !important; z-index: 10; max-width: 200px;">
+            <div class="d-flex align-items-center mb-2">
+                <div class="bg-success text-white rounded-circle p-1 me-2 d-flex align-items-center justify-content-center"
+                    style="width: 24px; height: 24px;">
+                    <i class="fas fa-check small"></i>
+                </div>
+                <span class="fw-bold small text-success">Verified Service</span>
+            </div>
+            <p class="mb-0 small text-muted" style="line-height: 1.4;">Trusted by <strong>50+</strong> Professors
+                across
+                India.</p>
+        </div>
     </div>
 </div>
 
@@ -180,7 +264,7 @@
     </div>
     <div class="row g-4">
         <!-- Card 1 -->
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+        <div class="col-md-4">
             <div class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up poz-relative overflow-hidden">
                 <div class="blob-bg"></div>
                 <div class="icon-box bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg position-relative"
@@ -193,7 +277,7 @@
             </div>
         </div>
         <!-- Card 2 -->
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+        <div class="col-md-4">
             <div
                 class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up overflow-hidden position-relative">
                 <div class="blob-bg" style="background: rgba(37, 211, 102, 0.1);"></div>
@@ -207,7 +291,7 @@
             </div>
         </div>
         <!-- Card 3 -->
-        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+        <div class="col-md-4">
             <div
                 class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up overflow-hidden position-relative">
                 <div class="blob-bg" style="background: rgba(255, 193, 7, 0.1);"></div>
@@ -231,22 +315,22 @@
     </div>
     <div class="row text-center">
         <div class="col-md-4 position-relative">
-            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
-                style="z-index: -1; opacity: 0.5;">01</div>
+            <div class="display-1 fw-bold position-absolute start-50 translate-middle-x process-number"
+                style="z-index: -1;">01</div>
             <i class="fas fa-upload fa-2x text-primary mb-3 mt-4"></i>
             <h5>Post Requirement</h5>
             <p class="text-muted small">Fill the form and upload your raw files.</p>
         </div>
         <div class="col-md-4 position-relative">
-            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
-                style="z-index: -1; opacity: 0.5;">02</div>
+            <div class="display-1 fw-bold position-absolute start-50 translate-middle-x process-number"
+                style="z-index: -1;">02</div>
             <i class="fas fa-tools fa-2x text-primary mb-3 mt-4"></i>
             <h5>We Work</h5>
             <p class="text-muted small">Our expert team completes your task.</p>
         </div>
         <div class="col-md-4 position-relative">
-            <div class="display-1 text-light fw-bold position-absolute start-50 translate-middle-x"
-                style="z-index: -1; opacity: 0.5;">03</div>
+            <div class="display-1 fw-bold position-absolute start-50 translate-middle-x process-number"
+                style="z-index: -1;">03</div>
             <i class="fas fa-check-double fa-2x text-primary mb-3 mt-4"></i>
             <h5>Verify & Pay</h5>
             <p class="text-muted small">Review the work, pay, and download.</p>
@@ -261,6 +345,16 @@
 
     .hover-up:hover {
         transform: translateY(-10px);
+    }
+
+    .process-number {
+        color: rgba(0, 0, 0, 0.05);
+        /* Very subtle dark for light mode */
+    }
+
+    [data-theme="dark"] .process-number {
+        color: rgba(255, 255, 255, 0.05);
+        /* Very subtle white for dark mode */
     }
 </style>
 
@@ -286,6 +380,98 @@
 
         // Safety timeout to stop checking after 10 seconds
         setTimeout(() => clearInterval(checkSpline), 10000);
+    });
+</script>
+
+<!-- GSAP Home Page Animations -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Helper: Simple Split Text (Wraps characters in spans)
+        const splitText = (selector) => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.innerHTML = el.innerText.split("").map(char =>
+                    char === " " ? "&nbsp;" : `<span class="char" style="display:inline-block; opacity:0;">${char}</span>`
+                ).join("");
+            });
+        };
+
+        // 1. Hero Animations
+        // Badge
+        gsap.from('.badge', {
+            duration: 0.8,
+            y: -20,
+            opacity: 0,
+            delay: 0.5,
+            ease: "back.out(1.7)"
+        });
+
+        // Split Headline
+        // Note: targeting the h1 but avoiding nested spans if possible, 
+        // simpler approach for Mixed HTML: just animate the h1 container for now 
+        // to avoid breaking the <span class="text-gradient">.
+        // If we want split text, we have to be careful. Let's do a simple slide up for now.
+        gsap.from('h1.display-3', {
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            delay: 0.7,
+            ease: "power3.out"
+        });
+
+        // Lead Text
+        gsap.from('.lead', {
+            duration: 1,
+            y: 30,
+            opacity: 0,
+            delay: 0.9,
+            ease: "power3.out"
+        });
+
+        // Buttons
+        gsap.from('.d-flex.gap-3 a', {
+            duration: 0.8,
+            y: 20,
+            opacity: 0,
+            stagger: 0.2,
+            delay: 1.1,
+            ease: "back.out(1.7)"
+        });
+
+        // 3D Model Floating Effect
+        gsap.to('spline-viewer', {
+            y: 20,
+            duration: 3,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut"
+        });
+
+        // 2. Services Section Stagger
+        gsap.from('#services .card', {
+            scrollTrigger: {
+                trigger: '#services',
+                start: "top 85%", // Trigger earlier
+            },
+            duration: 0.5, // Faster duration
+            y: 50, // Shorter distance
+            opacity: 0,
+            stagger: 0.1, // Quicker sequence
+            ease: "power3.out"
+        });
+
+        // 3. Process Section Reveal
+        gsap.from('.py-5 .col-md-4', {
+            scrollTrigger: {
+                trigger: '.py-5 .display-1',
+                start: "top 90%", // Trigger much earlier
+            },
+            duration: 0.5,
+            y: 30,
+            opacity: 0,
+            stagger: 0.1,
+            ease: "power3.out"
+        });
     });
 </script>
 {% endblock %}

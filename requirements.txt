@@ -15,4 +15,4 @@ PyMuPDF
 django-cleanup
 firebase-admin
 dj-database-url
-google-generativeai
+google-genai

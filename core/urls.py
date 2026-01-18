@@ -16,6 +16,7 @@ urlpatterns = [
     path('faqs/', views.faqs_view, name='faqs'),
     path('case-studies/', views.case_studies_view, name='case_studies'),
     path('terms/', views.terms_view, name='terms'),
+    path('privacy/', views.privacy, name='privacy'),
     path('contact/', views.contact_view, name='contact'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('api/chatbot/', views.chatbot_api, name='chatbot_api'),

@@ -4,7 +4,7 @@
 <div class="container py-5">
     <!-- Hero Section -->
     <div class="row align-items-center mb-5">
-        <div class="col-lg-6">
+        <div class="col-lg-6 mb-5 mb-lg-0">
             <h1 class="display-4 fw-bold mb-4">{{ setting.about_title|default:"About Hewor" }}</h1>
             <div class="lead text-muted">
                 {% if setting.about_description %}
@@ -16,7 +16,7 @@
             </div>
             <a href="{% url 'contact' %}" class="btn btn-primary btn-lg mt-3">Work With Us</a>
         </div>
-        <div class="col-lg-6 text-center">
+        <div class="col-lg-6 text-center mt-4 mt-lg-0">
             {% if setting.about_image %}
             <img src="{{ setting.about_image.url }}" class="img-fluid rounded shadow-lg" alt="About Us">
             {% else %}
@@ -52,7 +52,7 @@
     </div>
     <div class="row justify-content-center text-center">
         <div class="col-md-4" data-aos="zoom-in" data-aos-delay="200">
-            <div class="card glass-card border-0 h-100 hover-up">
+            <div class="card glass-card no-tilt border-0 h-100 hover-up">
                 <!-- Placeholder for Founder Image -->
                 <div class="card-body p-5">
                     <div class="mb-4">

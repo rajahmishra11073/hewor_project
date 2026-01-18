@@ -296,6 +296,10 @@ def case_studies_view(request):
 def terms_view(request):
     return render(request, 'core/terms.html')
 
+def privacy(request):
+    """Render the privacy policy page."""
+    return render(request, 'core/privacy.html')
+
 # --- NEW ORDER DETAIL & CHAT VIEW (UPDATED) ---
 @login_required
 def order_detail(request, order_id):
