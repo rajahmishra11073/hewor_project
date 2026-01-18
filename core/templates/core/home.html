@@ -30,20 +30,7 @@
             display: none !important;
         }
 
-        /* CARD FIX: Make static and visible on mobile */
-        .glass-card {
-            transform: none !important;
-            opacity: 1 !important;
-            transition: none !important;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
-            /* Static shadow */
-            visibility: visible !important;
-            animation: none !important;
-        }
 
-        .glass-card:hover {
-            transform: none !important;
-        }
 
         .service-highlights {
             justify-content: center;
@@ -53,6 +40,21 @@
         .hero-text-col {
             padding-right: 0 !important;
         }
+    }
+
+    /* GLOBAL STATIC CSS for glass-card (Web & Mobile) */
+    .glass-card {
+        transform: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        visibility: visible !important;
+        animation: none !important;
+    }
+
+    .glass-card:hover {
+        transform: none !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
     }
 </style>
 <div class="row align-items-center py-5 hero-row" style="min-height: 80vh;">
@@ -273,15 +275,14 @@
 
 <!-- Services Section -->
 <div class="py-5 my-5" id="services">
-    <div class="text-center mb-5" data-aos="fade-up">
+    <div class="text-center mb-5">
         <span class="text-primary fw-bold letter-spacing-2">OUR SERVICES</span>
         <h2 class="display-5 fw-bold mt-2">Premium Solutions</h2>
     </div>
     <div class="row g-4">
         <!-- Card 1 -->
         <div class="col-md-4">
-            <div
-                class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up position-relative overflow-hidden">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center no-tilt position-relative overflow-hidden">
                 <div class="blob-bg"></div>
                 <div class="icon-box bg-white text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg position-relative"
                     style="width: 90px; height: 90px; font-size: 2.2rem; z-index: 2;">
@@ -294,8 +295,7 @@
         </div>
         <!-- Card 2 -->
         <div class="col-md-4">
-            <div
-                class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up overflow-hidden position-relative">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center no-tilt overflow-hidden position-relative">
                 <div class="blob-bg" style="background: rgba(37, 211, 102, 0.1);"></div>
                 <div class="icon-box bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg position-relative"
                     style="width: 90px; height: 90px; font-size: 2.2rem; z-index: 2;">
@@ -308,8 +308,7 @@
         </div>
         <!-- Card 3 -->
         <div class="col-md-4">
-            <div
-                class="card glass-card h-100 py-5 px-4 border-0 text-center hover-up overflow-hidden position-relative">
+            <div class="card glass-card h-100 py-5 px-4 border-0 text-center no-tilt overflow-hidden position-relative">
                 <div class="blob-bg" style="background: rgba(255, 193, 7, 0.1);"></div>
                 <div class="icon-box bg-white text-warning rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg position-relative"
                     style="width: 90px; height: 90px; font-size: 2.2rem; z-index: 2;">
