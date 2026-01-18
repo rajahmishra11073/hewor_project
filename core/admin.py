@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat
 from django.utils.html import format_html
 from django.urls import reverse
 
@@ -112,3 +112,25 @@ class ReviewAdmin(admin.ModelAdmin):
         url = reverse('admin:core_review_delete', args=[obj.pk])
         return format_html('<a class="button" href="{}" style="background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-weight: bold;">Delete</a>', url)
     delete_action.short_description = "Delete"
+
+# --- Case Study Admin ---
+@admin.register(CaseStudy)
+class CaseStudyAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'category_color', 'order')
+    list_editable = ('order', 'category_color')
+    list_filter = ('category',)
+    search_fields = ('title', 'challenge', 'solution')
+
+# --- Agency Stat Admin ---
+@admin.register(AgencyStat)
+class AgencyStatAdmin(admin.ModelAdmin):
+    list_display = ('label', 'value', 'icon_color', 'order')
+    list_editable = ('value', 'order', 'icon_color')
+
+# --- Team Member Admin ---
+from .models import TeamMember
+@admin.register(TeamMember)
+class TeamMemberAdmin(admin.ModelAdmin):
+    list_display = ('name', 'role', 'order')
+    list_editable = ('order',)
+    search_fields = ('name', 'role', 'quote')

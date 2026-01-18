@@ -47,33 +47,51 @@
 
     <!-- Leadership Section -->
     <div class="text-center mb-5" data-aos="fade-up">
-        <h2 class="fw-bold">Meet Our Leadership</h2>
-        <p class="text-muted">The minds behind Hewor.</p>
+        <h2 class="fw-bold">{{ setting.about_leadership_title|default:"Meet Our Leadership" }}</h2>
+        <p class="text-muted">{{ setting.about_leadership_subtitle|default:"The minds behind Hewor." }}</p>
     </div>
     <div class="row justify-content-center text-center">
-        <div class="col-md-6 col-lg-4" data-aos="zoom-in" data-aos-delay="200">
+        {% for member in team_members %}
+        <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="{{ forloop.counter|add:'1' }}00">
             <div class="card glass-card no-tilt border-0 h-100 hover-up">
-                <!-- Placeholder for Founder Image -->
                 <div class="card-body p-5">
                     <div class="mb-4">
                         <div class="d-inline-block p-1 rounded-circle border border-2 border-primary">
-                            {% load static %}
-                            <img src="{% static 'core/assets/rajesh.jpg' %}" alt="CEO" class="rounded-circle"
-                                width="120" height="120">
+                            {% if member.image %}
+                            <img src="{{ member.image.url }}" alt="{{ member.name }}"
+                                class="rounded-circle object-fit-cover" width="120" height="120">
+                            {% else %}
+                            <div class="bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                style="width: 120px; height: 120px; font-size: 2rem;">
+                                {{ member.name|first }}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
-                    <h3 class="fw-bold">Rajesh Kumar Mishra</h3>
-                    <p class="text-primary fw-bold letter-spacing-2 small">FOUNDER & CEO</p>
-                    <p class="text-muted mt-3">"I started Hewor with a simple mission: To let students study while we
-                        handle the grunt work. We are the future of academic assistance."</p>
+                    <h3 class="fw-bold">{{ member.name }}</h3>
+                    <p class="text-primary fw-bold letter-spacing-2 small">{{ member.role|upper }}</p>
+                    {% if member.quote %}
+                    <p class="text-muted mt-3">"{{ member.quote }}"</p>
+                    {% endif %}
 
                     <div class="mt-4">
-                        <a href="#" class="text-primary me-2"><i class="fab fa-linkedin fa-lg"></i></a>
-                        <a href="#" class="text-primary"><i class="fab fa-twitter fa-lg"></i></a>
+                        {% if member.linkedin_url %}
+                        <a href="{{ member.linkedin_url }}" target="_blank" class="text-primary me-2"><i
+                                class="fab fa-linkedin fa-lg"></i></a>
+                        {% endif %}
+                        {% if member.twitter_url %}
+                        <a href="{{ member.twitter_url }}" target="_blank" class="text-primary"><i
+                                class="fab fa-twitter fa-lg"></i></a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <div class="col-12 text-center text-muted">
+            <p>Leadership team details coming soon.</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}

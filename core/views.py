@@ -4,7 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember
 from django.conf import settings
 import random
 import logging
@@ -266,7 +266,11 @@ def payment_view(request, order_id):
 
 def about_view(request):
     setting = SiteSetting.objects.first()
-    return render(request, 'core/about.html', {'setting': setting})
+    team_members = TeamMember.objects.all().order_by('order')
+    return render(request, 'core/about.html', {
+        'setting': setting,
+        'team_members': team_members
+    })
 
 def contact_view(request):
     setting = SiteSetting.objects.first()
@@ -292,7 +296,14 @@ def faqs_view(request):
     return render(request, 'core/faqs.html')
 
 def case_studies_view(request):
-    return render(request, 'core/case_studies.html')
+    case_studies = CaseStudy.objects.all().order_by('order')
+    stats = AgencyStat.objects.all().order_by('order')
+    setting = SiteSetting.objects.first()
+    return render(request, 'core/case_studies.html', {
+        'case_studies': case_studies,
+        'agency_stats': stats,
+        'setting': setting
+    })
 
 def terms_view(request):
     return render(request, 'core/terms.html')

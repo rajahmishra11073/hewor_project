@@ -64,6 +64,15 @@ class SiteSetting(models.Model):
     about_description = models.TextField(help_text="Write your company story here.")
     about_image = models.ImageField(upload_to='site/', blank=True, null=True)
     
+    # Leadership Section Settings
+    about_leadership_title = models.CharField(max_length=200, default="Meet Our Leadership")
+    about_leadership_subtitle = models.CharField(max_length=200, default="The minds behind Hewor.")
+    
+    # Case Studies Page Settings
+    case_studies_title = models.CharField(max_length=200, default="Client Success Stories")
+    case_studies_subtitle = models.CharField(max_length=200, default="Real results for real clients.")
+    case_studies_description = models.TextField(default="Discover how we help academicians and professionals stand out.", help_text="Short lead text under the title.")
+    
     contact_email = models.EmailField(default="support@hewor.com")
     contact_phone = models.CharField(max_length=20, default="+91 8797456730")
     contact_address = models.TextField(default="Tech Park, New Delhi, India")
@@ -102,3 +111,66 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.rating} Stars"
+
+# --- 6. CASE STUDY MODEL ---
+class CaseStudy(models.Model):
+    title = models.CharField(max_length=200, help_text="e.g., PhD Thesis Acceptance")
+    category = models.CharField(max_length=100, help_text="e.g., Thesis Formatting")
+    category_color = models.CharField(max_length=20, default="primary", choices=[
+        ("primary", "Blue (Thesis)"),
+        ("danger", "Red (PPT)"),
+        ("info", "Cyan (Data)"),
+        ("success", "Green"),
+        ("warning", "Yellow"),
+        ("secondary", "Grey (Book)"),
+    ])
+    image = models.ImageField(upload_to='case_studies/', help_text="Success Story Image")
+    
+    challenge = models.TextField(help_text="Describe the challenge faced.")
+    solution = models.TextField(help_text="Describe the solution provided.")
+    
+    # Stat 1
+    stat1_value = models.CharField(max_length=50, help_text="e.g., 100%")
+    stat1_label = models.CharField(max_length=50, help_text="e.g., Compliance")
+    
+    # Stat 2
+    stat2_value = models.CharField(max_length=50, help_text="e.g., 48 Hrs")
+    stat2_label = models.CharField(max_length=50, help_text="e.g., Turnaround")
+    
+    order = models.PositiveIntegerField(default=0, help_text="Display Order (lowest first)")
+    
+    def __str__(self):
+        return self.title
+
+# --- 7. AGENCY STATS MODEL ---
+class AgencyStat(models.Model):
+    value = models.CharField(max_length=50, help_text="e.g., 34+")
+    label = models.CharField(max_length=100, help_text="e.g., Projects Delivered")
+    icon_color = models.CharField(max_length=20, default="primary", choices=[
+        ("primary", "Blue"),
+        ("secondary", "Grey"),
+        ("accent", "Teal"),
+        ("success", "Green"),
+        ("danger", "Red"),
+        ("warning", "Yellow"),
+        ("info", "Cyan"),
+    ])
+    order = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.value} - {self.label}"
+
+# --- 8. TEAM MEMBER MODEL ---
+class TeamMember(models.Model):
+    name = models.CharField(max_length=100)
+    role = models.CharField(max_length=100, help_text="e.g., FOUNDER & CEO")
+    quote = models.TextField(help_text="Short quote or bio.")
+    image = models.ImageField(upload_to='team/', blank=True, null=True)
+    
+    linkedin_url = models.URLField(blank=True, null=True)
+    twitter_url = models.URLField(blank=True, null=True, help_text="X / Twitter URL")
+    
+    order = models.PositiveIntegerField(default=0, help_text="Display Order")
+    
+    def __str__(self):
+        return f"{self.name} - {self.role}"
