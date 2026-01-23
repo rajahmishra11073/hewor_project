@@ -11,10 +11,15 @@ password = "Hewor.order@a2025M"
 email = "order_admin@hewor.in"
 
 try:
-    if not User.objects.filter(username=username).exists():
-        User.objects.create_user(username=username, password=password, email=email)
+    user, created = User.objects.get_or_create(username=username)
+    if created:
+        user.email = email
         print(f"User {username} created successfully.")
     else:
-        print(f"User {username} already exists.")
+        print(f"User {username} already exists. Updating password...")
+    
+    user.set_password(password)
+    user.save()
+    print(f"Password for {username} set to: {password}")
 except Exception as e:
     print(f"Error creating user: {e}")
