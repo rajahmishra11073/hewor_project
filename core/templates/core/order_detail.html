@@ -109,6 +109,84 @@
                     </div>
                     {% endif %}
                 </div>
+            </div>
+
+            <!-- FILE MANAGEMENT CARD (NEW) -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold">File Management</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Section 1: Source Files -->
+                    <h6 class="fw-bold"><i class="fas fa-file-upload me-2 text-primary"></i>Your Files (Source)</h6>
+                    <div class="d-flex gap-2 mb-3 align-items-center">
+                        {% if source_files %}
+                        <a href="{% url 'download_order_files' order.id 'source' %}"
+                            class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-download me-1"></i> Download All
+                        </a>
+                        {% else %}
+                        <span class="text-muted small fst-italic me-2">No files yet.</span>
+                        {% endif %}
+
+                        <!-- Upload Button (For User or Admin) -->
+                        <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#uploadSourceCollapse">
+                            <i class="fas fa-plus me-1"></i> Upload File
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Upload Form for Source -->
+                    <div class="collapse mb-3" id="uploadSourceCollapse">
+                        <div class="card card-body bg-light border p-2">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="upload_type" value="source">
+                                <label class="small text-muted mb-1">Select Files:</label>
+                                <input type="file" name="file_upload" multiple class="form-control form-control-sm mb-2"
+                                    required>
+                                <button type="submit" class="btn btn-primary btn-sm w-100">Upload Source Files</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Section 2: Delivery Files -->
+                    <h6 class="fw-bold"><i class="fas fa-gift me-2 text-success"></i>Completed Work</h6>
+                    <div class="d-flex gap-2 align-items-center">
+                        {% if delivery_files %}
+                        <a href="{% url 'download_order_files' order.id 'delivery' %}" class="btn btn-success btn-sm">
+                            <i class="fas fa-download me-1"></i> Download Final
+                        </a>
+                        {% else %}
+                        <span class="text-muted small fst-italic me-2">Not delivered yet.</span>
+                        {% endif %}
+
+                        {% if request.user.is_superuser %}
+                        <button class="btn btn-outline-success btn-sm" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#uploadDeliveryCollapse">
+                            <i class="fas fa-upload me-1"></i> Upload Delivery
+                        </button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Collapsible Upload Form for Delivery (Admin Only) -->
+                    {% if request.user.is_superuser %}
+                    <div class="collapse mt-2" id="uploadDeliveryCollapse">
+                        <div class="card card-body bg-light border-success p-2">
+                            <form method="POST" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <input type="hidden" name="upload_type" value="delivery">
+                                <label class="small text-muted mb-1">Select Final Files:</label>
+                                <input type="file" name="file_upload" multiple class="form-control form-control-sm mb-2"
+                                    required>
+                                <button type="submit" class="btn btn-success btn-sm w-100">Deliver Project</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
 
                 <!-- DELIVERY SECTION (NEW) -->
                 {% if order.delivery_file %}

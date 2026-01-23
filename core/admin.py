@@ -11,6 +11,8 @@ admin.site.index_title = "Welcome to Hewor Management Dashboard"
 class OrderFileInline(admin.TabularInline):
     model = OrderFile
     extra = 0
+    fields = ('file', 'file_type', 'uploaded_at')
+    readonly_fields = ('uploaded_at',)
 
 # --- Service Order Admin (FIXED) ---
 @admin.register(ServiceOrder)

@@ -105,6 +105,7 @@ class OrderTests(TestCase):
         self.user = User.objects.create_user(username='testuser', password='password123')
         self.client.login(username='testuser', password='password123')
 
+
     def test_create_order_multiple_files(self):
         file1 = SimpleUploadedFile("file1.txt", b"content 1")
         file2 = SimpleUploadedFile("file2.txt", b"content 2")
@@ -123,4 +124,48 @@ class OrderTests(TestCase):
         order = ServiceOrder.objects.first()
         self.assertIsNotNone(order)
         self.assertEqual(order.files.count(), 2)
+
+    def test_create_order_merge_logic(self):
+        """Test that duplicate titles merge and duplicate files are ignored."""
+        # Step 1: Create initial order
+        file1 = SimpleUploadedFile("file1.txt", b"content 1")
+        data1 = {
+             'service_type': 'presentation',
+             'title': 'Merge Project', # Unique Title
+             'description': 'Description 1',
+             'file_upload': [file1]
+        }
+        self.client.post(self.create_order_url, data1)
+        
+        self.assertEqual(ServiceOrder.objects.count(), 1)
+        order = ServiceOrder.objects.first()
+        self.assertEqual(order.files.count(), 1)
+
+        # Step 2: Create overlapping order (Same Title, One New File, One Duplicate File)
+        file2 = SimpleUploadedFile("file2.txt", b"content 2") # New
+        file1_dup = SimpleUploadedFile("file1.txt", b"content 1 duplicate") # Duplicate Name
+        
+        data2 = {
+             'service_type': 'consultation', # Different type, should be ignored
+             'title': 'Merge Project', # SAME Title
+             'description': 'Description 2',
+             'file_upload': [file2, file1_dup]
+        }
+        
+        response = self.client.post(self.create_order_url, data2)
+        
+        # Verify redirect
+        self.assertRedirects(response, self.dashboard_url)
+        
+        # Verify ONLY ONE order exists
+        self.assertEqual(ServiceOrder.objects.count(), 1)
+        
+        # Verify files count: Should be 2 (file1 + file2), NOT 3 (file1_dup should be ignored)
+        order.refresh_from_db()
+        self.assertEqual(order.files.count(), 2)
+        
+        filenames = [f.original_filename for f in order.files.all()]
+        self.assertIn("file1.txt", filenames)
+        self.assertIn("file2.txt", filenames)
+
 

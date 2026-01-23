@@ -1,5 +1,8 @@
 import re
 from django.shortcuts import render, redirect, get_object_or_404
+import zipfile
+import io
+from django.http import HttpResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -209,21 +212,42 @@ def create_order(request):
         request_call = request.POST.get('request_call') == 'on'
         files = request.FILES.getlist('file_upload')
         
-        order = ServiceOrder.objects.create(
-            user=request.user,
-            service_type=service_type,
-            title=title,
-            description=description,
-            phone_number=phone_number,
-            request_call=request_call,
-            # file_upload field in ServiceOrder is kept for backward compatibility or can be ignored/removed later
-        )
+        
+        # Check for existing order with same title
+        order = ServiceOrder.objects.filter(user=request.user, title=title).first()
+        
+        is_new_order = False
+        if not order:
+            # Create new order if not exists
+            order = ServiceOrder.objects.create(
+                user=request.user,
+                service_type=service_type,
+                title=title,
+                description=description,
+                phone_number=phone_number,
+                request_call=request_call,
+            )
+            is_new_order = True
+        else:
+             # Logic for Merged Order (Optional: Update description? For now, keep original to avoid overwrite)
+             pass
 
         from .models import OrderFile
+        files_added = 0
+        
         for f in files:
-            OrderFile.objects.create(order=order, file=f)
+            # Check for duplicate file name in this order
+            if not OrderFile.objects.filter(order=order, original_filename=f.name).exists():
+                 OrderFile.objects.create(order=order, file=f, original_filename=f.name)
+                 files_added += 1
 
-        messages.success(request, "Order received successfully!")
+        if is_new_order:
+            messages.success(request, "Order received successfully!")
+        elif files_added > 0:
+            messages.success(request, f"New files added to existing project: '{title}'")
+        else:
+             messages.info(request, f"Project '{title}' already exists and no new files were added.")
+             
         return redirect('dashboard')
         
     return render(request, 'core/create_order.html')
@@ -328,6 +352,32 @@ def order_detail(request, order_id):
         return redirect('dashboard')
     
     if request.method == 'POST':
+        # File Upload Logic
+        if 'file_upload' in request.FILES:
+            files = request.FILES.getlist('file_upload')
+            upload_type = request.POST.get('upload_type', 'source')
+            
+            # Security: Non-admin users can ONLY upload source files
+            if not request.user.is_superuser:
+                upload_type = 'source'
+            
+            from .models import OrderFile
+            for f in files:
+                # Deduplication for additional uploads
+                if not OrderFile.objects.filter(order=order, original_filename=f.name).exists():
+                    OrderFile.objects.create(order=order, file=f, file_type=upload_type, original_filename=f.name)
+            
+            messages.success(request, f"{upload_type.title()} files uploaded successfully.")
+            
+            # Auto-update status if Admin delivers work
+            if request.user.is_superuser and upload_type == 'delivery':
+                if order.status != 'completed':
+                    order.status = 'completed'
+                    from django.utils import timezone
+                    order.completed_at = timezone.now()
+                    order.save()
+            return redirect('order_detail', order_id=order.id)
+
         message = request.POST.get('message')
         
         if message:
@@ -351,7 +401,45 @@ def order_detail(request, order_id):
     # Purani chats fetch karo (oldest first)
     chats = order.chats.all().order_by('created_at')
     
-    return render(request, 'core/order_detail.html', {'order': order, 'chats': chats})
+    # Separation of files
+    source_files = order.files.filter(file_type='source')
+    delivery_files = order.files.filter(file_type='delivery')
+    
+    return render(request, 'core/order_detail.html', {
+        'order': order, 
+        'chats': chats,
+        'source_files': source_files,
+        'delivery_files': delivery_files
+    })
+
+@login_required
+def download_order_files(request, order_id, file_type):
+    order = get_object_or_404(ServiceOrder, id=order_id)
+    
+    if request.user != order.user and not request.user.is_superuser:
+        messages.error(request, "Access denied.")
+        return redirect('dashboard')
+    
+    files = order.files.filter(file_type=file_type)
+    
+    if not files.exists():
+        messages.error(request, "No files found.")
+        return redirect('order_detail', order_id=order.id)
+        
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+        for f in files:
+            try:
+                file_path = f.file.path
+                file_name = f.file.name.split('/')[-1]
+                zip_file.write(file_path, file_name)
+            except FileNotFoundError:
+                continue # Skip missing files
+    
+    zip_buffer.seek(0)
+    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="{file_type}_files_{order.id}.zip"'
+    return response
 
 # --- CHATBOT API ---
 from django.http import JsonResponse
