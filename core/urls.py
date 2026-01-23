@@ -20,6 +20,7 @@ urlpatterns = [
     path('contact/', views.contact_view, name='contact'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('api/chatbot/', views.chatbot_api, name='chatbot_api'),
+    path('order/<int:order_id>/download/<str:file_type>/', views.download_order_files, name='download_order_files'),
 ]
 
 
