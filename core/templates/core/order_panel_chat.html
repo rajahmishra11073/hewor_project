@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Freelancer | HEWOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="h-14 border-b border-slate-700 flex items-center justify-between px-4 bg-slate-900">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'order_panel_dashboard' %}" class="text-slate-400 hover:text-white"><i
+                    class="fas fa-arrow-left"></i></a>
+            <h1 class="text-sm font-bold text-white">Chat on Order #{{ order.id }}</h1>
+        </div>
+        <div class="text-xs text-blue-400 font-mono">{{ order.freelancer.name }}</div>
+    </header>
+
+    <!-- Chat Area -->
+    <main class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-container">
+        {% for chat in chats %}
+        <div class="flex flex-col {% if chat.sender == request.user %}items-end{% else %}items-start{% endif %}">
+            <div
+                class="max-w-[85%] rounded-lg p-3 text-sm {% if chat.sender == request.user %}bg-blue-600 text-white{% else %}bg-slate-700 text-slate-200{% endif %}">
+                {{ chat.message }}
+                {% if chat.attachment %}
+                <div class="mt-2 pt-2 border-t border-white/20">
+                    <a href="{{ chat.attachment.url }}" download class="flex items-center gap-1 text-xs underline"><i
+                            class="fas fa-paperclip"></i> Attachment</a>
+                </div>
+                {% endif %}
+            </div>
+            <span class="text-[10px] text-slate-500 mt-1">{{ chat.created_at|date:"H:i" }}</span>
+        </div>
+        {% empty %}
+        <div class="text-center text-slate-500 text-sm py-10">No messages yet. Start chatting.</div>
+        {% endfor %}
+    </main>
+
+    <!-- Input -->
+    <form method="post" enctype="multipart/form-data" class="p-3 border-t border-slate-700 bg-slate-800">
+        {% csrf_token %}
+        <div class="flex gap-2">
+            <label class="p-2 text-slate-400 hover:text-white cursor-pointer bg-slate-700 rounded"><i
+                    class="fas fa-paperclip"></i>
+                <input type="file" name="attachment" class="hidden">
+            </label>
+            <input type="text" name="message" placeholder="Type message..."
+                class="flex-1 bg-slate-900 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none">
+            <button type="submit"
+                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded text-sm font-medium">Send</button>
+        </div>
+    </form>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    </script>
+</body>
+
+</html>

@@ -46,6 +46,12 @@ class ServiceOrder(models.Model):
     payment_screenshot = models.ImageField(upload_to='payments/', blank=True, null=True)
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
 
+    # Freelancer Assignment (Updated)
+    freelancer = models.ForeignKey('Freelancer', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')
+    freelancer_roadmap = models.FileField(upload_to='roadmaps/', blank=True, null=True, help_text="Upload roadmap/instructions for freelancer")
+    freelancer_description = models.TextField(blank=True, null=True, help_text="Detailed work description for freelancer")
+
+
     # Delivery Fields
     delivery_file = models.FileField(upload_to='deliveries/', blank=True, null=True, help_text="Upload the final project file here.")
     delivery_message = models.TextField(blank=True, null=True, help_text="Message to the client upon delivery.")
@@ -71,6 +77,20 @@ class OrderFile(models.Model):
 
     def __str__(self):
         return f"{self.get_file_type_display()} for {self.order.title}"
+
+class Freelancer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    name = models.CharField(max_length=100)
+    freelancer_id = models.CharField(max_length=50, unique=True, help_text="Unique ID for the freelancer")
+    profile_pic = models.ImageField(upload_to='freelancers/', blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    profession = models.CharField(max_length=100, help_text="e.g. Web Developer, Content Writer")
+    address = models.TextField(blank=True, null=True)
+    expertise = models.TextField(help_text="List of skills or expertise areas")
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.freelancer_id})"
 
 
 # --- 3. DYNAMIC PAGES SETTINGS ---
@@ -114,6 +134,17 @@ class OrderChat(models.Model):
 
     def __str__(self):
         return f"Chat on {self.order.title} by {self.sender.username}"
+
+# --- 4b. FREELANCER CHAT MODEL (Admin <-> Freelancer) ---
+class FreelancerChat(models.Model):
+    order = models.ForeignKey(ServiceOrder, on_delete=models.CASCADE, related_name='freelancer_chats')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    attachment = models.FileField(upload_to='chat_attachments/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Freelancer Chat on {self.order.title}"
 
 # --- 5. CLIENT REVIEW MODEL ---
 class Review(models.Model):

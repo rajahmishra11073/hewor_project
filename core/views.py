@@ -4,10 +4,12 @@ import zipfile
 import io
 from django.http import HttpResponse
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember
+from .models import ServiceOrder, OrderFile, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember, Freelancer, FreelancerChat
 from django.conf import settings
 import random
 import logging
@@ -238,7 +240,7 @@ def create_order(request):
         for f in files:
             # Check for duplicate file name in this order
             if not OrderFile.objects.filter(order=order, original_filename=f.name).exists():
-                 OrderFile.objects.create(order=order, file=f, original_filename=f.name)
+                 OrderFile.objects.create(order=order, file=f, file_type='source', original_filename=f.name)
                  files_added += 1
 
         if is_new_order:
@@ -347,7 +349,7 @@ def order_detail(request, order_id):
     order = get_object_or_404(ServiceOrder, id=order_id)
     
     # Security Check: Sirf apna order ya Admin dekh sake
-    if request.user != order.user and not request.user.is_superuser:
+    if request.user != order.user and not request.user.is_superuser and request.user.username != 'Hewor.order':
         messages.error(request, "You are not authorized to view this order.")
         return redirect('dashboard')
     
@@ -461,3 +463,225 @@ def chatbot_api(request):
         except Exception as e:
             return JsonResponse({'response': "Error processing request.", 'status': 'error'})
     return JsonResponse({'status': 'invalid_method'})
+
+# --- ORDER PANEL VIEWS ---
+def order_panel_login(request):
+    if request.user.is_authenticated:
+        return redirect('order_panel_dashboard')
+    
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect('order_panel_dashboard')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/order_panel_login.html', {'form': form})
+
+@login_required(login_url='order_panel_login')
+def order_panel_dashboard(request):
+    orders = ServiceOrder.objects.all().order_by('-created_at')
+    freelancers = Freelancer.objects.all().order_by('name')
+    return render(request, 'core/order_panel_dashboard.html', {'orders': orders, 'freelancers': freelancers})
+
+@login_required(login_url='order_panel_login')
+def order_panel_upload(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(ServiceOrder, pk=order_id)
+        files = request.FILES.getlist('file_upload')
+        file_type = request.POST.get('file_type', 'delivery')
+        
+        for f in files:
+            if not OrderFile.objects.filter(order=order, original_filename=f.name).exists():
+                OrderFile.objects.create(
+                    order=order, 
+                    file=f, 
+                    file_type=file_type, 
+                    original_filename=f.name
+                )
+        messages.success(request, f"{len(files)} files uploaded.")
+    return redirect('order_panel_dashboard')
+
+@login_required(login_url='order_panel_login')
+def order_panel_mark_delivered(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(ServiceOrder, pk=order_id)
+        order.status = 'completed'
+        from django.utils import timezone
+        order.completed_at = timezone.now()
+        order.save()
+        messages.success(request, f"Order #{order.id} marked as Delivered.")
+    return redirect('order_panel_dashboard')
+
+@login_required(login_url='order_panel_login')
+def order_panel_assign_freelancer(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(ServiceOrder, pk=order_id)
+        freelancer_name = request.POST.get('freelancer_name')
+        if freelancer_name:
+            order.freelancer = freelancer_name
+            order.save()
+            messages.success(request, f"Freelancer '{freelancer_name}' assigned to Order #{order.id}.")
+    return redirect('order_panel_dashboard')
+@login_required(login_url='order_panel_login')
+def order_panel_freelancers(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        freelancer_id = request.POST.get('freelancer_id')
+        phone = request.POST.get('phone')
+        profession = request.POST.get('profession')
+        address = request.POST.get('address')
+        expertise = request.POST.get('expertise')
+        profile_pic = request.FILES.get('profile_pic')
+        password = request.POST.get('password') # Pass this from form
+
+        if Freelancer.objects.filter(freelancer_id=freelancer_id).exists():
+            messages.error(request, f"Freelancer ID {freelancer_id} already exists.")
+        else:
+            try:
+                # 1. Create User for Login
+                user = User.objects.create_user(username=freelancer_id, password=password)
+                
+                # 2. Create Freelancer linked to User
+                Freelancer.objects.create(
+                    user=user,
+                    name=name, freelancer_id=freelancer_id, phone=phone,
+                    profession=profession, address=address, expertise=expertise,
+                    profile_pic=profile_pic
+                )
+                messages.success(request, f"Freelancer {name} added with Login ID: {freelancer_id}")
+            except Exception as e:
+                messages.error(request, f"Error creating freelancer: {str(e)}")
+                
+        return redirect('order_panel_freelancers')
+
+    freelancers = Freelancer.objects.all().order_by('-joined_at')
+    return render(request, 'core/order_panel_freelancers.html', {'freelancers': freelancers})
+
+@login_required(login_url='order_panel_login')
+def order_panel_assign_freelancer(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(ServiceOrder, pk=order_id)
+        freelancer_id = request.POST.get('freelancer_id') # ID from select box
+        roadmap = request.FILES.get('freelancer_roadmap')
+        description = request.POST.get('freelancer_description')
+
+        if freelancer_id:
+            freelancer = get_object_or_404(Freelancer, id=freelancer_id)
+            order.freelancer = freelancer
+            
+            if roadmap:
+                order.freelancer_roadmap = roadmap
+            if description:
+                order.freelancer_description = description
+                
+            order.save()
+            messages.success(request, f"Order #{order.id} assigned to {freelancer.name}.")
+    return redirect('order_panel_dashboard')
+
+@login_required(login_url='order_panel_login')
+def order_panel_delete_freelancer(request, freelancer_id):
+    if request.method == 'POST':
+        freelancer = get_object_or_404(Freelancer, id=freelancer_id)
+        freelancer.delete()
+        messages.success(request, "Freelancer deleted successfully.")
+    return redirect('order_panel_freelancers')
+
+# --- 4b. FREELANCER ORDER CHAT ---
+@login_required(login_url='order_panel_login')
+def order_panel_freelancer_chat(request, order_id):
+    # This view is for ADMIN side to chat with freelancer
+    order = get_object_or_404(ServiceOrder, id=order_id)
+    
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        attachment = request.FILES.get('attachment')
+        if message or attachment:
+            FreelancerChat.objects.create(
+                order=order,
+                sender=request.user,
+                message=message,
+                attachment=attachment
+            )
+            return redirect('order_panel_freelancer_chat', order_id=order.id)
+            
+    chats = order.freelancer_chats.all().order_by('created_at')
+    return render(request, 'core/order_panel_chat.html', {'order': order, 'chats': chats})
+
+# --- FREELANCER PORTAL VIEWS ---
+
+def freelancer_login(request):
+    if request.user.is_authenticated and hasattr(request.user, 'freelancer'):
+        return redirect('freelancer_dashboard')
+        
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            # Ensure it's a freelancer account
+            if hasattr(user, 'freelancer'):
+                login(request, user)
+                return redirect('freelancer_dashboard')
+            else:
+                messages.error(request, "Not a freelancer account.")
+    else:
+        form = AuthenticationForm()
+    return render(request, 'core/freelancer_login.html', {'form': form})
+
+@login_required(login_url='freelancer_login')
+def freelancer_dashboard(request):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        logout(request)
+        return redirect('freelancer_login')
+        
+    orders = ServiceOrder.objects.filter(freelancer=freelancer).order_by('-created_at')
+    return render(request, 'core/freelancer_dashboard.html', {'orders': orders})
+
+@login_required(login_url='freelancer_login')
+def freelancer_order_detail(request, order_id):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        logout(request)
+        return redirect('freelancer_login')
+        
+    order = get_object_or_404(ServiceOrder, id=order_id, freelancer=freelancer)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        
+        if action == 'upload_work':
+            files = request.FILES.getlist('files')
+            if files:
+                for f in files:
+                    OrderFile.objects.create(
+                        order=order,
+                        file=f,
+                        file_type='freelancer_upload',
+                        original_filename=f.name
+                    )
+                messages.success(request, f"{len(files)} files uploaded successfully.")
+                
+        elif action == 'send_message':
+            message = request.POST.get('message')
+            attachment = request.FILES.get('attachment')
+            if message or attachment:
+                FreelancerChat.objects.create(
+                    order=order,
+                    sender=request.user,
+                    message=message,
+                    attachment=attachment
+                )
+        return redirect('freelancer_order_detail', order_id=order.id)
+            
+    chats = order.freelancer_chats.all().order_by('created_at')
+    uploaded_files = order.files.filter(file_type='freelancer_upload').order_by('-uploaded_at')
+    
+    return render(request, 'core/freelancer_order_detail.html', {
+        'order': order,
+        'chats': chats,
+        'uploaded_files': uploaded_files
+    })

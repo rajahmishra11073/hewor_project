@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Panel Login | HEWOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input-field {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            color: white;
+        }
+
+        .input-field:focus {
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, #2563eb, #1d4ed8);
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body class="h-screen flex items-center justify-center relative overflow-hidden">
+    <!-- Background Effects -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[100px]">
+        </div>
+    </div>
+
+    <div class="w-full max-w-md p-8 rounded-2xl login-card shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                Order Panel</h1>
+            <p class="text-slate-400 mt-2">Sign in to manage service orders</p>
+        </div>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="p-3 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                <p class="font-medium">Login Failed</p>
+                <p>Please check your credentials and try again.</p>
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="id_username" class="block text-sm font-medium text-slate-300 mb-1">Username</label>
+                <input type="text" name="username" autofocus required id="id_username"
+                    class="w-full px-4 py-3 rounded-lg input-field placeholder-slate-500" placeholder="Enter username">
+            </div>
+
+            <div>
+                <label for="id_password" class="block text-sm font-medium text-slate-300 mb-1">Password</label>
+                <input type="password" name="password" required id="id_password"
+                    class="w-full px-4 py-3 rounded-lg input-field placeholder-slate-500" placeholder="Enter password">
+            </div>
+
+            <button type="submit"
+                class="w-full py-3 px-4 rounded-lg text-white font-semibold submit-btn shadow-lg mt-4">
+                Sign In
+            </button>
+        </form>
+    </div>
+</body>
+
+</html>

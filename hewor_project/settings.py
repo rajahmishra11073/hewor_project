@@ -338,3 +338,6 @@ LOGGING = {
         'level': 'INFO',
     },
 }
+
+# Default Login URL
+LOGIN_URL = 'login'
