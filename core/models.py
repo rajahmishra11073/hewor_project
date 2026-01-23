@@ -58,6 +58,15 @@ class ServiceOrder(models.Model):
         from django.urls import reverse
         return reverse('order_detail', kwargs={'order_id': self.pk})
 
+class OrderFile(models.Model):
+    order = models.ForeignKey(ServiceOrder, related_name='files', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='order_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"File for {self.order.title}"
+
+
 # --- 3. DYNAMIC PAGES SETTINGS ---
 class SiteSetting(models.Model):
     about_title = models.CharField(max_length=200, default="About Hewor")

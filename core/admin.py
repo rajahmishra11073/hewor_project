@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat
+from .models import ServiceOrder, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, OrderFile
 from django.utils.html import format_html
 from django.urls import reverse
 
@@ -7,6 +7,10 @@ from django.urls import reverse
 admin.site.site_header = "Hewor Administration"
 admin.site.site_title = "Hewor Admin Portal"
 admin.site.index_title = "Welcome to Hewor Management Dashboard"
+
+class OrderFileInline(admin.TabularInline):
+    model = OrderFile
+    extra = 0
 
 # --- Service Order Admin (FIXED) ---
 @admin.register(ServiceOrder)
@@ -24,6 +28,8 @@ class ServiceOrderAdmin(admin.ModelAdmin):
     list_editable = ('status', 'is_paid')
     
     list_per_page = 20
+
+    inlines = [OrderFileInline]
 
     fieldsets = (
         ('Order Details', {

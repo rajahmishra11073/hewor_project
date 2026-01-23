@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Profile
 from unittest.mock import patch
+from django.core.files.uploadedfile import SimpleUploadedFile
+from .models import ServiceOrder, OrderFile
 
 class AuthenticationTests(TestCase):
     def setUp(self):
@@ -94,3 +96,31 @@ class AuthenticationTests(TestCase):
         
         messages = list(response.context['messages'])
         self.assertEqual(str(messages[0]), "Invalid Email/Phone or Password")
+
+class OrderTests(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.create_order_url = reverse('create_order')
+        self.dashboard_url = reverse('dashboard')
+        self.user = User.objects.create_user(username='testuser', password='password123')
+        self.client.login(username='testuser', password='password123')
+
+    def test_create_order_multiple_files(self):
+        file1 = SimpleUploadedFile("file1.txt", b"content 1")
+        file2 = SimpleUploadedFile("file2.txt", b"content 2")
+        
+        data = {
+            'service_type': 'presentation',
+            'title': 'Test Order',
+            'description': 'Test Description',
+            'phone_number': '1234567890',
+            'file_upload': [file1, file2]
+        }
+        
+        response = self.client.post(self.create_order_url, data)
+        self.assertRedirects(response, self.dashboard_url)
+        
+        order = ServiceOrder.objects.first()
+        self.assertIsNotNone(order)
+        self.assertEqual(order.files.count(), 2)
+

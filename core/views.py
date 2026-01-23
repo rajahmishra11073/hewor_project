@@ -207,17 +207,22 @@ def create_order(request):
         description = request.POST.get('description')
         phone_number = request.POST.get('phone_number')
         request_call = request.POST.get('request_call') == 'on'
-        file = request.FILES.get('file_upload')
+        files = request.FILES.getlist('file_upload')
         
-        ServiceOrder.objects.create(
+        order = ServiceOrder.objects.create(
             user=request.user,
             service_type=service_type,
             title=title,
             description=description,
             phone_number=phone_number,
             request_call=request_call,
-            file_upload=file
+            # file_upload field in ServiceOrder is kept for backward compatibility or can be ignored/removed later
         )
+
+        from .models import OrderFile
+        for f in files:
+            OrderFile.objects.create(order=order, file=f)
+
         messages.success(request, "Order received successfully!")
         return redirect('dashboard')
         
