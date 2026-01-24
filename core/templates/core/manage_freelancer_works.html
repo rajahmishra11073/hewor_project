@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Assignments | HEWOR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-row-hover:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen relative" x-data="{ 
+    openPayModal: false, 
+    activeOrder: { title: '', qr: '', url: '' } 
+}">
+    <!-- Top Bar -->
+    <header
+        class="h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md fixed w-full top-0 z-40">
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+                HEWOR Panel</h1>
+            <nav class="ml-8 space-x-4 text-sm font-medium">
+                <a href="{% url 'order_panel_dashboard' %}"
+                    class="text-slate-400 hover:text-white transition">Dashboard</a>
+                <span class="text-slate-600">/</span>
+                <span class="text-white">Manage Freelancers</span>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-slate-400">Logged in as <b>{{ request.user.username }}</b></span>
+            <a href="{% url 'logout' %}"
+                class="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20">Logout</a>
+        </div>
+    </header>
+
+    <main class="pt-24 px-6 pb-12">
+        <div class="max-w-full mx-auto">
+
+            {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for message in messages %}
+                <div class="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">{{ message }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Header & Navigation -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                <h2 class="text-2xl font-bold text-white">Manage Freelancers</h2>
+
+                <div class="bg-slate-800 p-1 rounded-lg flex">
+                    <a href="{% url 'manage_freelancer_works' %}"
+                        class="px-4 py-2 rounded-md text-sm font-medium transition {% if active_tab == 'works' %}bg-blue-600 text-white shadow-lg{% else %}text-slate-400 hover:text-white{% endif %}">
+                        <i class="fas fa-tasks mr-2"></i> Manage Assignments (Table)
+                    </a>
+                    <a href="{% url 'order_panel_freelancers' %}"
+                        class="px-4 py-2 rounded-md text-sm font-medium transition {% if active_tab == 'profiles' %}bg-blue-600 text-white shadow-lg{% else %}text-slate-400 hover:text-white{% endif %}">
+                        <i class="fas fa-users mr-2"></i> Freelancer Profiles (Cards)
+                    </a>
+                </div>
+            </div>
+
+            <!-- Master Table -->
+            <div class="glass-panel rounded-xl overflow-hidden shadow-2xl overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1400px]">
+                    <thead class="bg-slate-800/50 text-slate-300 uppercase text-xs font-semibold tracking-wider">
+                        <tr>
+                            <th class="p-4 border-b border-slate-700">Freelancer</th>
+                            <th class="p-4 border-b border-slate-700">Task Title</th>
+                            <th class="p-4 border-b border-slate-700">Client</th>
+                            <th class="p-4 border-b border-slate-700">Payment Details</th>
+                            <th class="p-4 border-b border-slate-700">Timelines</th>
+                            <th class="p-4 border-b border-slate-700">Status</th>
+                            <th class="p-4 border-b border-slate-700">Paid</th>
+                            <th class="p-4 border-b border-slate-700">Files</th>
+                            <th class="p-4 border-b border-slate-700 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-700">
+                        {% for order in assignments %}
+                        <tr class="table-row-hover transition-colors">
+                            <td class="p-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-slate-700 overflow-hidden flex-shrink-0">
+                                        {% if order.freelancer.profile_pic %}
+                                        <img src="{{ order.freelancer.profile_pic.url }}"
+                                            class="w-full h-full object-cover">
+                                        {% else %}
+                                        <div
+                                            class="w-full h-full flex items-center justify-center text-slate-500 text-xs">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="font-medium text-white">{{ order.freelancer.name }}</div>
+                                        <div class="text-xs text-slate-400">{{ order.freelancer.freelancer_id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <span class="text-slate-300 font-medium block truncate max-w-xs"
+                                    title="{{ order.title }}">
+                                    {{ order.title }}
+                                </span>
+                                <span class="text-xs text-slate-500">#{{ order.id }}</span>
+                            </td>
+                            <td class="p-4 text-slate-400 text-sm">{{ order.user.username }}</td>
+                            <td class="p-4 text-sm text-slate-400">
+                                <div class="max-w-[200px] truncate" title="{{ order.freelancer.payment_details }}">
+                                    {{ order.freelancer.payment_details|default:"--" }}
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                <div class="text-xs text-slate-400">
+                                    <p><span class="text-slate-500">Assigned:</span> {{ order.assigned_at|date:"M d,
+                                        H:i" }}</p>
+                                    <p class="mt-1"><span class="text-red-400">Due:</span> {{
+                                        order.freelancer_deadline|date:"M d, H:i" }}</p>
+                                </div>
+                            </td>
+                            <td class="p-4">
+                                {% with uploads=order.get_freelancer_uploads %}
+                                {% if uploads %}
+                                <span
+                                    class="px-2 py-1 rounded text-xs font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1 w-fit">
+                                    <i class="fas fa-check-circle"></i> Order Submitted
+                                </span>
+                                {% else %}
+                                <span class="px-2 py-1 rounded text-xs font-semibold
+                                    {% if order.freelancer_status == 'accepted' %}bg-green-500/10 text-green-400
+                                    {% elif order.freelancer_status == 'rejected' %}bg-red-500/10 text-red-400
+                                    {% elif order.freelancer_status == 'timeout' %}bg-yellow-500/10 text-yellow-400
+                                    {% else %}bg-slate-500/10 text-slate-400{% endif %}">
+                                    {{ order.get_freelancer_status_display }}
+                                </span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="p-4">
+                                {% if order.is_freelancer_paid %}
+                                <span
+                                    class="text-green-400 text-xs bg-green-500/10 px-2 py-1 rounded font-bold">PAID</span>
+                                {% else %}
+                                <button @click="openPayModal = true; activeOrder = { 
+                                    title: `{{ order.title|escapejs }}`, 
+                                    qr: '{% if order.freelancer.qr_code %}{{ order.freelancer.qr_code.url }}{% endif %}', 
+                                    url: '{% url 'order_panel_pay_freelancer' order.id %}' 
+                                }"
+                                    class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded shadow-lg transition">
+                                    <i class="fas fa-qrcode mr-1"></i> Pay Now
+                                </button>
+                                {% endif %}
+                            </td>
+                            <td class="p-4">
+                                {% with uploads=order.get_freelancer_uploads %}
+                                {% if uploads %}
+                                <div x-data="{ openFiles: false }" class="relative">
+                                    <button @click="openFiles = !openFiles" @click.away="openFiles = false"
+                                        class="text-xs bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-3 py-1.5 rounded hover:bg-indigo-500/20 transition flex items-center gap-1">
+                                        <i class="fas fa-folder-open"></i> {{ uploads.count }} Files
+                                    </button>
+                                    <div x-show="openFiles"
+                                        class="absolute z-10 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-lg shadow-xl py-1 right-0"
+                                        style="display: none;">
+                                        {% for f in uploads %}
+                                        <a href="{{ f.file.url }}" download
+                                            class="block px-4 py-2 text-xs text-slate-300 hover:bg-slate-700 truncate"
+                                            title="{{ f.original_filename }}">
+                                            <i class="fas fa-download mr-1"></i> {{
+                                            f.original_filename|default:"Download" }}
+                                        </a>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% else %}
+                                <span class="text-xs text-slate-600 italic">No files yet</span>
+                                {% endif %}
+                                {% endwith %}
+                            </td>
+                            <td class="p-4 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{% url 'order_panel_freelancer_chat' order.id %}"
+                                        class="text-blue-400 hover:text-blue-300 p-2 rounded hover:bg-slate-700/50"
+                                        title="Chat with Freelancer">
+                                        <i class="fas fa-comment-dots text-lg"></i>
+                                    </a>
+                                    {% if order.status != 'completed' %}
+                                    <form action="{% url 'order_panel_mark_delivered' order.id %}" method="post"
+                                        onsubmit="return confirm('Verify files and send to client?');">
+                                        {% csrf_token %}
+                                        <button type="submit"
+                                            class="text-green-400 hover:text-green-300 p-2 rounded hover:bg-slate-700/50"
+                                            title="Verify & Send to Client"><i
+                                                class="fas fa-paper-plane text-lg"></i></button>
+                                    </form>
+                                    {% else %}
+                                    <span class="text-green-500" title="Sent to Client"><i
+                                            class="fas fa-check-double"></i></span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="p-12 text-center text-slate-500 italic">
+                                No assignments found.
+                                <br><span class="text-xs">Go to <a href="{% url 'order_panel_dashboard' %}"
+                                        class="text-blue-400 hover:underline">Dashboard</a> to assign work.</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Payment Modal (Outside Table) -->
+    <div x-show="openPayModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        style="display: none;">
+        <div class="bg-white text-slate-900 w-full max-w-md rounded-xl shadow-2xl overflow-hidden"
+            @click.away="openPayModal = false">
+            <div class="bg-blue-600 p-4 flex justify-between items-center">
+                <h3 class="text-white font-bold text-lg"><i class="fas fa-wallet mr-2"></i> Complete Payment</h3>
+                <button @click="openPayModal = false" class="text-white/80 hover:text-white"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div class="p-6 text-center">
+                <p class="text-slate-500 mb-4 font-medium">Project: <span x-text="activeOrder.title"
+                        class="font-bold text-slate-800"></span></p>
+                <div class="bg-slate-100 p-4 rounded-lg inline-block mb-4 border border-slate-200">
+                    <template x-if="activeOrder.qr">
+                        <img :src="activeOrder.qr" class="w-48 h-48 object-cover mx-auto rounded-md">
+                    </template>
+                    <template x-if="!activeOrder.qr">
+                        <div class="w-48 h-48 flex items-center justify-center bg-slate-200 text-slate-400 rounded-md">
+                            <span>No QR Code</span>
+                        </div>
+                    </template>
+                    <p class="text-xs text-slate-500 mt-2 font-bold">Scan to Pay via UPI</p>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded p-3 text-left mb-6">
+                    <p class="text-xs text-blue-700"><i class="fas fa-info-circle mr-1"></i> <strong>Note:</strong>
+                        After payment, please upload the screenshot or enter the Transaction ID below for verification.
+                    </p>
+                </div>
+                <form :action="activeOrder.url" method="post" enctype="multipart/form-data" class="text-left space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Transaction ID</label>
+                        <input type="text" name="transaction_id" placeholder="e.g. UPI Ref ID: 123456789" required
+                            class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Upload Screenshot *</label>
+                        <input type="file" name="payment_screenshot" required
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                    </div>
+                    <button type="submit"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition shadow-md mt-2">Submit
+                        Payment Proof</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -50,7 +50,24 @@ class ServiceOrder(models.Model):
     freelancer = models.ForeignKey('Freelancer', on_delete=models.SET_NULL, null=True, blank=True, related_name='assigned_orders')
     freelancer_roadmap = models.FileField(upload_to='roadmaps/', blank=True, null=True, help_text="Upload roadmap/instructions for freelancer")
     freelancer_description = models.TextField(blank=True, null=True, help_text="Detailed work description for freelancer")
-
+    
+    # New Fields for Assignment Tracking
+    assigned_at = models.DateTimeField(blank=True, null=True)
+    freelancer_status = models.CharField(
+        max_length=20, 
+        choices=[
+            ('pending_acceptance', 'Pending Acceptance'),
+            ('accepted', 'Accepted'),
+            ('rejected', 'Rejected'),
+            ('timeout', 'Timeout (No Response)'),
+        ],
+        default='pending_acceptance',
+        blank=True, null=True
+    )
+    is_freelancer_paid = models.BooleanField(default=False)
+    freelancer_transaction_id = models.CharField(max_length=100, blank=True, null=True, help_text="Transaction ID for payment to freelancer")
+    freelancer_payment_screenshot = models.ImageField(upload_to='freelancer_payments/', blank=True, null=True)
+    freelancer_deadline = models.DateTimeField(blank=True, null=True, help_text="Deadline for the freelancer to complete the work")
 
     # Delivery Fields
     delivery_file = models.FileField(upload_to='deliveries/', blank=True, null=True, help_text="Upload the final project file here.")
@@ -63,6 +80,12 @@ class ServiceOrder(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse('order_detail', kwargs={'order_id': self.pk})
+
+    def get_freelancer_uploads(self):
+        return self.files.filter(file_type='freelancer_upload')
+
+    def get_client_uploads(self):
+        return self.files.filter(file_type='source')
 
 class OrderFile(models.Model):
     TYPE_CHOICES = [
@@ -87,6 +110,11 @@ class Freelancer(models.Model):
     profession = models.CharField(max_length=100, help_text="e.g. Web Developer, Content Writer")
     address = models.TextField(blank=True, null=True)
     expertise = models.TextField(help_text="List of skills or expertise areas")
+    
+    # New Fields
+    qr_code = models.ImageField(upload_to='freelancer_qr/', blank=True, null=True, help_text="Upload QR Code for payments")
+    payment_details = models.TextField(blank=True, null=True, help_text="Bank details or UPI ID")
+    
     joined_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

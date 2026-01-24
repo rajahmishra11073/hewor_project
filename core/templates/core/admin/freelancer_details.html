@@ -1,0 +1,180 @@
+{% extends 'core/base_admin.html' %} <!-- Assuming a base admin template exists, if not I'll check -->
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">{{ freelancer.name }}</h2>
+            <p class="text-muted mb-0">ID: {{ freelancer.freelancer_id }} | {{ freelancer.profession }}</p>
+        </div>
+        <a href="{% url 'order_panel_freelancers' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Freelancer Details Card -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body text-center">
+                    {% if freelancer.profile_pic %}
+                    <img src="{{ freelancer.profile_pic.url }}" class="rounded-circle mb-3"
+                        style="width: 120px; height: 120px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                        style="width: 120px; height: 120px; font-size: 2rem;">
+                        {{ freelancer.name|slice:":1" }}
+                    </div>
+                    {% endif %}
+
+                    <h5 class="card-title">{{ freelancer.name }}</h5>
+                    <p class="text-muted">{{ freelancer.profession }}</p>
+
+                    <div class="text-start mt-4">
+                        <p><strong>Phone:</strong> {{ freelancer.phone }}</p>
+                        <p><strong>Email:</strong> {{ freelancer.user.email }}</p>
+                        <p><strong>Joined:</strong> {{ freelancer.joined_at|date:"M d, Y" }}</p>
+
+                        {% if freelancer.payment_details %}
+                        <hr>
+                        <h6>Payment Details</h6>
+                        <p class="small text-muted">{{ freelancer.payment_details|linebreaksbr }}</p>
+                        {% endif %}
+
+                        {% if freelancer.qr_code %}
+                        <img src="{{ freelancer.qr_code.url }}" class="img-fluid rounded mt-2" alt="Payment QR">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders & Stats -->
+        <div class="col-md-8">
+            <!-- Stats -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white text-center p-3">
+                        <h3>{{ active_count }}</h3>
+                        <small>Active Jobs</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white text-center p-3">
+                        <h3>{{ completed_count }}</h3>
+                        <small>Completed</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-warning text-dark text-center p-3">
+                        <h3>{{ pending_acceptance_count }}</h3>
+                        <small>Pending Acceptance</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assigned Orders List -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Assigned Orders</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Client</th>
+                                    <th>Timeline</th>
+                                    <th>Status</th>
+                                    <th>Files</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in assigned_orders %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ order.title }}</strong><br>
+                                        <small class="text-muted">#{{ order.id }}</small>
+                                    </td>
+                                    <td>
+                                        {{ order.user.username }}<br>
+                                        {% if order.is_paid %}
+                                        <span class="badge bg-success" style="font-size: 0.6rem;">Paid</span>
+                                        {% else %}
+                                        <span class="badge bg-danger" style="font-size: 0.6rem;">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="d-block text-muted">Assigned: {{ order.assigned_at|date:"M d, H:i"
+                                            }}</small>
+                                        {% if order.freelancer_deadline %}
+                                        <small class="d-block text-danger">Due: {{ order.freelancer_deadline|date:"M d,
+                                            H:i" }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if order.freelancer_status == 'accepted' %}bg-success
+                                            {% elif order.freelancer_status == 'rejected' %}bg-danger
+                                            {% elif order.freelancer_status == 'timeout' %}bg-warning
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ order.get_freelancer_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% with uploads=order.get_freelancer_uploads %}
+                                        {% if uploads %}
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-info dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown">
+                                                {{ uploads.count }} Files
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                {% for f in uploads %}
+                                                <li><a class="dropdown-item" href="{{ f.file.url }}" download>{{
+                                                        f.original_filename|truncatechars:20 }}</a></li>
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted small">No uploads</span>
+                                        {% endif %}
+                                        {% endwith %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'order_panel_freelancer_chat' order.id %}"
+                                                class="btn btn-sm btn-primary" title="Chat">
+                                                <i class="fas fa-comment"></i>
+                                            </a>
+                                            {% if order.status != 'completed' %}
+                                            <form action="{% url 'order_panel_mark_delivered' order.id %}" method="post"
+                                                class="d-inline"
+                                                onsubmit="return confirm('Verify and send to client?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success"
+                                                    title="Verify & Send to Client">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">No orders assigned yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

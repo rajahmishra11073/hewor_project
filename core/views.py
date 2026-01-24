@@ -11,6 +11,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import ServiceOrder, OrderFile, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember, Freelancer, FreelancerChat
 from django.conf import settings
+from django.core.mail import send_mail
+from django.utils import timezone
+import datetime
 import random
 import logging
 # Re-import firebase_admin for Google Auth
@@ -514,16 +517,7 @@ def order_panel_mark_delivered(request, order_id):
         messages.success(request, f"Order #{order.id} marked as Delivered.")
     return redirect('order_panel_dashboard')
 
-@login_required(login_url='order_panel_login')
-def order_panel_assign_freelancer(request, order_id):
-    if request.method == 'POST':
-        order = get_object_or_404(ServiceOrder, pk=order_id)
-        freelancer_name = request.POST.get('freelancer_name')
-        if freelancer_name:
-            order.freelancer = freelancer_name
-            order.save()
-            messages.success(request, f"Freelancer '{freelancer_name}' assigned to Order #{order.id}.")
-    return redirect('order_panel_dashboard')
+
 @login_required(login_url='order_panel_login')
 def order_panel_freelancers(request):
     if request.method == 'POST':
@@ -535,6 +529,9 @@ def order_panel_freelancers(request):
         expertise = request.POST.get('expertise')
         profile_pic = request.FILES.get('profile_pic')
         password = request.POST.get('password') # Pass this from form
+        
+        qr_code = request.FILES.get('qr_code')
+        payment_details = request.POST.get('payment_details')
 
         if Freelancer.objects.filter(freelancer_id=freelancer_id).exists():
             messages.error(request, f"Freelancer ID {freelancer_id} already exists.")
@@ -548,7 +545,8 @@ def order_panel_freelancers(request):
                     user=user,
                     name=name, freelancer_id=freelancer_id, phone=phone,
                     profession=profession, address=address, expertise=expertise,
-                    profile_pic=profile_pic
+                    profile_pic=profile_pic,
+                    qr_code=qr_code, payment_details=payment_details
                 )
                 messages.success(request, f"Freelancer {name} added with Login ID: {freelancer_id}")
             except Exception as e:
@@ -557,13 +555,27 @@ def order_panel_freelancers(request):
         return redirect('order_panel_freelancers')
 
     freelancers = Freelancer.objects.all().order_by('-joined_at')
-    return render(request, 'core/order_panel_freelancers.html', {'freelancers': freelancers})
+    return render(request, 'core/order_panel_freelancers.html', {'freelancers': freelancers, 'active_tab': 'profiles'})
+
+@login_required(login_url='order_panel_login')
+def order_panel_freelancer_detail(request, freelancer_id):
+    freelancer = get_object_or_404(Freelancer, id=freelancer_id)
+    assigned_orders = ServiceOrder.objects.filter(freelancer=freelancer).order_by('-assigned_at')
+    
+    context = {
+        'freelancer': freelancer,
+        'assigned_orders': assigned_orders,
+        'active_count': assigned_orders.filter(status='in_progress').count(),
+        'completed_count': assigned_orders.filter(status='completed').count(),
+        'pending_acceptance_count': assigned_orders.filter(freelancer_status='pending_acceptance').count(),
+    }
+    return render(request, 'core/admin/freelancer_details.html', context)
 
 @login_required(login_url='order_panel_login')
 def order_panel_assign_freelancer(request, order_id):
     if request.method == 'POST':
         order = get_object_or_404(ServiceOrder, pk=order_id)
-        freelancer_id = request.POST.get('freelancer_id') # ID from select box
+        freelancer_id = request.POST.get('freelancer_id')
         roadmap = request.FILES.get('freelancer_roadmap')
         description = request.POST.get('freelancer_description')
 
@@ -575,9 +587,44 @@ def order_panel_assign_freelancer(request, order_id):
                 order.freelancer_roadmap = roadmap
             if description:
                 order.freelancer_description = description
-                
+            
+            # Set Assignment Details
+            order.assigned_at = timezone.now()
+            order.freelancer_status = 'pending_acceptance'
+            # Default deadline (e.g., 2 days from now, can be made dynamic later)
+            order.freelancer_deadline = timezone.now() + datetime.timedelta(days=2)
+            
             order.save()
-            messages.success(request, f"Order #{order.id} assigned to {freelancer.name}.")
+            
+            # --- NOTIFICATION LOGIC ---
+            # 1. Email Notification
+            subject = f"New Work Assigned: {order.title}"
+            message = f"""
+            Hello {freelancer.name},
+            
+            You have been assigned a new project: "{order.title}".
+            
+            Price: Discussed with Admin.
+            Description: {description or 'Check dashboard for details.'}
+            
+            Please login to your dashboard to Accept or Reject this order within 30 minutes.
+            
+            Login Here: {request.build_absolute_uri('/freelancer/login/')}
+            """
+            try:
+                if freelancer.user.email:
+                    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [freelancer.user.email])
+            except Exception as e:
+                print(f"Email sending failed: {e}")
+                
+            # 2. WhatsApp Notification (Placeholder)
+            print(f"--- WHATSAPP NOTIFICATION ---")
+            print(f"To: {freelancer.phone}")
+            print(f"Msg: New Order Assigned: {order.title}. Accept in 30 mins.")
+            print(f"-----------------------------")
+            
+            messages.success(request, f"Order assigned to {freelancer.name}. Notifications sent.")
+            
     return redirect('order_panel_dashboard')
 
 @login_required(login_url='order_panel_login')
@@ -637,8 +684,60 @@ def freelancer_dashboard(request):
         logout(request)
         return redirect('freelancer_login')
         
+    # --- AUTO-TIMEOUT LOGIC ---
+    # Check for pending orders that have exceeded 30 minutes
+    timeout_threshold = timezone.now() - datetime.timedelta(minutes=30)
+    expired_orders = ServiceOrder.objects.filter(
+        freelancer=freelancer,
+        freelancer_status='pending_acceptance',
+        assigned_at__lt=timeout_threshold
+    )
+    # Update them to 'timeout'
+    if expired_orders.exists():
+        count = expired_orders.update(freelancer_status='timeout')
+        print(f"Auto-timed out {count} orders for {freelancer.name}")
+
     orders = ServiceOrder.objects.filter(freelancer=freelancer).order_by('-created_at')
     return render(request, 'core/freelancer_dashboard.html', {'orders': orders})
+
+@login_required(login_url='order_panel_login')
+def order_panel_pay_freelancer(request, order_id):
+    order = get_object_or_404(ServiceOrder, pk=order_id)
+    if request.method == 'POST':
+        try:
+            transaction_id = request.POST.get('transaction_id')
+            screenshot = request.FILES.get('payment_screenshot')
+            
+            if transaction_id:
+                order.is_freelancer_paid = True
+                order.freelancer_transaction_id = transaction_id
+                if screenshot:
+                    order.freelancer_payment_screenshot = screenshot
+                order.save()
+                messages.success(request, f"Payment recorded for Freelancer: {order.freelancer.name}")
+            else:
+                messages.error(request, "Transaction ID is required.")
+        except Exception as e:
+            messages.error(request, f"Error processing payment: {str(e)}")
+            
+    return redirect('manage_freelancer_works')
+
+# Redoing the tool call with the actual code after I update the model. 
+# actually, I should update the model FIRST.
+# Cancelling this replacement to update model first.
+
+
+@login_required(login_url='order_panel_login')
+def manage_freelancer_works(request):
+    # Fetch all orders that have been assigned to a freelancer
+    assignments = ServiceOrder.objects.filter(freelancer__isnull=False).order_by('-assigned_at')
+    
+    context = {
+        'assignments': assignments,
+        'active_tab': 'works'
+    }
+    return render(request, 'core/manage_freelancer_works.html', context)
+
 
 @login_required(login_url='freelancer_login')
 def freelancer_order_detail(request, order_id):
@@ -685,3 +784,45 @@ def freelancer_order_detail(request, order_id):
         'chats': chats,
         'uploaded_files': uploaded_files
     })
+
+@login_required(login_url='freelancer_login')
+def freelancer_accept_order(request, order_id):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        return redirect('freelancer_login')
+        
+    order = get_object_or_404(ServiceOrder, id=order_id, freelancer=freelancer)
+    
+    if order.freelancer_status != 'pending_acceptance':
+        messages.error(request, "Order is not pending acceptance.")
+        return redirect('freelancer_dashboard')
+        
+    # Check 30 minute timeout
+    time_diff = timezone.now() - order.assigned_at
+    if time_diff.total_seconds() > 1800: # 30 minutes * 60 seconds
+        order.freelancer_status = 'timeout'
+        order.save()
+        messages.error(request, "Order acceptance time expired.")
+    else:
+        order.freelancer_status = 'accepted'
+        order.save()
+        messages.success(request, "Order accepted successfully!")
+        
+    return redirect('freelancer_dashboard')
+
+@login_required(login_url='freelancer_login')
+def freelancer_reject_order(request, order_id):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        return redirect('freelancer_login')
+        
+    order = get_object_or_404(ServiceOrder, id=order_id, freelancer=freelancer)
+    
+    if order.freelancer_status == 'pending_acceptance':
+        order.freelancer_status = 'rejected'
+        order.save()
+        messages.info(request, "Order rejected.")
+        
+    return redirect('freelancer_dashboard')

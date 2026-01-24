@@ -1,14 +1,14 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang='en'>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Manage Freelancers | HEWOR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css' rel='stylesheet'>
+    <script defer src='https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'></script>
     <style>
         body {
             background-color: #0f172a;
@@ -28,169 +28,172 @@
     </style>
 </head>
 
-<body class="min-h-screen relative" x-data="{ openAddModal: false }">
-
+<body class='min-h-screen relative' x-data='{ openAddModal: false }'>
     <!-- Top Bar -->
     <header
-        class="h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md fixed w-full top-0 z-40">
-        <div class="flex items-center gap-4">
-            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+        class='h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md fixed w-full top-0 z-40'>
+        <div class='flex items-center gap-4'>
+            <h1 class='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400'>
                 HEWOR Panel</h1>
-            <nav class="ml-8 space-x-4 text-sm font-medium">
-                <a href="{% url 'order_panel_dashboard' %}"
-                    class="text-slate-400 hover:text-white transition">Dashboard</a>
-                <span class="text-slate-600">/</span>
-                <span class="text-white">Freelancers</span>
+            <nav class='ml-8 space-x-4 text-sm font-medium'>
+                <a href='{% url "order_panel_dashboard" %}'
+                    class='text-slate-400 hover:text-white transition'>Dashboard</a>
+                <span class='text-slate-600'>/</span>
+                <span class='text-white'>Freelancers</span>
             </nav>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-slate-400">Logged in as <b>{{ request.user.username }}</b></span>
-            <a href="{% url 'logout' %}"
-                class="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20">Logout</a>
+        <div class='flex items-center gap-4'>
+            <span class='text-sm text-slate-400'>Logged in as <b>{{ request.user.username }}</b></span>
+            <a href='{% url "logout" %}'
+                class='text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20'>Logout</a>
         </div>
     </header>
-
-    <main class="pt-24 px-6 pb-12">
-        <div class="max-w-6xl mx-auto">
-
+    <main class='pt-24 px-6 pb-12'>
+        <div class='max-w-6xl mx-auto'>
             {% if messages %}
-            <div class="mb-6 space-y-2">
+            <div class='mb-6 space-y-2'>
                 {% for message in messages %}
-                <div class="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">{{ message }}</div>
+                <div class='p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400'>{{ message }}</div>
                 {% endfor %}
             </div>
             {% endif %}
-
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <h2 class="text-2xl font-bold text-white">Freelancers</h2>
-                <button @click="openAddModal = true"
-                    class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition shadow-lg">
-                    <i class="fas fa-plus"></i> Add Freelancer
-                </button>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {% for f in freelancers %}
-                <div class="glass-panel rounded-xl p-6 relative group">
-                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                        <form action="{% url 'order_panel_delete_freelancer' f.id %}" method="post"
-                            onsubmit="return confirm('Delete this freelancer?');">
-                            {% csrf_token %}
-                            <button type="submit" class="text-red-400 hover:text-red-300 p-2"><i
-                                    class="fas fa-trash"></i></button>
-                        </form>
+                <div class="flex items-center gap-4">
+                    <!-- Toggle Buttons -->
+                    <div class="bg-slate-800 p-1 rounded-lg flex">
+                        <a href="{% url 'manage_freelancer_works' %}"
+                            class="px-4 py-2 rounded-md text-sm font-medium transition {% if active_tab == 'works' %}bg-blue-600 text-white shadow-lg{% else %}text-slate-400 hover:text-white{% endif %}">
+                            <i class="fas fa-tasks mr-2"></i> Manage Assignments (Table)
+                        </a>
+                        <a href="{% url 'order_panel_freelancers' %}"
+                            class="px-4 py-2 rounded-md text-sm font-medium transition {% if active_tab == 'profiles' %}bg-blue-600 text-white shadow-lg{% else %}text-slate-400 hover:text-white{% endif %}">
+                            <i class="fas fa-users mr-2"></i> Freelancer Profiles (Cards)
+                        </a>
                     </div>
 
-                    <div class="flex items-center gap-4 mb-4">
+                    <button @click="openAddModal = true"
+                        class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition shadow-lg">
+                        <i class="fas fa-plus"></i> Add Freelancer
+                    </button>
+                </div>
+            </div>
+            <div class='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                {% for f in freelancers %}
+                <div class='glass-panel rounded-xl p-6 relative group'>
+                    <div class='absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition z-10'>
+                        <a href='{% url "order_panel_freelancer_detail" f.id %}'
+                            class='text-blue-400 hover:text-blue-300 p-2 bg-slate-800/50 rounded-full'
+                            title='View Details'><i class='fas fa-eye'></i></a>
+                        <form action='{% url "order_panel_delete_freelancer" f.id %}' method='post'
+                            onsubmit='return confirm("Delete this freelancer?");'>
+                            {% csrf_token %}
+                            <button type='submit'
+                                class='text-red-400 hover:text-red-300 p-2 bg-slate-800/50 rounded-full'
+                                title='Delete'><i class='fas fa-trash'></i></button>
+                        </form>
+                    </div>
+                    <div class='flex items-center gap-4 mb-4'>
                         <div
-                            class="w-16 h-16 rounded-full bg-slate-700 overflow-hidden flex-shrink-0 border-2 border-slate-600">
+                            class='w-16 h-16 rounded-full bg-slate-700 overflow-hidden flex-shrink-0 border-2 border-slate-600'>
                             {% if f.profile_pic %}
-                            <img src="{{ f.profile_pic.url }}" class="w-full h-full object-cover">
+                            <img src='{{ f.profile_pic.url }}' class='w-full h-full object-cover'>
                             {% else %}
-                            <div class="w-full h-full flex items-center justify-center text-slate-500"><i
-                                    class="fas fa-user text-2xl"></i></div>
+                            <div class='w-full h-full flex items-center justify-center text-slate-500'><i
+                                    class='fas fa-user text-2xl'></i></div>
                             {% endif %}
                         </div>
                         <div>
-                            <h3 class="font-bold text-white">{{ f.name }}</h3>
-                            <span class="text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded">ID: {{ f.freelancer_id
+                            <a href='{% url "order_panel_freelancer_detail" f.id %}'
+                                class='hover:underline hover:text-blue-400'>
+                                <h3 class='font-bold text-white'>{{ f.name }}</h3>
+                            </a>
+                            <span class='text-xs text-slate-400 bg-slate-800 px-2 py-0.5 rounded'>ID: {{ f.freelancer_id
                                 }}</span>
                         </div>
                     </div>
-
-                    <div class="space-y-2 text-sm text-slate-300">
-                        <p><i class="fas fa-briefcase w-5 text-slate-500"></i> {{ f.profession }}</p>
-                        <p><i class="fas fa-phone w-5 text-slate-500"></i> {{ f.phone|default:"--" }}</p>
-                        <p><i class="fas fa-map-marker-alt w-5 text-slate-500"></i> {{
+                    <div class='space-y-2 text-sm text-slate-300'>
+                        <p><i class='fas fa-briefcase w-5 text-slate-500'></i> {{ f.profession }}</p>
+                        <p><i class='fas fa-phone w-5 text-slate-500'></i> {{ f.phone|default:"--" }}</p>
+                        <p><i class='fas fa-map-marker-alt w-5 text-slate-500'></i> {{
                             f.address|truncatechars:30|default:"--" }}</p>
                     </div>
-
-                    <div class="mt-4 pt-4 border-t border-slate-700">
-                        <p class="text-xs text-slate-500 uppercase font-semibold mb-1">Expertise</p>
-                        <p class="text-xs text-slate-400 leading-relaxed">{{ f.expertise|linebreaksbr }}</p>
+                    <div class='mt-4 pt-4 border-t border-slate-700'>
+                        <p class='text-xs text-slate-500 uppercase font-semibold mb-1'>Expertise</p>
+                        <p class='text-xs text-slate-400 leading-relaxed'>{{ f.expertise|linebreaksbr }}</p>
                     </div>
                 </div>
                 {% empty %}
-                <div class="col-span-full text-center py-12 text-slate-500 italic glass-panel rounded-xl">
-                    No freelancers added yet.
-                </div>
+                <div class='col-span-full text-center py-12 text-slate-500 italic glass-panel rounded-xl'>No freelancers
+                    added yet.</div>
                 {% endfor %}
             </div>
-
         </div>
     </main>
-
-    <!-- Add Modal -->
-    <div x-show="openAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg backdrop-blur-sm"
-        x-transition.opacity style="display: none;">
-        <div class="glass-panel w-full max-w-lg rounded-xl shadow-2xl overflow-hidden"
-            @click.away="openAddModal = false">
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                <h3 class="text-lg font-bold text-white">Add New Freelancer</h3>
-                <button @click="openAddModal = false" class="text-slate-400 hover:text-white"><i
-                        class="fas fa-times"></i></button>
+    <div x-show='openAddModal' class='fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg backdrop-blur-sm'
+        x-transition.opacity style='display: none;'>
+        <div class='glass-panel w-full max-w-lg rounded-xl shadow-2xl overflow-hidden'
+            @click.away='openAddModal = false'>
+            <div class='p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50'>
+                <h3 class='text-lg font-bold text-white'>Add New Freelancer</h3>
+                <button @click='openAddModal = false' class='text-slate-400 hover:text-white'><i
+                        class='fas fa-times'></i></button>
             </div>
-
-            <form method="post" enctype="multipart/form-data" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            <form method='post' enctype='multipart/form-data' class='p-6 space-y-4 max-h-[80vh] overflow-y-auto'>
                 {% csrf_token %}
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Full Name</label>
-                        <input type="text" name="name" required
-                            class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                <div class='grid grid-cols-2 gap-4'>
+                    <div><label class='block text-xs text-slate-400 mb-1'>Full Name</label><input type='text'
+                            name='name' required
+                            class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Freelancer ID</label>
-                        <input type="text" name="freelancer_id" required
-                            class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                    <div><label class='block text-xs text-slate-400 mb-1'>Freelancer ID</label><input type='text'
+                            name='freelancer_id' required
+                            class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Password</label>
-                        <input type="text" name="password" required value="hewor@123"
-                            class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                    <div><label class='block text-xs text-slate-400 mb-1'>Password</label><input type='text'
+                            name='password' required value='hewor@123'
+                            class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'>
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Profession</label>
-                    <input type="text" name="profession" required placeholder="e.g. Graphic Designer"
-                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                <div><label class='block text-xs text-slate-400 mb-1'>Profession</label><input type='text'
+                        name='profession' required placeholder='e.g. Graphic Designer'
+                        class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'>
+                </div>
+                <div class='grid grid-cols-2 gap-4'>
+                    <div><label class='block text-xs text-slate-400 mb-1'>Phone Number</label><input type='text'
+                            name='phone'
+                            class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'>
+                    </div>
+                    <div><label class='block text-xs text-slate-400 mb-1'>Profile Picture</label><input type='file'
+                            name='profile_pic'
+                            class='w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:bg-slate-700 file:text-white file:border-0 hover:file:bg-slate-600'>
+                    </div>
+                </div>
+                <div><label class="block text-xs text-slate-400 mb-1">Address</label><textarea name="address" rows="2"
+                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none"></textarea>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Phone Number</label>
-                        <input type="text" name="phone"
-                            class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
+                    <div><label class="block text-xs text-slate-400 mb-1">Payment Details (UPI/Bank)</label><textarea
+                            name="payment_details" rows="2" placeholder="e.g. UPI: user@okicici"
+                            class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none"></textarea>
                     </div>
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Profile Picture</label>
-                        <input type="file" name="profile_pic"
+                    <div><label class="block text-xs text-slate-400 mb-1">Payment QR Code</label><input type="file"
+                            name="qr_code"
                             class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:bg-slate-700 file:text-white file:border-0 hover:file:bg-slate-600">
                     </div>
                 </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Address</label>
-                    <textarea name="address" rows="2"
-                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none"></textarea>
+                <div><label class='block text-xs text-slate-400 mb-1'>Expertise Section</label><textarea
+                        name='expertise' rows='3' required placeholder='List skills...'
+                        class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'></textarea>
                 </div>
-
-                <div>
-                    <label class="block text-xs text-slate-400 mb-1">Expertise Section</label>
-                    <textarea name="expertise" rows="3" required placeholder="List skills..."
-                        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none"></textarea>
-                </div>
-
-                <div class="pt-4 text-right">
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg">Save
-                        Freelancer</button>
-                </div>
+                <div class='pt-4 text-right'><button type='submit'
+                        class='bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg'>Save
+                        Freelancer</button></div>
             </form>
         </div>
     </div>
-
 </body>
 
 </html>

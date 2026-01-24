@@ -1,355 +1,196 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang='en'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
     <title>Order Management Dashboard | HEWOR</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css' rel='stylesheet'>
+    <script defer src='https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js'></script>
     <style>
-        body {
-            background-color: #0f172a;
-            color: #e2e8f0;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .table-row-hover:hover {
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-
-        .modal-bg {
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #475569;
-            border-radius: 4px;
-        }
+        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .table-row-hover:hover { background-color: rgba(59, 130, 246, 0.1); }
+        .modal-bg { background-color: rgba(0, 0, 0, 0.7); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 4px; }
     </style>
 </head>
-
-<body class="min-h-screen relative" x-data="{ openModal: null }">
-
-    <!-- Top Bar -->
-    <header
-        class="h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md fixed w-full top-0 z-40">
-        <div class="flex items-center gap-4">
-            <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                HEWOR Panel</h1>
-            <a href="{% url 'order_panel_freelancers' %}"
-                class="ml-8 text-sm text-slate-400 hover:text-white transition flex items-center gap-2">
-                <i class="fas fa-users"></i> Manage Freelancers
-            </a>
+<body class='min-h-screen relative' x-data='{ openModal: null }'>
+    <header class='h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md fixed w-full top-0 z-40'>
+        <div class='flex items-center gap-4'>
+            <h1 class='text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400'>HEWOR Panel</h1>
+            <a href='/order-panel/freelancers/' class='ml-8 text-sm text-slate-400 hover:text-white transition flex items-center gap-2'><i class='fas fa-users'></i> Manage Freelancers</a>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm text-slate-400">Logged in as <b>{{ request.user.username }}</b></span>
-            <a href="{% url 'logout' %}"
-                class="text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20">Logout</a>
+        <div class='flex items-center gap-4'>
+            <span class='text-sm text-slate-400'>Logged in as <b>{{ request.user.username }}</b></span>
+            <a href='/logout/' class='text-xs bg-red-500/10 text-red-400 px-3 py-1 rounded hover:bg-red-500/20'>Logout</a>
         </div>
     </header>
-
-    <!-- Main Content -->
-    <main class="pt-24 px-6 pb-12">
-        <div class="max-w-full mx-auto"> <!-- Increased width for more columns -->
-
+    <main class='pt-24 px-6 pb-12'>
+        <div class='max-w-full mx-auto'>
             {% if messages %}
-            <div class="mb-6 space-y-2">
+            <div class='mb-6 space-y-2'>
                 {% for message in messages %}
-                <div class="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400">
-                    {{ message }}
-                </div>
+                <div class='p-4 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400'>{{ message }}</div>
                 {% endfor %}
             </div>
             {% endif %}
-
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-semibold text-white">All Projects</h2>
-                <div class="text-sm text-slate-400">Total Orders: {{ orders.count }}</div>
+            <div class='flex items-center justify-between mb-6'>
+                <h2 class='text-2xl font-semibold text-white'>All Projects</h2>
+                <div class='text-sm text-slate-400'>Total Orders: {{ orders.count }}</div>
             </div>
-
-            <div class="glass-panel rounded-xl overflow-hidden shadow-2xl overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[1200px]"> <!-- Ensure min-width for table -->
-                    <thead class="bg-slate-800/50 text-slate-300 uppercase text-xs font-semibold tracking-wider">
+            <div class='glass-panel rounded-xl overflow-hidden shadow-2xl overflow-x-auto'>
+                <table class='w-full text-left border-collapse min-w-[1200px]'>
+                    <thead class='bg-slate-800/50 text-slate-300 uppercase text-xs font-semibold tracking-wider'>
                         <tr>
-                            <th class="p-4 border-b border-slate-700">Order ID</th>
-                            <th class="p-4 border-b border-slate-700">Client</th>
-                            <th class="p-4 border-b border-slate-700">Project Title</th>
-                            <th class="p-4 border-b border-slate-700">Service Type</th> <!-- NEW -->
-                            <th class="p-4 border-b border-slate-700">Status</th>
-                            <th class="p-4 border-b border-slate-700 text-center">Paid</th> <!-- NEW -->
-                            <th class="p-4 border-b border-slate-700">Chat</th> <!-- NEW -->
-                            <th class="p-4 border-b border-slate-700">Freelancer</th> <!-- NEW -->
-                            <th class="p-4 border-b border-slate-700">Created At</th>
-                            <th class="p-4 border-b border-slate-700 text-right">Actions</th>
+                            <th class='p-4 border-b border-slate-700'>Order ID</th>
+                            <th class='p-4 border-b border-slate-700'>Client</th>
+                            <th class='p-4 border-b border-slate-700'>Project Title</th>
+                            <th class='p-4 border-b border-slate-700'>Service Type</th>
+                            <th class='p-4 border-b border-slate-700'>Status</th>
+                            <th class='p-4 border-b border-slate-700 text-center'>Paid</th>
+                            <th class='p-4 border-b border-slate-700'>Chat</th>
+                            <th class='p-4 border-b border-slate-700'>Freelancer</th>
+                            <th class='p-4 border-b border-slate-700'>Created At</th>
+                            <th class='p-4 border-b border-slate-700 text-right'>Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-700" x-data="{ assignModal: null }">
+                    <tbody class='divide-y divide-slate-700' x-data='{ assignModal: null }'>
                         {% for order in orders %}
-                        <tr class="table-row-hover transition-colors">
-                            <td class="p-4 font-mono text-slate-400">#{{ order.id }}</td>
-                            <td class="p-4 font-medium text-white">{{ order.user.username }}</td>
-                            <td class="p-4 text-slate-300">{{ order.title }}</td>
-                            <td class="p-4 text-slate-400 text-xs">{{ order.get_service_type_display }}</td>
-                            <!-- NEW -->
-                            <td class="p-4">
-                                <span class="px-2 py-1 rounded text-xs font-semibold
-                                    {% if order.status == 'completed' %}bg-green-500/10 text-green-400
-                                    {% elif order.status == 'pending' %}bg-yellow-500/10 text-yellow-400
-                                    {% else %}bg-blue-500/10 text-blue-400{% endif %}">
+                        <tr class='table-row-hover transition-colors'>
+                            <td class='p-4 font-mono text-slate-400'>#{{ order.id }}</td>
+                            <td class='p-4 font-medium text-white'>{{ order.user.username }}</td>
+                            <td class='p-4 text-slate-300'>{{ order.title }}</td>
+                            <td class='p-4 text-slate-400 text-xs'>{{ order.get_service_type_display }}</td>
+                            <td class='p-4'>
+                                <span class='px-2 py-1 rounded text-xs font-semibold {% if order.status == "completed" %}bg-green-500/10 text-green-400{% elif order.status == "pending" %}bg-yellow-500/10 text-yellow-400{% else %}bg-blue-500/10 text-blue-400{% endif %}'>
                                     {{ order.get_status_display|default:order.status }}
                                 </span>
                             </td>
-                            <td class="p-4 text-center"> <!-- NEW Is Paid -->
+                            <td class='p-4 text-center'>
                                 {% if order.is_paid %}
-                                <span class="text-green-400" title="Paid"><i class="fas fa-check-circle"></i></span>
+                                <span class='text-green-400' title='Paid'><i class='fas fa-check-circle'></i></span>
                                 {% else %}
-                                <span class="text-red-400" title="Unpaid"><i class="fas fa-times-circle"></i></span>
+                                <span class='text-red-400' title='Unpaid'><i class='fas fa-times-circle'></i></span>
                                 {% endif %}
                             </td>
-                            <td class="p-4"> <!-- NEW Chat -->
-                                <a href="{% url 'order_detail' order.id %}" target="_blank"
-                                    class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
-                                    <i class="fas fa-comments"></i> Open Chat
-                                </a>
+                            <td class='p-4'>
+                                <a href='{% url "order_detail" order.id %}' target='_blank' class='text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1'><i class='fas fa-comments'></i> Open Chat</a>
                             </td>
-                            <td class="p-4"> <!-- NEW Freelancer Column -->
-                                <div class="flex items-center gap-2">
+                            <td class='p-4'>
+                                <div class='flex items-center gap-2'>
                                     {% if order.freelancer %}
-                                    <span class="text-white text-sm bg-slate-700 px-2 py-1 rounded">{{ order.freelancer
-                                        }}</span>
-                                    <button @click="assignModal = {{ order.id }}"
-                                        class="text-slate-500 hover:text-blue-400 text-xs" title="Change Freelancer">
-                                        <i class="fas fa-pen"></i>
-                                    </button>
+                                    <span class='text-white text-sm bg-slate-700 px-2 py-1 rounded'>{{ order.freelancer }}</span>
+                                    <button @click='assignModal = {{ order.id }}' class='text-slate-500 hover:text-blue-400 text-xs' title='Change Freelancer'><i class='fas fa-pen'></i></button>
                                     {% else %}
-                                    <button @click="assignModal = {{ order.id }}"
-                                        class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded flex items-center gap-1 transition">
-                                        <i class="fas fa-plus"></i> Assign
-                                    </button>
+                                    <button @click='assignModal = {{ order.id }}' class='text-xs bg-slate-700 hover:bg-slate-600 text-slate-300 px-2 py-1 rounded flex items-center gap-1 transition'><i class='fas fa-plus'></i> Assign</button>
                                     {% endif %}
                                 </div>
-
-                                <!-- Modal Inline -->
-                                <div x-show="assignModal === {{ order.id }}"
-                                    class="fixed inset-0 z-[60] flex items-center justify-center p-4 modal-bg backdrop-blur-sm"
-                                    x-transition.opacity style="display: none;">
-                                    <div class="glass-panel w-full max-w-lg rounded-xl shadow-2xl p-6"
-                                        @click.away="assignModal = null">
-                                        <h3 class="text-lg font-bold text-white mb-4">Assign Freelancer</h3>
-                                        <p class="text-sm text-slate-400 mb-4">For Order #{{ order.id }}</p>
-                                        <form action="{% url 'order_panel_assign_freelancer' order.id %}" method="post"
-                                            enctype="multipart/form-data">
+                                <div x-show='assignModal === {{ order.id }}' class='fixed inset-0 z-[60] flex items-center justify-center p-4 modal-bg backdrop-blur-sm' x-transition.opacity style='display: none;'>
+                                    <div class='glass-panel w-full max-w-lg rounded-xl shadow-2xl p-6' @click.away='assignModal = null'>
+                                        <h3 class='text-lg font-bold text-white mb-4'>Assign Freelancer</h3>
+                                        <p class='text-sm text-slate-400 mb-4'>For Order #{{ order.id }}</p>
+                                        <form action='{% url "order_panel_assign_freelancer" order.id %}' method='post' enctype='multipart/form-data'>
                                             {% csrf_token %}
-
-                                            <div class="mb-4">
-                                                <label class="block text-xs text-slate-400 mb-1">Select
-                                                    Freelancer</label>
-                                                <select name="freelancer_id"
-                                                    class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none">
-                                                    <option value="">-- Choose Freelancer --</option>
+                                            <div class='mb-4'>
+                                                <label class='block text-xs text-slate-400 mb-1'>Select Freelancer</label>
+                                                <select name='freelancer_id' class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none'>
+                                                    <option value=''>-- Choose Freelancer --</option>
                                                     {% for f in freelancers %}
-                                                    <option value="{{ f.id }}" {% if order.freelancer.id == f.id %}selected{% endif %}>{{ f.name }} ({{ f.freelancer_id }})</option>
+                                                    <option value='{{ f.id }}' {% if order.freelancer.id == f.id %}selected{% endif %}>{{ f.name }} ({{ f.freelancer_id }})</option>
                                                     {% endfor %}
                                                 </select>
                                             </div>
-
-                                            <div class="mb-4">
-                                                <label class="block text-xs text-slate-400 mb-1">Work Description /
-                                                    Message</label>
-                                                <textarea name="freelancer_description" rows="4"
-                                                    placeholder="Detailed instructions..."
-                                                    class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none">{{ order.freelancer_description|default:'' }}</textarea>
+                                            <div class='mb-4'>
+                                                <label class='block text-xs text-slate-400 mb-1'>Work Description / Message</label>
+                                                <textarea name='freelancer_description' rows='4' placeholder='Detailed instructions...' class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none'>{{ order.freelancer_description|default:'' }}</textarea>
                                             </div>
-
-                                            <div class="mb-6">
-                                                <label class="block text-xs text-slate-400 mb-1">Upload Roadmap
-                                                    (Optional)</label>
-                                                <input type="file" name="freelancer_roadmap"
-                                                    class="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:bg-slate-700 file:text-white file:border-0 hover:file:bg-slate-600">
+                                            <div class='mb-6'>
+                                                <label class='block text-xs text-slate-400 mb-1'>Upload Roadmap (Optional)</label>
+                                                <input type='file' name='freelancer_roadmap' class='w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-2 file:rounded file:bg-slate-700 file:text-white file:border-0 hover:file:bg-slate-600'>
                                             </div>
-
-                                            <div class="flex justify-end gap-2">
-                                                <button type="button" @click="assignModal = null"
-                                                    class="text-xs text-slate-400 hover:text-white px-3 py-2">Cancel</button>
-                                                <button type="submit"
-                                                    class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded text-sm font-medium">Assign
-                                                    Task</button>
+                                            <div class='flex justify-end gap-2'>
+                                                <button type='button' @click='assignModal = null' class='text-xs text-slate-400 hover:text-white px-3 py-2'>Cancel</button>
+                                                <button type='submit' class='bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded text-sm font-medium'>Assign Task</button>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-4 text-slate-400 text-sm">{{ order.created_at|date:"M d, Y" }}</td>
-                            <td class="p-4 text-right flex items-center justify-end gap-2">
-                                <button @click="openModal = {{ order.id }}"
-                                    class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded transition">
-                                    Manage Files
-                                </button>
-
+                            <td class='p-4 text-slate-400 text-sm'>{{ order.created_at|date:"M d, Y" }}</td>
+                            <td class='p-4 text-right flex items-center justify-end gap-2'>
+                                <button @click='openModal = {{ order.id }}' class='text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded transition'>Manage Files</button>
                                 {% if order.status != 'completed' %}
-                                <form action="{% url 'order_panel_mark_delivered' order.id %}" method="post"
-                                    onsubmit="return confirm('Are you sure you want to mark this as delivered?');">
+                                <form action='{% url "order_panel_mark_delivered" order.id %}' method='post' onsubmit='return confirm("Are you sure you want to mark this as delivered?");'>
                                     {% csrf_token %}
-                                    <button type="submit"
-                                        class="text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded transition">
-                                        Mark Delivered
-                                    </button>
+                                    <button type='submit' class='text-xs bg-green-600 hover:bg-green-500 text-white px-3 py-1.5 rounded transition'>Mark Delivered</button>
                                 </form>
                                 {% endif %}
                             </td>
                         </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="10" class="p-8 text-center text-slate-500">No orders found.</td>
-                        </tr>
+                        <tr><td colspan='10' class='p-8 text-center text-slate-500'>No orders found.</td></tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-
         </div>
     </main>
-
-    <!-- Modals -->
     {% for order in orders %}
-    <div x-show="openModal === {{ order.id }}"
-        class="fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg backdrop-blur-sm" x-transition.opacity
-        style="display: none;">
-
-        <div class="glass-panel w-full max-w-3xl rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto"
-            @click.away="openModal = null">
-            <!-- Header -->
-            <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                <div>
-                    <h3 class="text-lg font-bold text-white">Project Files</h3>
-                    <p class="text-sm text-slate-400">Order #{{ order.id }} - {{ order.title }}</p>
-                </div>
-                <button @click="openModal = null" class="text-slate-400 hover:text-white">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
+    <div x-show='openModal === {{ order.id }}' class='fixed inset-0 z-50 flex items-center justify-center p-4 modal-bg backdrop-blur-sm' x-transition.opacity style='display: none;'>
+        <div class='glass-panel w-full max-w-3xl rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto' @click.away='openModal = null'>
+            <div class='p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800/50'>
+                <div><h3 class='text-lg font-bold text-white'>Project Files</h3><p class='text-sm text-slate-400'>Order #{{ order.id }} - {{ order.title }}</p></div>
+                <button @click='openModal = null' class='text-slate-400 hover:text-white'><i class='fas fa-times text-xl'></i></button>
             </div>
-
-            <div class="p-6 space-y-8">
-
-                <!-- File Lists -->
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Source Files -->
-                    <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-semibold text-blue-400">Source Files (Client)</h4>
-                            <a href="{% url 'download_order_files' order.id 'source' %}"
-                                class="text-xs hover:underline text-slate-400">Download All</a>
-                        </div>
-                        <ul class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
-                            <!-- Legacy File Support -->
+            <div class='p-6 space-y-8'>
+                <div class='grid md:grid-cols-2 gap-6'>
+                    <div class='bg-slate-900/50 rounded-lg p-4 border border-slate-700/50'>
+                        <div class='flex justify-between items-center mb-4'><h4 class='font-semibold text-blue-400'>Source Files (Client)</h4><a href='{% url "download_order_files" order.id "source" %}' class='text-xs hover:underline text-slate-400'>Download All</a></div>
+                        <ul class='space-y-2 max-h-40 overflow-y-auto custom-scrollbar'>
                             {% if order.file_upload %}
-                            <li
-                                class="flex items-center justify-between text-sm bg-slate-800 p-2 rounded border border-slate-700">
-                                <span class="truncate w-32" title="Legacy Upload">Primary Upload</span>
-                                <a href="{{ order.file_upload.url }}" download
-                                    class="text-blue-400 hover:text-blue-300"><i class="fas fa-download"></i></a>
-                            </li>
+                            <li class='flex items-center justify-between text-sm bg-slate-800 p-2 rounded border border-slate-700'><span class='truncate w-32' title='Legacy Upload'>Primary Upload</span><a href='{{ order.file_upload.url }}' download class='text-blue-400 hover:text-blue-300'><i class='fas fa-download'></i></a></li>
                             {% endif %}
-
-                            <!-- New OrderFile Support -->
                             {% with sources=order.files.all %}
                             {% for file in sources %}
                             {% if file.file_type == 'source' %}
-                            <li class="flex items-center justify-between text-sm bg-slate-800 p-2 rounded">
-                                <span class="truncate w-32" title="{{ file.original_filename }}">{{
-                                    file.original_filename|default:file.file.name }}</span>
-                                <a href="{{ file.file.url }}" download class="text-blue-400 hover:text-blue-300"><i
-                                        class="fas fa-download"></i></a>
-                            </li>
+                            <li class='flex items-center justify-between text-sm bg-slate-800 p-2 rounded'><span class='truncate w-32' title='{{ file.original_filename }}'>{{ file.original_filename|default:file.file.name }}</span><a href='{{ file.file.url }}' download class='text-blue-400 hover:text-blue-300'><i class='fas fa-download'></i></a></li>
                             {% endif %}
                             {% endfor %}
                             {% endwith %}
                         </ul>
-                        <!-- Fallback message if absolutely no files -->
-                        {% if not order.file_upload and not order.files.exists %}
-                        <p class="text-xs text-slate-500 italic mt-2">No source files yet.</p>
-                        {% endif %}
+                         {% if not order.file_upload and not order.files.exists %}<p class='text-xs text-slate-500 italic mt-2'>No source files yet.</p>{% endif %}
                     </div>
-
-                    <!-- Delivery Files -->
-                    <div class="bg-slate-900/50 rounded-lg p-4 border border-slate-700/50">
-                        <div class="flex justify-between items-center mb-4">
-                            <h4 class="font-semibold text-purple-400">Delivery Files (Admin)</h4>
-                            <a href="{% url 'download_order_files' order.id 'delivery' %}"
-                                class="text-xs hover:underline text-slate-400">Download All</a>
-                        </div>
-                        <ul class="space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                    <div class='bg-slate-900/50 rounded-lg p-4 border border-slate-700/50'>
+                        <div class='flex justify-between items-center mb-4'><h4 class='font-semibold text-purple-400'>Delivery Files (Admin)</h4><a href='{% url "download_order_files" order.id "delivery" %}' class='text-xs hover:underline text-slate-400'>Download All</a></div>
+                        <ul class='space-y-2 max-h-40 overflow-y-auto custom-scrollbar'>
                             {% with deliveries=order.files.all %}
                             {% for file in deliveries %}
                             {% if file.file_type == 'delivery' %}
-                            <li class="flex items-center justify-between text-sm bg-slate-800 p-2 rounded">
-                                <span class="truncate w-32" title="{{ file.original_filename }}">{{
-                                    file.original_filename|default:file.file.name }}</span>
-                                <a href="{{ file.file.url }}" download class="text-purple-400 hover:text-purple-300"><i
-                                        class="fas fa-download"></i></a>
-                            </li>
+                            <li class='flex items-center justify-between text-sm bg-slate-800 p-2 rounded'><span class='truncate w-32' title='{{ file.original_filename }}'>{{ file.original_filename|default:file.file.name }}</span><a href='{{ file.file.url }}' download class='text-purple-400 hover:text-purple-300'><i class='fas fa-download'></i></a></li>
                             {% endif %}
                             {% endfor %}
-                            <li x-data="{ hasDelivery: false }"
-                                x-init="hasDelivery = $el.parentElement.querySelectorAll('li:not([x-data])').length > 0"
-                                x-show="!hasDelivery" class="text-xs text-slate-500 italic">
-                                No delivery files yet.
-                            </li>
+                            <li x-data='{ hasDelivery: false }' x-init='hasDelivery = .parentElement.querySelectorAll("li:not([x-data])").length > 0' x-show='!hasDelivery' class='text-xs text-slate-500 italic'>No delivery files yet.</li>
                             {% endwith %}
                         </ul>
                     </div>
                 </div>
-
-                <!-- Upload Section -->
-                <div class="border-t border-slate-700 pt-6">
-                    <h4 class="font-semibold text-white mb-4">Upload New Files</h4>
-                    <form action="{% url 'order_panel_upload' order.id %}" method="post" enctype="multipart/form-data"
-                        class="space-y-4">
+                <div class='border-t border-slate-700 pt-6'>
+                    <h4 class='font-semibold text-white mb-4'>Upload New Files</h4>
+                    <form action='{% url "order_panel_upload" order.id %}' method='post' enctype='multipart/form-data' class='space-y-4'>
                         {% csrf_token %}
-
-                        <div class="flex gap-4">
-                            <div class="flex-1">
-                                <label class="block text-xs text-slate-400 mb-1">File Type</label>
-                                <select name="file_type"
-                                    class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none">
-                                    <option value="delivery" selected>Delivery File (Result)</option>
-                                    <option value="source">Source File (Resource)</option>
-                                </select>
-                            </div>
-                            <div class="flex-[3]">
-                                <label class="block text-xs text-slate-400 mb-1">Select Files (Multiple)</label>
-                                <input type="file" name="file_upload" multiple required
-                                    class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
-                            </div>
+                        <div class='flex gap-4'>
+                            <div class='flex-1'><label class='block text-xs text-slate-400 mb-1'>File Type</label><select name='file_type' class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none'><option value='delivery' selected>Delivery File (Result)</option><option value='source'>Source File (Resource)</option></select></div>
+                            <div class='flex-[3]'><label class='block text-xs text-slate-400 mb-1'>Select Files (Multiple)</label><input type='file' name='file_upload' multiple required class='w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer'></div>
                         </div>
-
-                        <div class="text-right">
-                            <button type="submit"
-                                class="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition shadow-lg">
-                                Upload Files
-                            </button>
-                        </div>
+                        <div class='text-right'><button type='submit' class='bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90 transition shadow-lg'>Upload Files</button></div>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
     {% endfor %}
-
 </body>
-
 </html>
