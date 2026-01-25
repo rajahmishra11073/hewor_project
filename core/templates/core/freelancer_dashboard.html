@@ -209,16 +209,20 @@
                         <a href="?filter=pending"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
                             {% if filter_status == 'pending' %}bg-yellow-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
-                            <i class="fas fa-clock mr-1"></i> Pending {% if stats.pending_count > 0 %}({{stats.pending_count}}){% endif %}
+                            <i class="fas fa-clock mr-1"></i> Pending{% if stats.pending_count > 0 %}
+                            ({{stats.pending_count}}){% endif %}
+                        </a>
                         <a href="?filter=active"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
                             {% if filter_status == 'active' %}bg-green-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
-                            <i class="fas fa-briefcase mr-1"></i> Active {% if stats.active_count > 0 %}({{
+                            <i class="fas fa-briefcase mr-1"></i> Active{% if stats.active_count > 0 %}
+                            ({{stats.active_count}}){% endif %}
                         </a>
                         <a href="?filter=due_soon"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
                             {% if filter_status == 'due_soon' %}bg-red-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Due Soon {% if stats.due_soon_count > 0 %}({{stats.due_soon_count}}){% endif %}
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Due Soon{% if stats.due_soon_count > 0 %}
+                            ({{stats.due_soon_count}}){% endif %}
                         </a>
                         <a href="?filter=completed"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
