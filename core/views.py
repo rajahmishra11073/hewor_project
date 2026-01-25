@@ -843,21 +843,31 @@ def freelancer_dashboard(request):
             'link': '?filter=due_soon'
         })
     
+    # Get notifications for this freelancer
+    notifications = FreelancerNotification.objects.filter(
+        freelancer=freelancer
+    ) | FreelancerNotification.objects.filter(is_broadcast=True)
+    notifications = notifications.distinct()[:5]  # Latest 5
+    unread_count = notifications.filter(is_read=False).count()
+    
+    stats = {
+        'total_earned': total_earned,
+        'week_earnings': week_earnings,
+        'month_earnings': month_earnings,
+        'active_count': active_count,
+        'completed_count': completed_count,
+        'pending_count': pending_count,
+        'due_soon_count': due_soon_count,
+        'rating': 4.8,  # Placeholder - implement rating system later
+    }
+
     context = {
         'orders': orders,
         'filter_status': filter_status,
-        'stats': {
-            'total_earned': total_earned,
-            'week_earnings': week_earnings,
-            'month_earnings': month_earnings,
-            'active_count': active_count,
-            'completed_count': completed_count,
-            'pending_count': pending_count,
-            'due_soon_count': due_soon_count,
-            'rating': 4.8,  # Placeholder - implement rating system later
-        },
-        'notifications': notifications[:5],  # Show max 5
-        'quick_actions': quick_actions,
+        'stats': stats,
+        'notifications': notifications,
+        'unread_count': unread_count,
+        'quick_actions': quick_actions, # Added back quick_actions as it was in the original context
     }
     
     return render(request, 'core/freelancer_dashboard.html', context)
