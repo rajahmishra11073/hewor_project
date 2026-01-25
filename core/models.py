@@ -255,3 +255,32 @@ class TeamMember(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.role}"
+
+class FreelancerNotification(models.Model):
+    """
+    Notifications sent from admin to freelancers.
+    Can be sent to individual freelancer or broadcast to all.
+    """
+    NOTIFICATION_TYPES = [
+        ('info', 'Information'),
+        ('warning', 'Warning'),
+        ('success', 'Success'),
+        ('urgent', 'Urgent'),
+    ]
+    
+    freelancer = models.ForeignKey('Freelancer', on_delete=models.CASCADE, related_name='notifications', null=True, blank=True)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    notification_type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES, default='info')
+    is_broadcast = models.BooleanField(default=False, help_text="Send to all freelancers")
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        if self.is_broadcast:
+            return f"[BROADCAST] {self.title}"
+        return f"{self.title} - {self.freelancer.name if self.freelancer else 'N/A'}"
