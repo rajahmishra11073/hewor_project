@@ -1,0 +1,77 @@
+<!-- Notification Modal -->
+<div x-show="notificationModal"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" x-transition
+    style="display: none;">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl shadow-2xl w-full max-w-lg p-6"
+        @click.away="notificationModal = false">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-xl font-bold text-white">Send Notification</h3>
+            <button @click="notificationModal = false" class="text-slate-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form action="{% url 'order_panel_send_notification' %}" method="post">
+            {% csrf_token %}
+
+            <!-- Notification Type -->
+            <div class="mb-4">
+                <label class="block text-xs text-slate-400 mb-2">Notification Type</label>
+                <select name="type"
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-blue-500 outline-none">
+                    <option value="info">📘 Info</option>
+                    <option value="success">✅ Success</option>
+                    <option value="warning">⚠️ Warning</option>
+                    <option value="urgent">🚨 Urgent</option>
+                </select>
+            </div>
+
+            <!-- Recipient Selection -->
+            <div class="mb-4" x-data="{ broadcast: false }">
+                <label class="flex items-center gap-2 mb-3">
+                    <input type="checkbox" name="broadcast" value="yes" x-model="broadcast"
+                        class="w-4 h-4 text-blue-600">
+                    <span class="text-sm text-white font-medium">📢 Send to ALL Freelancers</span>
+                </label>
+
+                <div x-show="!broadcast">
+                    <label class="block text-xs text-slate-400 mb-2">Select Freelancer</label>
+                    <select name="freelancer_id"
+                        class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-blue-500 outline-none">
+                        <option value="">-- Choose Freelancer --</option>
+                        {% for freelancer in freelancers %}
+                        <option value="{{ freelancer.id }}">{{ freelancer.name }} ({{ freelancer.freelancer_id }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <!-- Title -->
+            <div class="mb-4">
+                <label class="block text-xs text-slate-400 mb-2">Notification Title *</label>
+                <input type="text" name="title" required placeholder="e.g., New Payment Received"
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-blue-500 outline-none">
+            </div>
+
+            <!-- Message -->
+            <div class="mb-6">
+                <label class="block text-xs text-slate-400 mb-2">Message *</label>
+                <textarea name="message" required rows="4" placeholder="Type your message here..."
+                    class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-blue-500 outline-none"></textarea>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-end gap-2">
+                <button type="button" @click="notificationModal = false"
+                    class="px-4 py-2 text-slate-400 hover:text-white transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2 rounded-lg font-medium transition shadow-lg">
+                    <i class="fas fa-paper-plane mr-2"></i>Send
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -31,6 +31,7 @@ urlpatterns = [
     path('order-panel/pay-freelancer/<int:order_id>/', views.order_panel_pay_freelancer, name='order_panel_pay_freelancer'),
     path('order-panel/freelancers/delete/<int:freelancer_id>/', views.order_panel_delete_freelancer, name='order_panel_delete_freelancer'),
     path('order-panel/freelancer/<int:freelancer_id>/', views.order_panel_freelancer_detail, name='order_panel_freelancer_detail'),
+    path('order-panel/send-notification/', views.order_panel_send_notification, name='order_panel_send_notification'),
     path('order-panel/chat/<int:order_id>/', views.order_panel_freelancer_chat, name='order_panel_freelancer_chat'),
     
     # Freelancer Portal

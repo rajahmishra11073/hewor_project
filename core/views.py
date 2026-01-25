@@ -9,7 +9,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import ServiceOrder, OrderFile, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember, Freelancer, FreelancerChat
+from .models import ServiceOrder, OrderFile, Profile, SiteSetting, ContactMessage, OrderChat, Review, CaseStudy, AgencyStat, TeamMember, Freelancer, FreelancerChat, FreelancerNotification
 from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
@@ -2704,3 +2704,45 @@ def whiteboard_tool(request):
     Renders a full-screen or large canvas for drawing.
     """
     return render(request, 'core/whiteboard.html')
+@login_required(login_url='order_panel_login')
+def order_panel_send_notification(request):
+    """
+    Send notification to individual freelancer or broadcast to all
+    """
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        message = request.POST.get('message')
+        notification_type = request.POST.get('type', 'info')
+        is_broadcast = request.POST.get('broadcast') == 'yes'
+        
+        if is_broadcast:
+            # Send to all freelancers
+            freelancers = Freelancer.objects.all()
+            for freelancer in freelancers:
+                FreelancerNotification.objects.create(
+                    freelancer=freelancer,
+                    title=title,
+                    message=message,
+                    notification_type=notification_type,
+                    is_broadcast=True,
+                    created_by=request.user
+                )
+            messages.success(request, f"Notification sent to {freelancers.count()} freelancers!")
+        else:
+            # Send to specific freelancer
+            freelancer_id = request.POST.get('freelancer_id')
+            if freelancer_id:
+                freelancer = get_object_or_404(Freelancer, id=freelancer_id)
+                FreelancerNotification.objects.create(
+                    freelancer=freelancer,
+                    title=title,
+                    message=message,
+                    notification_type=notification_type,
+                    created_by=request.user
+                )
+                messages.success(request, f"Notification sent to {freelancer.name}!")
+        
+        # Redirect based on referer
+        return redirect(request.META.get('HTTP_REFERER', 'order_panel_freelancers'))
+    
+    return redirect('order_panel_freelancers')
