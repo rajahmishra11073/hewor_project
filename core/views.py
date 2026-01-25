@@ -789,11 +789,13 @@ def freelancer_order_detail(request, order_id):
             
     chats = order.freelancer_chats.all().order_by('created_at')
     uploaded_files = order.files.filter(file_type='freelancer_upload').order_by('-uploaded_at')
+    client_files = order.files.filter(file_type='source').order_by('-uploaded_at')  # Client's original files
     
     return render(request, 'core/freelancer_order_detail.html', {
         'order': order,
         'chats': chats,
-        'uploaded_files': uploaded_files
+        'uploaded_files': uploaded_files,
+        'client_files': client_files,  # Pass client files to template
     })
 
 @login_required(login_url='freelancer_login')

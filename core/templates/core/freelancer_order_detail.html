@@ -43,11 +43,43 @@
 
                 {% if order.freelancer_roadmap %}
                 <div class="mt-6 pt-6 border-t border-slate-700">
-                    <h4 class="text-sm font-semibold text-white mb-2">Attached Roadmap / Files</h4>
+                    <h4 class="text-sm font-semibold text-white mb-2">📎 Admin's Roadmap / Instructions</h4>
                     <a href="{{ order.freelancer_roadmap.url }}" download
                         class="inline-flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded text-sm transition">
-                        <i class="fas fa-file-download"></i> Download Brief
+                        <i class="fas fa-file-download"></i> Download Roadmap
                     </a>
+                </div>
+                {% endif %}
+
+                {% if client_files %}
+                <div class="mt-6 pt-6 border-t border-slate-700">
+                    <h4 class="text-sm font-semibold text-white mb-3">📁 Client's Original Files</h4>
+                    <p class="text-xs text-slate-400 mb-3">Files uploaded by the client when creating this order</p>
+                    <div class="space-y-2">
+                        {% for file in client_files %}
+                        <div
+                            class="group/file flex items-center p-3 bg-slate-700/30 rounded-lg border border-slate-600/50 hover:border-green-500/30 hover:bg-slate-700/50 transition">
+                            <div
+                                class="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400 mr-3 group-hover/file:bg-green-600/20 group-hover/file:text-green-400 transition">
+                                <i class="fas fa-file-alt text-lg"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-slate-200 truncate">{{ file.original_filename }}</p>
+                                <p class="text-xs text-slate-500">Uploaded: {{ file.uploaded_at|date:"M d, Y • H:i" }}
+                                </p>
+                            </div>
+                            <a href="{{ file.file.url }}" download
+                                class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-700/50 text-slate-400 hover:bg-green-600 hover:text-white transition"
+                                title="Download">
+                                <i class="fas fa-download text-xs"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="mt-6 pt-6 border-t border-slate-700">
+                    <p class="text-sm text-slate-400 italic">No client files attached to this order.</p>
                 </div>
                 {% endif %}
             </div>
