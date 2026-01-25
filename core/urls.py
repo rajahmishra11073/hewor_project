@@ -39,6 +39,30 @@ urlpatterns = [
     path('freelancer/project/<int:order_id>/', views.freelancer_order_detail, name='freelancer_order_detail'),
     path('freelancer/order/<int:order_id>/accept/', views.freelancer_accept_order, name='freelancer_accept_order'),
     path('freelancer/order/<int:order_id>/reject/', views.freelancer_reject_order, name='freelancer_reject_order'),
+
+    # Free Tools
+    path('tools/', views.tools_list, name='tools_list'),
+    path('tools/merge-pdf/', views.merge_pdf_tool, name='merge_pdf_tool'),
+    path('tools/split-pdf/', views.split_pdf_tool, name='split_pdf_tool'),
+    path('tools/compress-pdf/', views.compress_pdf_tool, name='compress_pdf_tool'),
+    path('tools/pdf-to-word/', views.pdf_to_word_tool, name='pdf_to_word_tool'),
+    path('tools/pdf-to-powerpoint/', views.pdf_to_ppt_tool, name='pdf_to_ppt_tool'),
+    path('tools/pdf-to-excel/', views.pdf_to_excel_tool, name='pdf_to_excel_tool'),
+    path('tools/word-to-pdf/', views.word_to_pdf_tool, name='word_to_pdf_tool'),
+    path('tools/excel-to-pdf/', views.excel_to_pdf_tool, name='excel_to_pdf_tool'),
+    path('tools/ppt-to-pdf/', views.ppt_to_pdf_tool, name='ppt_to_pdf_tool'),
+    path('tools/pdf-to-jpg/', views.pdf_to_jpg_tool, name='pdf_to_jpg_tool'),
+    path('tools/jpg-to-pdf/', views.jpg_to_pdf_tool, name='jpg_to_pdf_tool'),
+    path('tools/sign-pdf/', views.sign_pdf_tool, name='sign_pdf_tool'),
+    path('tools/html-to-pdf/', views.html_to_pdf_tool, name='html_to_pdf_tool'),
+    path('tools/rotate-pdf/', views.rotate_pdf_tool, name='rotate_pdf_tool'),
+    path('tools/add-watermark/', views.add_watermark_tool, name='add_watermark_tool'),
+    path('tools/protect-pdf/', views.protect_pdf_tool, name='protect_pdf_tool'),
+    path('tools/unlock-pdf/', views.unlock_pdf_tool, name='unlock_pdf_tool'),
+    path('tools/add-page-numbers/', views.add_page_numbers_tool, name='add_page_numbers_tool'),
+    path('tools/remove-pages/', views.remove_pages_tool, name='remove_pages_tool'),
+    path('tools/extract-pages/', views.extract_pages_tool, name='extract_pages_tool'),
+    path('tools/whiteboard/', views.whiteboard_tool, name='whiteboard_tool'),
 ]
 
 

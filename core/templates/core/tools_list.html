@@ -1,0 +1,320 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="py-5" style="background: var(--pt-page-bg); min-height: 100vh;">
+    <div class="container py-5">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span
+                class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3 fw-bold border border-primary border-opacity-10">
+                <i class="fas fa-tools me-2"></i>All Available Tools
+            </span>
+            <h1 class="display-4 fw-bold mb-3 ls-tighter">Powerful PDF utilities.</h1>
+            <p class="lead text-muted mx-auto" style="max-width: 600px;">
+                20+ Professional-grade tools to manage your documents.
+                100% Free, Secure, and Unlimited.
+            </p>
+        </div>
+
+        <div class="row g-4" data-aos="fade-up" data-aos-delay="100">
+            <!-- Helper Mixin logic: repeated for all tools -->
+
+            <!-- PDF Tools -->
+            <div class="col-12 mb-2">
+                <h5 class="fw-bold text-dark border-bottom pb-2">PDF Tools</h5>
+            </div>
+
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'merge_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-danger-subtle text-danger"><i class="fas fa-file-pdf"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Merge PDF</h6>
+                        <p class="x-small text-muted mb-0">Combine multiple files.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'split_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-warning-subtle text-warning"><i class="fas fa-cut"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Split PDF</h6>
+                        <p class="x-small text-muted mb-0">Extract pages.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'compress_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-success-subtle text-success"><i
+                                    class="fas fa-compress-arrows-alt"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Compress PDF</h6>
+                        <p class="x-small text-muted mb-0">Reduce file size.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'rotate_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-info-subtle text-info"><i class="fas fa-sync-alt"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Rotate PDF</h6>
+                        <p class="x-small text-muted mb-0">Rotate pages.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'add_page_numbers_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-primary-subtle text-primary"><i class="fas fa-list-ol"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Page Numbers</h6>
+                        <p class="x-small text-muted mb-0">Add numbers to pages.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'remove_pages_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-danger-subtle text-danger"><i class="fas fa-trash-alt"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Remove Pages</h6>
+                        <p class="x-small text-muted mb-0">Delete specific pages.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'extract_pages_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-secondary-subtle text-secondary"><i
+                                    class="fas fa-file-export"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Extract Pages</h6>
+                        <p class="x-small text-muted mb-0">Save pages as new PDF.</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Converters -->
+            <div class="col-12 mt-4 mb-2">
+                <h5 class="fw-bold text-dark border-bottom pb-2">Convert From PDF</h5>
+            </div>
+
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'pdf_to_word_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-primary-subtle text-primary"><i class="fas fa-file-word"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">PDF to Word</h6>
+                        <p class="x-small text-muted mb-0">Convert to Docx.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'pdf_to_ppt_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-danger-subtle text-danger"><i class="fas fa-file-powerpoint"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">PDF to PPT</h6>
+                        <p class="x-small text-muted mb-0">Convert to Slides.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'pdf_to_excel_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-success-subtle text-success"><i class="fas fa-file-excel"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">PDF to Excel</h6>
+                        <p class="x-small text-muted mb-0">Convert to Sheets.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'pdf_to_jpg_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-warning-subtle text-warning"><i class="fas fa-image"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">PDF to JPG</h6>
+                        <p class="x-small text-muted mb-0">Convert to Images.</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Convert To PDF -->
+            <div class="col-12 mt-4 mb-2">
+                <h5 class="fw-bold text-dark border-bottom pb-2">Convert To PDF</h5>
+            </div>
+
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'word_to_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-primary-subtle text-primary"><i class="fas fa-file-word"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Word to PDF</h6>
+                        <p class="x-small text-muted mb-0">Docx to PDF.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'ppt_to_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-danger-subtle text-danger"><i class="fas fa-file-powerpoint"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">PPT to PDF</h6>
+                        <p class="x-small text-muted mb-0">Slides to PDF.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'excel_to_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-success-subtle text-success"><i class="fas fa-file-excel"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Excel to PDF</h6>
+                        <p class="x-small text-muted mb-0">Sheets to PDF.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'jpg_to_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-primary-subtle text-primary"><i class="fas fa-images"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">JPG to PDF</h6>
+                        <p class="x-small text-muted mb-0">Images to PDF.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'html_to_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-secondary-subtle text-secondary"><i class="fas fa-globe"></i>
+                            </div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">HTML to PDF</h6>
+                        <p class="x-small text-muted mb-0">Webpage to PDF.</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Security Tools -->
+            <div class="col-12 mt-4 mb-2">
+                <h5 class="fw-bold text-dark border-bottom pb-2">Security & Sign</h5>
+            </div>
+
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'protect_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-dark text-white"><i class="fas fa-lock"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Protect PDF</h6>
+                        <p class="x-small text-muted mb-0">Encrypt file.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'unlock_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-danger text-white"><i class="fas fa-unlock-alt"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Unlock PDF</h6>
+                        <p class="x-small text-muted mb-0">Remove password.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'sign_pdf_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-primary text-white"><i class="fas fa-signature"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Sign PDF</h6>
+                        <p class="x-small text-muted mb-0">Add signature.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-4 col-xl-3">
+                <a href="{% url 'add_watermark_tool' %}" class="text-decoration-none">
+                    <div class="tool-card-modern p-4 h-100">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="icon-modern bg-secondary text-white"><i class="fas fa-stamp"></i></div>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Watermark</h6>
+                        <p class="x-small text-muted mb-0">Add watermark.</p>
+                    </div>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modern Utilities (Copied from Home) */
+    .ls-tighter {
+        letter-spacing: -0.05em;
+    }
+
+    .x-small {
+        font-size: 0.75rem;
+    }
+
+    /* Modern Card Styles */
+    .tool-card-modern {
+        background: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        position: relative;
+    }
+
+    .tool-card-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        border-color: #e2e8f0;
+    }
+
+    /* Modern Icon Box */
+    .icon-modern {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: transform 0.2s ease;
+    }
+
+    .tool-card-modern:hover .icon-modern {
+        transform: scale(1.05);
+    }
+</style>
+{% endblock %}

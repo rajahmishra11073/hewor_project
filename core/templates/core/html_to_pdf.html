@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Free HTML to PDF Converter | Hewor Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: var(--pt-page-bg);">
+
+    <div class="container" style="max-width: 900px;">
+        <div class="card premium-card bg-white text-center p-5 mb-4" data-aos="fade-up">
+
+            <!-- Header -->
+            <div class="mb-5">
+                <div class="icon-circle mb-3">
+                    <i class="fas fa-globe fa-2x"></i>
+                </div>
+                <h1 class="fw-bold display-5 mb-2 text-dark">HTML to PDF</h1>
+                <p class="text-muted lead mb-3">Convert Web Pages (URL) or HTML Files to PDF.</p>
+                <div class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                    <i class="fas fa-exclamation-triangle me-1"></i> Max Size: 200MB
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <ul class="nav nav-pills nav-fill mb-4 bg-light p-2 rounded-pill col-lg-8 mx-auto" id="pills-tab"
+                role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active rounded-pill fw-bold" id="pills-url-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-url" type="button">
+                        <i class="fas fa-link me-2"></i>Convert URL
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link rounded-pill fw-bold" id="pills-file-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-file" type="button">
+                        <i class="fas fa-file-code me-2"></i>Convert File
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="pills-tabContent">
+
+                <!-- URL Tab -->
+                <div class="tab-pane fade show active" id="pills-url">
+                    <form method="post" id="urlForm" class="mt-4 col-lg-8 mx-auto text-start">
+                        {% csrf_token %}
+                        <input type="hidden" name="conversion_type" value="url">
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Enter Web Page URL</label>
+                            <div class="input-group input-group-lg shadow-sm rounded-pill overflow-hidden">
+                                <span class="input-group-text bg-white border-0 ps-4"><i
+                                        class="fas fa-link text-primary"></i></span>
+                                <input type="url" name="url" class="form-control border-0 bg-white"
+                                    placeholder="https://example.com" required style="padding-left: 10px;">
+                            </div>
+                            <div class="form-text mt-2 ms-2 text-muted"><i class="fas fa-info-circle me-1"></i>We'll
+                                fetch the page and convert it detailed PDF.</div>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <button type="submit"
+                                class="btn btn-premium-gradient btn-lg w-100 py-3 rounded-pill shadow-lg"
+                                id="urlConvertBtn">
+                                <i class="fas fa-magic me-2"></i> Convert URL to PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- File Tab -->
+                <div class="tab-pane fade" id="pills-file">
+                    <form method="post" enctype="multipart/form-data" id="fileForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="conversion_type" value="file">
+
+                        <div class="upload-area-premium mb-4 position-relative" id="dropZone">
+                            <input type="file" name="html_files" id="htmlInput" class="file-input-overlay"
+                                accept=".html,.htm">
+
+                            <div class="py-4">
+                                <div class="cloud-icon mb-3">
+                                    <i class="fas fa-cloud-upload-alt fa-2x text-white"></i>
+                                </div>
+                                <h4 class="fw-bold text-dark">Drag & Drop HTML File</h4>
+                                <p class="text-muted mb-0">or click to select</p>
+                            </div>
+                        </div>
+
+                        <!-- File List -->
+                        <div id="fileList" class="mb-4 d-none text-start col-lg-8 mx-auto">
+                            <div class="file-list-container bg-light rounded-3 p-2">
+                                <div
+                                    class="d-flex justify-content-between align-items-center mb-0 p-3 bg-white rounded shadow-sm border">
+                                    <div class="d-flex align-items-center overflow-hidden">
+                                        <div class="rounded p-2 bg-primary-subtle me-3 text-primary"><i
+                                                class="fas fa-file-code"></i></div>
+                                        <h6 class="mb-0 fw-bold small text-dark text-truncate" id="fileName"
+                                            style="max-width: 250px;"></h6>
+                                    </div>
+                                    <i class="fas fa-check-circle text-success fs-5"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3 col-lg-8 mx-auto">
+                            <button type="submit"
+                                class="btn btn-premium-gradient btn-lg w-100 py-3 rounded-pill shadow-lg"
+                                id="fileConvertBtn" disabled>
+                                <i class="fas fa-sync-alt me-2"></i> Convert File to PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="mt-4">
+                    <a href="{% url 'home' %}" class="text-muted text-decoration-none small fw-bold">Back to Home</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // File Tab Logic
+        const dropZone = document.getElementById('dropZone');
+        const htmlInput = document.getElementById('htmlInput');
+        const fileList = document.getElementById('fileList');
+        const fileNameSpan = document.getElementById('fileName');
+        const fileConvertBtn = document.getElementById('fileConvertBtn');
+        const fileForm = document.getElementById('fileForm');
+
+        // URL Tab Logic
+        const urlForm = document.getElementById('urlForm');
+        const urlConvertBtn = document.getElementById('urlConvertBtn');
+
+        // Drag & Drop
+        ['dragenter', 'dragover'].forEach(eventName => {
+            if (dropZone) dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            if (dropZone) dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        if (htmlInput) {
+            htmlInput.addEventListener('change', () => {
+                const files = htmlInput.files;
+                if (files.length > 0) {
+                    fileList.classList.remove('d-none');
+                    fileNameSpan.textContent = files[0].name;
+                    fileConvertBtn.disabled = false;
+                } else {
+                    fileList.classList.add('d-none');
+                    fileConvertBtn.disabled = true;
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

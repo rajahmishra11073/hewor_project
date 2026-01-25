@@ -1,0 +1,251 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Free Online Whiteboard | Hewor Agency{% endblock %}
+
+{% block content %}
+<!-- Full Screen Canvas Container -->
+<div class="position-relative w-100" style="height: calc(100vh - 76px); background: var(--pt-page-bg);">
+
+    <!-- Toolbar -->
+    <div
+        class="position-absolute top-0 start-50 translate-middle-x mt-3 bg-white shadow-sm rounded-pill p-2 d-flex gap-2 align-items-center z-3 border">
+
+        <!-- Selection/Move -->
+        <button class="btn btn-light rounded-circle p-2 tool-btn active" id="btn-select" title="Select/Move"
+            onclick="setMode('select')">
+            <i class="fas fa-mouse-pointer"></i>
+        </button>
+
+        <div class="vr mx-1"></div>
+
+        <!-- Pen (Freehand) -->
+        <button class="btn btn-light rounded-circle p-2 tool-btn" id="btn-draw" title="Freehand Draw"
+            onclick="setMode('draw')">
+            <i class="fas fa-pen"></i>
+        </button>
+
+        <!-- Shapes -->
+        <button class="btn btn-light rounded-circle p-2 tool-btn" id="btn-rect" title="Rectangle" onclick="addRect()">
+            <i class="far fa-square"></i>
+        </button>
+        <button class="btn btn-light rounded-circle p-2 tool-btn" id="btn-circle" title="Circle" onclick="addCircle()">
+            <i class="far fa-circle"></i>
+        </button>
+
+        <!-- Text -->
+        <button class="btn btn-light rounded-circle p-2 tool-btn" id="btn-text" title="Add Text" onclick="addText()">
+            <i class="fas fa-font"></i>
+        </button>
+
+        <div class="vr mx-1"></div>
+
+        <!-- Color Picker -->
+        <div class="d-flex align-items-center px-2">
+            <input type="color" id="color-picker" class="form-control form-control-color border-0 p-0 rounded-circle"
+                value="#000000" title="Choose Color" onchange="updateColor(this.value)">
+        </div>
+
+        <!-- Stroke Width -->
+        <div class="d-flex align-items-center px-1" style="width: 100px;">
+            <input type="range" class="form-range" min="1" max="20" value="3" id="stroke-width"
+                onchange="updateWidth(this.value)">
+        </div>
+
+        <div class="vr mx-1"></div>
+
+        <!-- Actions -->
+        <button class="btn btn-light rounded-circle p-2 text-danger" title="Clear Canvas" onclick="clearCanvas()">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+
+        <button class="btn btn-primary rounded-pill px-3 ms-2" title="Download Image" onclick="downloadCanvas()">
+            <i class="fas fa-download me-2"></i>Export
+        </button>
+    </div>
+
+    <!-- Canvas -->
+    <canvas id="c"></canvas>
+
+    <!-- Help Text -->
+    <div class="position-absolute bottom-0 start-0 m-3 text-muted small opacity-50 user-select-none">
+        <i class="fas fa-info-circle me-1"></i>Select objects to move/resize. 'Delete' key to remove.
+    </div>
+
+</div>
+
+<!-- Fabric.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+
+<script>
+    let canvas;
+    let brushColor = '#000000';
+    let brushWidth = 3;
+    let currentMode = 'select';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Initialize Canvas
+        canvas = new fabric.Canvas('c', {
+            isDrawingMode: false,
+            backgroundColor: '#ffffff'
+        });
+
+        // Resize Canvas to fit container
+        function resizeCanvas() {
+            const container = document.querySelector('.position-relative');
+            canvas.setWidth(container.offsetWidth);
+            canvas.setHeight(container.offsetHeight);
+            canvas.renderAll();
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Initial call
+
+        // Default Brush
+        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
+        canvas.freeDrawingBrush.color = brushColor;
+        canvas.freeDrawingBrush.width = parseInt(brushWidth, 10);
+
+        // Key Events (Delete)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') {
+                const activeObjects = canvas.getActiveObjects();
+                if (activeObjects.length) {
+                    canvas.discardActiveObject();
+                    activeObjects.forEach((obj) => {
+                        canvas.remove(obj);
+                    });
+                }
+            }
+        });
+    });
+
+    function setMode(mode) {
+        currentMode = mode;
+
+        // Update UI
+        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active', 'btn-secondary'));
+        document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.add('btn-light'));
+
+        const activeBtn = document.getElementById('btn-' + mode);
+        if (activeBtn) {
+            activeBtn.classList.remove('btn-light');
+            activeBtn.classList.add('active', 'btn-secondary'); // Visual feedback
+        }
+
+        if (mode === 'draw') {
+            canvas.isDrawingMode = true;
+        } else {
+            canvas.isDrawingMode = false;
+        }
+    }
+
+    function updateColor(color) {
+        brushColor = color;
+        canvas.freeDrawingBrush.color = color;
+
+        const activeObj = canvas.getActiveObject();
+        if (activeObj) {
+            if (activeObj.type === 'i-text' || activeObj.type === 'text') {
+                activeObj.set('fill', color);
+            } else {
+                activeObj.set('stroke', color);
+                if (activeObj.type !== 'path') activeObj.set('fill', color); // Fill shapes too? Maybe just stroke.
+                // For shapes, let's just set fill
+                if (activeObj.type === 'rect' || activeObj.type === 'circle') {
+                    activeObj.set('fill', color);
+                    activeObj.set('stroke', 'transparent');
+                }
+            }
+            canvas.requestRenderAll();
+        }
+    }
+
+    function updateWidth(width) {
+        brushWidth = parseInt(width, 10);
+        canvas.freeDrawingBrush.width = brushWidth;
+    }
+
+    function addRect() {
+        setMode('select');
+        const rect = new fabric.Rect({
+            left: 100,
+            top: 100,
+            fill: brushColor,
+            width: 100,
+            height: 100,
+            opacity: 0.8
+        });
+        canvas.add(rect);
+        canvas.setActiveObject(rect);
+    }
+
+    function addCircle() {
+        setMode('select');
+        const circle = new fabric.Circle({
+            left: 150,
+            top: 150,
+            fill: brushColor,
+            radius: 50,
+            opacity: 0.8
+        });
+        canvas.add(circle);
+        canvas.setActiveObject(circle);
+    }
+
+    function addText() {
+        setMode('select');
+        const text = new fabric.IText('Type here...', {
+            left: 200,
+            top: 200,
+            fontFamily: 'arial',
+            fill: brushColor,
+            fontSize: 24
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+    }
+
+    function clearCanvas() {
+        if (confirm('Are you sure you want to clear the whiteboard?')) {
+            canvas.clear();
+            canvas.backgroundColor = '#ffffff';
+        }
+    }
+
+    function downloadCanvas() {
+        // Deselect everything first to avoid selection handles in image
+        canvas.discardActiveObject();
+        canvas.renderAll();
+
+        const dataURL = canvas.toDataURL({
+            format: 'png',
+            quality: 1
+        });
+
+        const link = document.createElement('a');
+        link.download = 'whiteboard-' + Date.now() + '.png';
+        link.href = dataURL;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
+
+<style>
+    .tool-btn.active {
+        background-color: #6c757d !important;
+        color: white !important;
+        border-color: #6c757d !important;
+    }
+
+    .form-range {
+        height: 5px;
+    }
+
+    /* Hide footer on whiteboard page for maximum space */
+    footer {
+        display: none !important;
+    }
+</style>
+{% endblock %}

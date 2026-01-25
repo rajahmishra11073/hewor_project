@@ -1,0 +1,220 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Free Sign PDF Tool | Hewor Agency{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: var(--pt-page-bg);">
+
+    <div class="container" style="max-width: 900px;">
+        <div class="card premium-card bg-white text-center p-5 mb-4" data-aos="fade-up">
+
+            <!-- Header -->
+            <div class="mb-5">
+                <div class="icon-circle mb-3">
+                    <i class="fas fa-signature fa-2x"></i>
+                </div>
+                <h1 class="fw-bold display-5 mb-2 text-dark">Sign PDF</h1>
+                <p class="text-muted lead mb-3">Draw your signature and add it to your PDF document.</p>
+                <div class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">
+                    <i class="fas fa-exclamation-triangle me-1"></i> Max Size: 200MB
+                </div>
+            </div>
+
+            <!-- Form -->
+            <form method="post" enctype="multipart/form-data" id="signForm">
+                {% csrf_token %}
+                <input type="hidden" name="signature_data" id="signatureData">
+
+                <!-- Step 1: Upload -->
+                <div class="mb-5">
+                    <h5 class="fw-bold text-start mb-3 ms-2 text-primary">1. Upload PDF</h5>
+                    <div class="upload-area-premium mb-4 position-relative" id="dropZone">
+                        <input type="file" name="pdf_file" id="pdfInput" class="file-input-overlay"
+                            accept="application/pdf" required>
+
+                        <div class="py-4">
+                            <div class="cloud-icon mb-3">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-white"></i>
+                            </div>
+                            <h4 class="fw-bold text-dark">Drag & Drop PDF here</h4>
+                            <p class="text-muted mb-0">or click to select file</p>
+                        </div>
+                    </div>
+                    <!-- File Preview -->
+                    <div id="fileList" class="d-none text-start col-lg-8 mx-auto">
+                        <div class="file-list-container bg-light rounded-3 p-2">
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-0 p-3 bg-white rounded shadow-sm border">
+                                <div class="d-flex align-items-center overflow-hidden">
+                                    <div class="rounded p-2 bg-dark-subtle me-3 text-dark"><i
+                                            class="fas fa-file-pdf"></i></div>
+                                    <h6 class="mb-0 fw-bold small text-dark text-truncate" id="fileName"
+                                        style="max-width: 250px;"></h6>
+                                </div>
+                                <i class="fas fa-check-circle text-success fs-5"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Signature -->
+                <div class="mb-5 text-start col-lg-8 mx-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0 text-primary">2. Draw Signature</h5>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" id="clearBtn">
+                            <i class="fas fa-eraser me-1"></i> Clear
+                        </button>
+                    </div>
+
+                    <div class="signature-pad-wrapper shadow-sm rounded-4 overflow-hidden border">
+                        <canvas id="signaturePad" class="w-100"
+                            style="height: 200px; touch-action: none; background: #fff; cursor: crosshair;"></canvas>
+                    </div>
+                    <div class="form-text mt-2 text-muted"><i class="fas fa-info-circle me-1"></i>Your signature will be
+                        placed at the bottom-right of the last page.</div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-3 col-lg-8 mx-auto">
+                    <button type="submit" class="btn btn-premium-gradient btn-lg w-100 py-3 rounded-pill shadow-lg"
+                        id="convertBtn">
+                        <i class="fas fa-pen-fancy me-2"></i> Sign PDF Now
+                    </button>
+                    <a href="{% url 'home' %}" class="text-muted text-decoration-none small fw-bold">Back to Home</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const pdfInput = document.getElementById('pdfInput');
+        const fileList = document.getElementById('fileList');
+        const fileNameSpan = document.getElementById('fileName');
+
+        const canvas = document.getElementById('signaturePad');
+        const clearBtn = document.getElementById('clearBtn');
+        const form = document.getElementById('signForm');
+        const signatureDataInput = document.getElementById('signatureData');
+        const convertBtn = document.getElementById('convertBtn');
+
+        // Verify elements exist before adding listeners
+        if (!canvas) return;
+
+        // Resize canvas
+        function resizeCanvas() {
+            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        // Initial resize with a small delay to ensure layout is computed
+        setTimeout(resizeCanvas, 100);
+
+        // Drawing Logic
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            // Handle touch events
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            return {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+        }
+
+        function start(e) {
+            isDrawing = true;
+            const pos = getPos(e);
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            if (e.cancelable) e.preventDefault(); // Prevent scrolling on touch
+
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = '#1e293b'; // Dark blue/slate for signature
+            ctx.lineWidth = 2.5;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+
+            lastX = pos.x;
+            lastY = pos.y;
+        }
+
+        function stop() {
+            isDrawing = false;
+        }
+
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stop);
+        canvas.addEventListener('mouseout', stop);
+
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stop);
+
+        clearBtn.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Note: using scaled width/height might need adjustment if using built-in width/height properties directly
+            // Actually ctx.clearRect works with the coordinate space, so 0,0 to width,height (logical) is correct? 
+            // Better to use stored logical width/height or just clear a massive area
+            // Re-query dimensions to be safe
+            const rect = canvas.getBoundingClientRect();
+            // We need to clear based on the SCALED coordinate system if we scaled the context.
+            // Since we did ctx.scale(ratio, ratio), we need to wipe 0,0 to canvas.width/ratio, canvas.height/ratio?
+            // Or simply:
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        });
+
+        // File Handling
+        ['dragenter', 'dragover'].forEach(eventName => {
+            if (dropZone) dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(eventName => {
+            if (dropZone) dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        if (pdfInput) {
+            pdfInput.addEventListener('change', () => {
+                const files = pdfInput.files;
+                if (files.length > 0) {
+                    fileList.classList.remove('d-none');
+                    fileNameSpan.textContent = files[0].name;
+                } else {
+                    fileList.classList.add('d-none');
+                }
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            // Save canvas to base64
+            const dataUrl = canvas.toDataURL('image/png');
+            signatureDataInput.value = dataUrl;
+
+            convertBtn.disabled = true;
+            convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Signing...';
+        });
+    });
+</script>
+{% endblock %}

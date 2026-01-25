@@ -19,6 +19,15 @@ import logging
 # Re-import firebase_admin for Google Auth
 import firebase_admin
 from firebase_admin import auth as firebase_auth
+import fitz  # PyMuPDF
+from pdf2docx import Converter
+import tempfile
+import os
+from pptx import Presentation
+import pdfplumber
+import pandas as pd
+import openpyxl
+from pptx.util import Inches
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +74,9 @@ def home(request):
         return redirect('dashboard')
     reviews = Review.objects.all().order_by('-created_at')
     return render(request, 'core/home.html', {'reviews': reviews})
+
+def tools_list(request):
+    return render(request, 'core/tools_list.html')
 
 def signup_view(request):
     if request.method == 'POST':
@@ -797,19 +809,422 @@ def freelancer_accept_order(request, order_id):
     if order.freelancer_status != 'pending_acceptance':
         messages.error(request, "Order is not pending acceptance.")
         return redirect('freelancer_dashboard')
+
+# --- FREE TOOLS ---
+
+def merge_pdf_tool(request):
+    """
+    View to handle Free PDF Merge tool.
+    Limits: Max 200MB total payload.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
         
-    # Check 30 minute timeout
-    time_diff = timezone.now() - order.assigned_at
-    if time_diff.total_seconds() > 1800: # 30 minutes * 60 seconds
-        order.freelancer_status = 'timeout'
-        order.save()
-        messages.error(request, "Order acceptance time expired.")
-    else:
-        order.freelancer_status = 'accepted'
-        order.save()
-        messages.success(request, "Order accepted successfully!")
+        if not files:
+            messages.error(request, "Please select at least one PDF file.")
+            return redirect('merge_pdf_tool')
+
+        # 1. Size Validation (Max 200MB)
+        MAX_SIZE_MB = 200
+        total_size = sum(f.size for f in files)
+        if total_size > MAX_SIZE_MB * 1024 * 1024:
+            messages.error(request, f"Total file size exceeds {MAX_SIZE_MB}MB limit. Your files: {round(total_size / (1024*1024), 2)}MB")
+            return redirect('merge_pdf_tool')
+
+        try:
+            # 2. Merge Logic using PyMuPDF (fitz)
+            merged_pdf = fitz.open()
+
+            for f in files:
+                # Read file from memory
+                file_stream = f.read()
+                # Open PDF from memory stream
+                with fitz.open(stream=file_stream, filetype="pdf") as pdf_doc:
+                    merged_pdf.insert_pdf(pdf_doc)
+
+            # 3. Return Response
+            pdf_bytes = merged_pdf.tobytes()
+            merged_pdf.close()
+
+            response = HttpResponse(pdf_bytes, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="hewor_merged.pdf"'
+            return response
+
+        except Exception as e:
+            logger.error(f"Error merging PDFs: {e}")
+            messages.error(request, f"Error processing files: {str(e)}")
+            return redirect('merge_pdf_tool')
+
+    return render(request, 'core/merge_pdf.html')
+
+def split_pdf_tool(request):
+    """
+    View to handle Free Split PDF tool.
+    Supports single or multiple files.
+    Input: PDF file(s) + comma-separated page numbers.
+    Output: ZIP file of split parts.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        split_pages_str = request.POST.get('split_pages', '')
+
+        if not files:
+            messages.error(request, "Please upload at least one PDF file.")
+            return redirect('split_pdf_tool')
+
+        try:
+            # Parse split pages
+            split_at_pages = [int(p.strip()) for p in split_pages_str.split(',') if p.strip().isdigit()]
+            split_at_pages.sort()
+            
+            if not split_at_pages:
+                messages.error(request, "Please enter valid page numbers.")
+                return redirect('split_pdf_tool')
+
+            # Prepare ZIP buffer for output
+            zip_buffer = io.BytesIO()
+            with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                
+                for file_idx, file in enumerate(files):
+                    # Check Limit
+                    MAX_SIZE_MB = 200
+                    if file.size > MAX_SIZE_MB * 1024 * 1024:
+                         messages.error(request, f"File {file.name} exceeds limit.")
+                         return redirect('split_pdf_tool')
+
+                    doc = fitz.open(stream=file.read(), filetype="pdf")
+                    total_pages = doc.page_count
+                    
+                    # Determine split ranges
+                    start_page = 0
+                    part_num = 1
+                    
+                    # Logic to handle splits
+                    # e.g. split at 5, 10 -> [0-4], [5-9], [10-end]
+                    
+                    current_splits = [p for p in split_at_pages if p < total_pages]
+                    
+                    # Logic: If split page is 5, it means split AFTER page 5 (pages 1-5 in output).
+                    # fitz uses 0-indexed. So split point 5 means page index 5 is start of NEXT doc.
+                    # Range 1: 0 to 4.
+                    
+                    ranges = []
+                    last_split = 0
+                    
+                    for split_point in current_splits:
+                        # User enters "5" -> they probably mean page 5 (visual). 
+                        # Code usually interprets "split after page 5".
+                        # So range is 0 to 4 (5 pages).
+                        # p index = 5 is the 6th page.
+                        # Wait, let's stick to standard PDF logic:
+                        # Input: "5" -> File 1: Pages 1-5. File 2: Pages 6-end.
+                        # Index range: [0, 5) and [5, total)
+                        
+                        ranges.append((last_split, split_point))
+                        last_split = split_point
+                        
+                    # Add final range
+                    if last_split < total_pages:
+                        ranges.append((last_split, total_pages))
+                        
+                    base_name = os.path.splitext(file.name)[0]
+                    
+                    for r_start, r_end in ranges:
+                        if r_start >= r_end: continue
+                        
+                        new_doc = fitz.open()
+                        new_doc.insert_pdf(doc, from_page=r_start, to_page=r_end-1)
+                        
+                        # Save to ZIP
+                        out_pdf_bytes = new_doc.write()
+                        zip_file.writestr(f"{base_name}_part_{part_num}.pdf", out_pdf_bytes)
+                        
+                        new_doc.close()
+                        part_num += 1
+                        
+                    doc.close()
+
+            zip_buffer.seek(0)
+            response = HttpResponse(zip_buffer, content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename="hewor_split_files.zip"'
+            return response
+
+        except Exception as e:
+            logger.error(f"Error splitting PDF: {e}")
+            messages.error(request, f"Error processing file: {str(e)}")
+            return redirect('split_pdf_tool')
+
+    return render(request, 'core/split_pdf.html')
+
+def compress_pdf_tool(request):
+    """
+    View to handle Free Compress PDF tool.
+    Supports batch processing.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
         
-    return redirect('freelancer_dashboard')
+        if not files:
+            messages.error(request, "Please upload at least one PDF file.")
+            return redirect('compress_pdf_tool')
+
+        MAX_SIZE_MB = 200
+        # Check total size logic if desired, or per file. 
+        # Using per file for now or simple sum.
+        
+        try:
+            # If single file -> return PDF
+            if len(files) == 1:
+                file = files[0]
+                if file.size > MAX_SIZE_MB * 1024 * 1024:
+                    messages.error(request, f"File size exceeds {MAX_SIZE_MB}MB limit.")
+                    return redirect('compress_pdf_tool')
+                
+                doc = fitz.open(stream=file.read(), filetype="pdf")
+                # Compress
+                # garbage=4 (deduplicate), deflate=True (compress streams)
+                out_bytes = doc.write(garbage=4, deflate=True)
+                doc.close()
+                
+                response = HttpResponse(out_bytes, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="compressed_{file.name}"'
+                return response
+            
+            # If multiple files -> return ZIP
+            else:
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                    for file in files:
+                        doc = fitz.open(stream=file.read(), filetype="pdf")
+                        out_bytes = doc.write(garbage=4, deflate=True)
+                        zip_file.writestr(f"compressed_{file.name}", out_bytes)
+                        doc.close()
+                
+                zip_buffer.seek(0)
+                response = HttpResponse(zip_buffer, content_type='application/zip')
+                response['Content-Disposition'] = 'attachment; filename="hewor_compressed_batch.zip"'
+                return response
+
+        except Exception as e:
+            logger.error(f"Error compressing PDF: {e}")
+            messages.error(request, f"Error processing file: {str(e)}")
+            return redirect('compress_pdf_tool')
+
+    return render(request, 'core/compress_pdf.html')
+
+def pdf_to_word_tool(request):
+    """
+    View to handle Free PDF to Word tool.
+    Uses pdf2docx library. Supports batch.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('pdf_to_word_tool')
+
+        MAX_SIZE_MB = 200
+        
+        temp_files_to_clean = []
+        
+        try:
+            # Single File Case
+            if len(files) == 1:
+                file = files[0]
+                if file.size > MAX_SIZE_MB * 1024 * 1024:
+                     messages.error(request, f"File size exceeds {MAX_SIZE_MB}MB limit.")
+                     return redirect('pdf_to_word_tool')
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                    for chunk in file.chunks():
+                        tmp_pdf.write(chunk)
+                    temp_pdf_path = tmp_pdf.name
+                    temp_files_to_clean.append(temp_pdf_path)
+
+                temp_docx_path = temp_pdf_path.replace('.pdf', '.docx')
+                temp_files_to_clean.append(temp_docx_path)
+
+                cv = Converter(temp_pdf_path)
+                cv.convert(temp_docx_path, start=0, end=None)
+                cv.close()
+
+                with open(temp_docx_path, 'rb') as docx_file:
+                    response = HttpResponse(docx_file.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                    base_name = os.path.splitext(file.name)[0]
+                    response['Content-Disposition'] = f'attachment; filename="{base_name}.docx"'
+                
+                return response
+            
+            # Batch Case
+            else:
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                    for file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                             for chunk in file.chunks():
+                                 tmp_pdf.write(chunk)
+                             temp_pdf_path = tmp_pdf.name
+                             temp_files_to_clean.append(temp_pdf_path)
+                        
+                        temp_docx_path = temp_pdf_path.replace('.pdf', '.docx')
+                        temp_files_to_clean.append(temp_docx_path)
+                        
+                        try:
+                            cv = Converter(temp_pdf_path)
+                            cv.convert(temp_docx_path, start=0, end=None)
+                            cv.close()
+                            
+                            base_name = os.path.splitext(file.name)[0]
+                            zip_file.write(temp_docx_path, f"{base_name}.docx")
+                            
+                        except Exception as sub_e:
+                            logger.error(f"Error in batch pdf2docx for {file.name}: {sub_e}")
+                            # Continue with other files or fail? user preference usually 'continue'
+                            # We'll just skip this one or add error log
+                            pass
+
+                zip_buffer.seek(0)
+                response = HttpResponse(zip_buffer, content_type='application/zip')
+                response['Content-Disposition'] = 'attachment; filename="hewor_converted_batch.zip"'
+                return response
+
+        except Exception as e:
+            logger.error(f"Error converting PDF to Word: {e}")
+            messages.error(request, f"Error processing file: {str(e)}")
+            return redirect('pdf_to_word_tool')
+        
+        finally:
+            # Cleanup all temp files
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except:
+                        pass
+
+    return render(request, 'core/pdf_to_word.html')
+        
+
+
+
+def pdf_to_ppt_tool(request):
+    """
+    View to handle Free PDF to PowerPoint tool.
+    Uses PyMuPDF (fitz) to render pages as images and python-pptx to create slides.
+    Supports batch processing.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('pdf_to_ppt_tool')
+
+        MAX_SIZE_MB = 200
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_pdf_to_pptx(pdf_file, output_pptx_path):
+                # Save input PDF to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                    for chunk in pdf_file.chunks():
+                        tmp_pdf.write(chunk)
+                    temp_pdf_path = tmp_pdf.name
+                    temp_files_to_clean.append(temp_pdf_path)
+
+                doc = fitz.open(temp_pdf_path)
+                prs = Presentation()
+                
+                # Standard slide size (10x7.5 inches) or Wide (13.33x7.5)
+                # We can try to match PDF aspect ratio or just use standard
+                # Let's set slide size to match the first page of PDF if possible
+                if len(doc) > 0:
+                    page = doc[0]
+                    # PyMuPDF uses points. 1 inch = 72 points.
+                    # python-pptx uses EMU. Inches(1)
+                    width_pt = page.rect.width
+                    height_pt = page.rect.height
+                    
+                    prs.slide_width = int(width_pt * 914400 / 72)
+                    prs.slide_height = int(height_pt * 914400 / 72)
+
+                blank_slide_layout = prs.slide_layouts[6] 
+
+                for page_num in range(len(doc)):
+                    page = doc[page_num]
+                    # Render high quality image (zoom=2)
+                    mat = fitz.Matrix(2, 2)
+                    pix = page.get_pixmap(matrix=mat)
+                    
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_img:
+                        pix.save(tmp_img.name)
+                        tmp_img_path = tmp_img.name
+                        temp_files_to_clean.append(tmp_img_path)
+                    
+                    slide = prs.slides.add_slide(blank_slide_layout)
+                    slide.shapes.add_picture(tmp_img_path, 0, 0, width=prs.slide_width, height=prs.slide_height)
+
+                prs.save(output_pptx_path)
+                doc.close()
+
+            # Single File Case
+            if len(files) == 1:
+                file = files[0]
+                if file.size > MAX_SIZE_MB * 1024 * 1024:
+                     messages.error(request, f"File size exceeds {MAX_SIZE_MB}MB limit.")
+                     return redirect('pdf_to_ppt_tool')
+
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pptx') as tmp_pptx:
+                    temp_pptx_path = tmp_pptx.name
+                    temp_files_to_clean.append(temp_pptx_path)
+                
+                convert_single_pdf_to_pptx(file, temp_pptx_path)
+
+                with open(temp_pptx_path, 'rb') as pptx_file:
+                    response = HttpResponse(pptx_file.read(), content_type='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+                    base_name = os.path.splitext(file.name)[0]
+                    response['Content-Disposition'] = f'attachment; filename="{base_name}.pptx"'
+                
+                return response
+            
+            # Batch Case
+            else:
+                zip_buffer = io.BytesIO()
+                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                    for file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pptx') as tmp_pptx:
+                            temp_pptx_path = tmp_pptx.name
+                            temp_files_to_clean.append(temp_pptx_path)
+                        
+                        try:
+                            convert_single_pdf_to_pptx(file, temp_pptx_path)
+                            base_name = os.path.splitext(file.name)[0]
+                            zip_file.write(temp_pptx_path, f"{base_name}.pptx")
+                        except Exception as sub_e:
+                            logger.error(f"Error in batch pdf2pptx for {file.name}: {sub_e}")
+                            pass
+
+                zip_buffer.seek(0)
+                response = HttpResponse(zip_buffer, content_type='application/zip')
+                response['Content-Disposition'] = 'attachment; filename="hewor_converted_ppt_batch.zip"'
+                return response
+
+        except Exception as e:
+            logger.error(f"Error converting PDF to PPTX: {e}")
+            messages.error(request, f"Error processing file: {str(e)}")
+            return redirect('pdf_to_ppt_tool')
+        
+        finally:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    try:
+                        os.remove(path)
+                    except:
+                        pass
+
+    return render(request, 'core/pdf_to_powerpoint.html')
+
 
 @login_required(login_url='freelancer_login')
 def freelancer_reject_order(request, order_id):
@@ -826,3 +1241,1332 @@ def freelancer_reject_order(request, order_id):
         messages.info(request, "Order rejected.")
         
     return redirect('freelancer_dashboard')
+
+def pdf_to_excel_tool(request):
+    """
+    View to handle Free PDF to Excel tool.
+    Uses pdfplumber to extract tables and pandas to save as Excel.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('pdf_to_excel_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_pdf_to_excel(pdf_file, output_excel_path):
+                # Save input PDF to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                    for chunk in pdf_file.chunks():
+                        tmp_pdf.write(chunk)
+                    temp_pdf_path = tmp_pdf.name
+                    temp_files_to_clean.append(temp_pdf_path)
+
+                # Extract and write to Excel
+                has_tables = False
+                with pdfplumber.open(temp_pdf_path) as pdf:
+                    with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
+                        for i, page in enumerate(pdf.pages):
+                            tables = page.extract_tables()
+                            for j, table in enumerate(tables):
+                                if table:
+                                    has_tables = True
+                                    # Create DataFrame. defaulting to no header to preserve exact structure
+                                    df = pd.DataFrame(table)
+                                    sheet_name = f'Page_{i+1}_Table_{j+1}'
+                                    # Sheet name limit is 31 chars
+                                    if len(sheet_name) > 31:
+                                        sheet_name = sheet_name[:31]
+                                    df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
+                
+                if not has_tables:
+                    # Create a dummy sheet if no tables found to avoid error
+                    with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
+                        pd.DataFrame(["No tables found in this PDF"]).to_excel(writer, sheet_name="Info", index=False, header=False)
+
+            results = []
+            
+            if len(files) == 1:
+                # Single file case
+                uploaded_file = files[0]
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_out:
+                    output_path = tmp_out.name
+                    temp_files_to_clean.append(output_path)
+                
+                convert_single_pdf_to_excel(uploaded_file, output_path)
+                
+                # Serve file
+                with open(output_path, 'rb') as f:
+                    file_data = f.read()
+                    
+                response = HttpResponse(file_data, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name.replace(".pdf", "")}.xlsx"'
+                
+                # Cleanup
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                        
+                return response
+            
+            else:
+                # Batch processing
+                zip_filename = "hewor_converted_excel_files.zip"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+                    zip_path = tmp_zip.name
+                    temp_files_to_clean.append(zip_path)
+                
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    for uploaded_file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_out:
+                            output_path = tmp_out.name
+                            temp_files_to_clean.append(output_path)
+                        
+                        convert_single_pdf_to_excel(uploaded_file, output_path)
+                        zipf.write(output_path, arcname=f"{uploaded_file.name.replace('.pdf', '')}.xlsx")
+                
+                with open(zip_path, 'rb') as f:
+                    zip_data = f.read()
+                    
+                response = HttpResponse(zip_data, content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                        
+                return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('pdf_to_excel_tool')
+
+    return render(request, 'core/pdf_to_excel.html')
+
+def word_to_pdf_tool(request):
+    """
+    View to handle Free Word to PDF tool.
+    Tries docx2pdf first (best quality), falls back to python-docx + xhtml2pdf.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('word_files')
+        
+        if not files:
+            messages.error(request, "Please upload a Word file.")
+            return redirect('word_to_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_word_to_pdf(docx_file, output_pdf_path):
+                # Save input DOCX to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp_docx:
+                    for chunk in docx_file.chunks():
+                        tmp_docx.write(chunk)
+                    temp_docx_path = tmp_docx.name
+                    temp_files_to_clean.append(temp_docx_path)
+
+                # Conversion Logic
+                conversion_success = False
+                
+                # Method 1: docx2pdf (Requires MS Word installed)
+                # We skip this for now on server environments usually, but let's try safely
+                try:
+                    from docx2pdf import convert
+                    # Note: docx2pdf might fail if no Word is installed or on Linux headless
+                    # convert(temp_docx_path, output_pdf_path) 
+                    # Commented out to prefer the safe method for now to avoid hanging
+                    pass
+                except:
+                    pass
+
+                if not conversion_success:
+                    # Method 2: python-docx -> HTML -> xhtml2pdf
+                    try:
+                        import docx
+                        from xhtml2pdf import pisa
+                        
+                        doc = docx.Document(temp_docx_path)
+                        html_content = "<html><head><style>body { font-family: Helvetica, sans-serif; }</style></head><body>"
+                        
+                        for para in doc.paragraphs:
+                            # Basic styling handling
+                            style = para.style.name.lower()
+                            text = para.text.strip()
+                            if not text:
+                                continue
+                                
+                            if 'heading' in style:
+                                level = style.replace('heading ', '')
+                                html_content += f"<h{level}>{text}</h{level}>"
+                            else:
+                                html_content += f"<p>{text}</p>"
+                                
+                        html_content += "</body></html>"
+                        
+                        with open(output_pdf_path, "wb") as pdf_file:
+                            pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+                            
+                        if pisa_status.err:
+                            raise Exception("PDF generation failed")
+                        
+                        conversion_success = True
+                    except Exception as e:
+                        logger.error(f"Word conversion failed: {e}")
+                        raise e
+
+            # Batch processing logic
+            if len(files) == 1:
+                uploaded_file = files[0]
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                    output_path = tmp_out.name
+                    temp_files_to_clean.append(output_path)
+                
+                convert_single_word_to_pdf(uploaded_file, output_path)
+                
+                with open(output_path, 'rb') as f:
+                    file_data = f.read()
+                    
+                response = HttpResponse(file_data, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name.replace(".docx", "").replace(".doc", "")}.pdf"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+            
+            else:
+                zip_filename = "hewor_converted_pdf_files.zip"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+                    zip_path = tmp_zip.name
+                    temp_files_to_clean.append(zip_path)
+                
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    for uploaded_file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                            output_path = tmp_out.name
+                            temp_files_to_clean.append(output_path)
+                        
+                        try:
+                            convert_single_word_to_pdf(uploaded_file, output_path)
+                            zipf.write(output_path, arcname=f"{uploaded_file.name.replace('.docx', '').replace('.doc', '')}.pdf")
+                        except Exception as e:
+                             logger.error(f"Failed to convert {uploaded_file.name}: {e}")
+                
+                with open(zip_path, 'rb') as f:
+                    zip_data = f.read()
+                    
+                response = HttpResponse(zip_data, content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('word_to_pdf_tool')
+
+    return render(request, 'core/word_to_pdf.html')
+
+def excel_to_pdf_tool(request):
+    """
+    View to handle Free Excel to PDF tool.
+    Uses pandas to read Excel and xhtml2pdf to generate PDF.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('excel_files')
+        
+        if not files:
+            messages.error(request, "Please upload an Excel file.")
+            return redirect('excel_to_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_excel_to_pdf(xlsx_file, output_pdf_path):
+                # Save input XLSX to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx') as tmp_xlsx:
+                    for chunk in xlsx_file.chunks():
+                        tmp_xlsx.write(chunk)
+                    temp_xlsx_path = tmp_xlsx.name
+                    temp_files_to_clean.append(temp_xlsx_path)
+
+                try:
+                    import pandas as pd
+                    from xhtml2pdf import pisa
+                    
+                    # Read all sheets
+                    xls = pd.ExcelFile(temp_xlsx_path)
+                    html_content = "<html><head><style>"
+                    html_content += "@page { size: A4 landscape; margin: 1cm; }"
+                    html_content += "table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 10px; }"
+                    html_content += "th, td { border: 1px solid #ddd; padding: 5px; text-align: left; }"
+                    html_content += "th { background-color: #f2f2f2; font-weight: bold; }"
+                    html_content += "h2 { font-family: sans-serif; color: #333; }"
+                    html_content += "</style></head><body>"
+                    
+                    for sheet_name in xls.sheet_names:
+                        df = pd.read_excel(xls, sheet_name=sheet_name)
+                        if not df.empty:
+                            html_content += f"<h2>Sheet: {sheet_name}</h2>"
+                            # Convert to HTML
+                            table_html = df.to_html(index=False, classes='table')
+                            html_content += table_html
+                            html_content += "<br/>"
+                            
+                    html_content += "</body></html>"
+                    
+                    with open(output_pdf_path, "wb") as pdf_file:
+                        pisa_status = pisa.CreatePDF(html_content, dest=pdf_file)
+                        
+                    if pisa_status.err:
+                        raise Exception("PDF generation failed")
+
+                except Exception as e:
+                    logger.error(f"Excel conversion failed: {e}")
+                    raise e
+
+            # Batch processing logic
+            if len(files) == 1:
+                uploaded_file = files[0]
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                    output_path = tmp_out.name
+                    temp_files_to_clean.append(output_path)
+                
+                convert_single_excel_to_pdf(uploaded_file, output_path)
+                
+                with open(output_path, 'rb') as f:
+                    file_data = f.read()
+                    
+                response = HttpResponse(file_data, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name.replace(".xlsx", "").replace(".xls", "")}.pdf"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+            
+            else:
+                zip_filename = "hewor_converted_pdf_files.zip"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+                    zip_path = tmp_zip.name
+                    temp_files_to_clean.append(zip_path)
+                
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    for uploaded_file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                            output_path = tmp_out.name
+                            temp_files_to_clean.append(output_path)
+                        
+                        try:
+                            convert_single_excel_to_pdf(uploaded_file, output_path)
+                            zipf.write(output_path, arcname=f"{uploaded_file.name.replace('.xlsx', '').replace('.xls', '')}.pdf")
+                        except Exception as e:
+                             logger.error(f"Failed to convert {uploaded_file.name}: {e}")
+                
+                with open(zip_path, 'rb') as f:
+                    zip_data = f.read()
+                    
+                response = HttpResponse(zip_data, content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('excel_to_pdf_tool')
+
+    return render(request, 'core/excel_to_pdf.html')
+
+def ppt_to_pdf_tool(request):
+    """
+    View to handle Free PowerPoint to PDF tool.
+    Extracts text content from slides and generates a PDF report.
+    Note: Does not preserve layout (requires LibreOffice for that).
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('ppt_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PowerPoint file.")
+            return redirect('ppt_to_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_ppt_to_pdf(ppt_file, output_pdf_path):
+                # Save input PPTX to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pptx') as tmp_ppt:
+                    for chunk in ppt_file.chunks():
+                        tmp_ppt.write(chunk)
+                    temp_ppt_path = tmp_ppt.name
+                    temp_files_to_clean.append(temp_ppt_path)
+
+                try:
+                    from pptx import Presentation
+                    from reportlab.lib.pagesizes import letter
+                    from reportlab.pdfgen import canvas
+                    from reportlab.lib import colors
+                    from reportlab.lib.styles import getSampleStyleSheet
+                    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+                    
+                    # Use Platypus for better text wrapping
+                    doc = SimpleDocTemplate(output_pdf_path, pagesize=letter)
+                    story = []
+                    styles = getSampleStyleSheet()
+                    
+                    prs = Presentation(temp_ppt_path)
+                    
+                    for i, slide in enumerate(prs.slides):
+                        # Slide Header
+                        story.append(Paragraph(f"<b>Slide {i+1}</b>", styles['Heading2']))
+                        story.append(Spacer(1, 12))
+                        
+                        # Extract Text
+                        slide_text = []
+                        # shapes are not always in reading order, but we try
+                        for shape in slide.shapes:
+                            if hasattr(shape, "has_text_frame") and shape.has_text_frame:
+                                for paragraph in shape.text_frame.paragraphs:
+                                    text = paragraph.text.strip()
+                                    if text:
+                                        story.append(Paragraph(text, styles['BodyText']))
+                                        story.append(Spacer(1, 6))
+                        
+                        story.append(PageBreak())
+                        
+                    doc.build(story)
+
+                except Exception as e:
+                    logger.error(f"PPT conversion failed: {e}")
+                    raise e
+
+            # Batch processing logic
+            if len(files) == 1:
+                uploaded_file = files[0]
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                    output_path = tmp_out.name
+                    temp_files_to_clean.append(output_path)
+                
+                convert_single_ppt_to_pdf(uploaded_file, output_path)
+                
+                with open(output_path, 'rb') as f:
+                    file_data = f.read()
+                    
+                response = HttpResponse(file_data, content_type='application/pdf')
+                response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name.replace(".pptx", "").replace(".ppt", "")}.pdf"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+            
+            else:
+                zip_filename = "hewor_converted_pdf_files.zip"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+                    zip_path = tmp_zip.name
+                    temp_files_to_clean.append(zip_path)
+                
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    for uploaded_file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                            output_path = tmp_out.name
+                            temp_files_to_clean.append(output_path)
+                        
+                        try:
+                            convert_single_ppt_to_pdf(uploaded_file, output_path)
+                            zipf.write(output_path, arcname=f"{uploaded_file.name.replace('.pptx', '').replace('.ppt', '')}.pdf")
+                        except Exception as e:
+                             logger.error(f"Failed to convert {uploaded_file.name}: {e}")
+                
+                with open(zip_path, 'rb') as f:
+                    zip_data = f.read()
+                    
+                response = HttpResponse(zip_data, content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('ppt_to_pdf_tool')
+
+    return render(request, 'core/ppt_to_pdf.html')
+
+def pdf_to_jpg_tool(request):
+    """
+    View to handle Free PDF to JPG tool.
+    Converts PDF pages to high-quality JPG images.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('pdf_to_jpg_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            def convert_single_pdf_to_jpgs(pdf_file, output_zip_path):
+                # Save input PDF to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                    for chunk in pdf_file.chunks():
+                        tmp_pdf.write(chunk)
+                    temp_pdf_path = tmp_pdf.name
+                    temp_files_to_clean.append(temp_pdf_path)
+
+                # Open PDF and convert pages
+                doc = fitz.open(temp_pdf_path)
+                base_name = pdf_file.name.replace('.pdf', '')
+                
+                with zipfile.ZipFile(output_zip_path, 'w') as zipf:
+                    for i, page in enumerate(doc):
+                        # clear resolution (zoom=2 means 144dpi approx, good for screen)
+                        pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                        
+                        # Save each page as JPG
+                        img_filename = f"{base_name}_page_{i+1}.jpg"
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                            pix.save(tmp_img.name)
+                            temp_files_to_clean.append(tmp_img.name)
+                            
+                            # Add to zip
+                            zipf.write(tmp_img.name, arcname=img_filename)
+            
+            # Use a main ZIP for the download
+            final_zip_filename = "hewor_converted_jpgs.zip"
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_final_zip:
+                final_zip_path = tmp_final_zip.name
+                temp_files_to_clean.append(final_zip_path)
+            
+            # Since even a single PDF produces multiple JPGs, we always return a ZIP of JPGs (or ZIP of folders if batch)
+            # Simpler approach: Just put all images in one ZIP. If batch, prefix with filename.
+            
+            with zipfile.ZipFile(final_zip_path, 'w') as final_zip:
+                for uploaded_file in files:
+                    # Save input PDF to temp
+                    with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                        for chunk in uploaded_file.chunks():
+                            tmp_pdf.write(chunk)
+                        temp_pdf_path = tmp_pdf.name
+                        temp_files_to_clean.append(temp_pdf_path)
+                    
+                    doc = fitz.open(temp_pdf_path)
+                    base_name = uploaded_file.name.replace('.pdf', '')
+                    
+                    for i, page in enumerate(doc):
+                         pix = page.get_pixmap(matrix=fitz.Matrix(2, 2))
+                         img_filename = f"{base_name}_page_{i+1}.jpg"
+                         
+                         with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp_img:
+                            pix.save(tmp_img.name)
+                            temp_files_to_clean.append(tmp_img.name)
+                            final_zip.write(tmp_img.name, arcname=img_filename)
+
+            with open(final_zip_path, 'rb') as f:
+                zip_data = f.read()
+                
+            response = HttpResponse(zip_data, content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename="{final_zip_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('pdf_to_jpg_tool')
+
+    return render(request, 'core/pdf_to_jpg.html')
+
+def jpg_to_pdf_tool(request):
+    """
+    View to handle Free JPG to PDF tool.
+    Converts uploaded images to a single PDF.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('jpg_files')
+        
+        if not files:
+            messages.error(request, "Please upload image files.")
+            return redirect('jpg_to_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            # Save all images first
+            image_paths = []
+            for img_file in files:
+                suffix = os.path.splitext(img_file.name)[1].lower()
+                if suffix not in ['.jpg', '.jpeg', '.png']:
+                    # Force valid suffix if missing or allow conversion later?
+                    # img2pdf requires jpg/jpeg naming or valid header
+                    suffix = '.jpg'
+                    
+                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_img:
+                    for chunk in img_file.chunks():
+                        tmp_img.write(chunk)
+                    tmp_img.flush()
+                    image_paths.append(tmp_img.name)
+                    temp_files_to_clean.append(tmp_img.name)
+
+            # Define Output PDF
+            final_filename = "hewor_images_combined.pdf"
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                output_pdf_path = tmp_pdf.name
+                temp_files_to_clean.append(output_pdf_path)
+
+            # TRY img2pdf first (best quality, direct embedding)
+            try:
+                import img2pdf
+                # img2pdf might fail on some PNGs (alpha channel), so fallback to PIL is safer for generic "Image to PDF".
+                # But let's try it if inputs are strictly JPEG.
+                # Actually, PIL is robust for user uploads that might be messy.
+                # Let's use PIL for maximum compatibility.
+                
+                from PIL import Image
+                
+                pil_images = []
+                for p in image_paths:
+                    img = Image.open(p)
+                    # Convert to RGB to avoid mode errors (e.g. RGBA -> PDF issue)
+                    if img.mode != 'RGB':
+                        img = img.convert('RGB')
+                    pil_images.append(img)
+                
+                if pil_images:
+                    base_image = pil_images[0]
+                    other_images = pil_images[1:] if len(pil_images) > 1 else []
+                    
+                    base_image.save(output_pdf_path, "PDF", resolution=100.0, save_all=True, append_images=other_images)
+                else:
+                    raise Exception("No valid images found")
+                    
+            except Exception as e:
+                # Fallback or error
+                logger.error(f"JPG to PDF failed: {e}")
+                raise e
+
+            # Serve File
+            with open(output_pdf_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{final_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting files: {str(e)}")
+            return redirect('jpg_to_pdf_tool')
+
+    return render(request, 'core/jpg_to_pdf.html')
+
+def sign_pdf_tool(request):
+    """
+    View to handle Free Sign PDF tool.
+    Allows user to upload a PDF and a signature (or draw one), and overlays it.
+    MVP: Places signature at bottom-right of the last page.
+    """
+    if request.method == 'POST':
+        # PDF File
+        try:
+            pdf_file = request.FILES.get('pdf_file')
+            signature_data = request.POST.get('signature_data') # Base64 string from canvas
+            
+            if not pdf_file or not signature_data:
+                messages.error(request, "Please provide both a PDF and a signature.")
+                return redirect('sign_pdf_tool')
+
+            temp_files_to_clean = []
+            
+            # Save PDF
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in pdf_file.chunks():
+                    tmp_pdf.write(chunk)
+                temp_pdf_path = tmp_pdf.name
+                temp_files_to_clean.append(temp_pdf_path)
+            
+            # Save Signature Image (Base64 -> PNG)
+            import base64
+            from PIL import Image
+            import io
+            
+            format, imgstr = signature_data.split(';base64,') 
+            ext = format.split('/')[-1] 
+            
+            signature_bytes = base64.b64decode(imgstr)
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_sig:
+               tmp_sig.write(signature_bytes)
+               temp_sig_path = tmp_sig.name
+               temp_files_to_clean.append(temp_sig_path)
+
+            # Output Path
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_pdf_path = tmp_out.name
+                temp_files_to_clean.append(output_pdf_path)
+            
+            # Overlay Logic using PyMuPDF (fitz)
+            doc = fitz.open(temp_pdf_path)
+            
+            # Target Page: Last Page
+            page = doc[-1]
+            rect = page.rect
+            
+            # Defined Size for Signature (e.g., 200px width, aspect ratio maintained)
+            # Or simpler: Fixed box at bottom right
+            # PDF coords: (0,0) is top-left in PyMuPDF? No, it varies. PyMuPDF is top-left usually.
+            # Let's say we want it 50 units from bottom, 50 units from right.
+            
+            SIG_WIDTH = 150
+            SIG_HEIGHT = 80 # Approx
+            
+            # Calculate position: Bottom Right
+            x1 = rect.width - SIG_WIDTH - 50
+            y1 = rect.height - SIG_HEIGHT - 50
+            x2 = x1 + SIG_WIDTH
+            y2 = y1 + SIG_HEIGHT
+            
+            signature_rect = fitz.Rect(x1, y1, x2, y2)
+            
+            # Insert Image
+            page.insert_image(signature_rect, filename=temp_sig_path)
+            
+            doc.save(output_pdf_path)
+            
+            # Respond
+            with open(output_pdf_path, 'rb') as f:
+                pdf_data = f.read()
+            
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{pdf_file.name.replace(".pdf", "")}_signed.pdf"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error signing PDF: {str(e)}")
+            return redirect('sign_pdf_tool')
+
+    return render(request, 'core/sign_pdf.html')
+
+def html_to_pdf_tool(request):
+    """
+    View to handle Free HTML to PDF tool.
+    Converts uploaded HTML files or URL to PDF.
+    """
+    from xhtml2pdf import pisa
+    import requests
+    
+    if request.method == 'POST':
+        conversion_type = request.POST.get('conversion_type') # 'url' or 'file'
+        
+        temp_files_to_clean = []
+        source_html = ""
+        filename_prefix = "converted"
+        
+        try:
+            if conversion_type == 'url':
+                url = request.POST.get('url')
+                if not url:
+                    messages.error(request, "Please enter a valid URL.")
+                    return redirect('html_to_pdf_tool')
+                
+                # Fetch URL content
+                try:
+                    # Fake user agent to avoid some blocks
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+                    response = requests.get(url, headers=headers, timeout=30)
+                    response.raise_for_status()
+                    source_html = response.text
+                    filename_prefix = url.split("//")[-1].replace("/", "_")[:20]
+                except Exception as e:
+                    messages.error(request, f"Failed to fetch URL: {str(e)}")
+                    return redirect('html_to_pdf_tool')
+
+            elif conversion_type == 'file':
+                files = request.FILES.getlist('html_files')
+                if not files:
+                    messages.error(request, "Please upload an HTML file.")
+                    return redirect('html_to_pdf_tool')
+                
+                # For now, handle single file or batch? Request says "one by one" usually implies single user flow, but our previous tools support batch.
+                # However, HTML to PDF is complex. Let's stick to single file or simple batch zip.
+                # Simplest: Single file for best "working" quality focus.
+                
+                uploaded_file = files[0]
+                source_html = uploaded_file.read().decode('utf-8', errors='ignore')
+                filename_prefix = uploaded_file.name.replace('.html', '').replace('.htm', '')
+                
+            else:
+                 messages.error(request, "Invalid request.")
+                 return redirect('html_to_pdf_tool')
+
+            # Create PDF
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                output_path = tmp_pdf.name
+                temp_files_to_clean.append(output_path)
+            
+            # Convert
+            with open(output_path, "w+b") as result_file:
+                pisa_status = pisa.CreatePDF(source_html, dest=result_file)
+            
+            if pisa_status.err:
+                raise Exception("PDF Creation Failed")
+                
+            # Serve File
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+            
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename_prefix}.pdf"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error converting: {str(e)}")
+            return redirect('html_to_pdf_tool')
+
+    return render(request, 'core/html_to_pdf.html')
+
+def rotate_pdf_tool(request):
+    """
+    View to handle Free Rotate PDF tool.
+    Rotates all pages of a PDF by 90, 180, or 270 degrees.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files') # Support multiple if needed, but UI usually single
+        rotation = request.POST.get('rotation') # 90, 180, 270 (clockwise)
+        
+        if not files or not rotation:
+            messages.error(request, "Please provide a PDF and rotation angle.")
+            return redirect('rotate_pdf_tool')
+
+        try:
+            rotation_angle = int(rotation)
+            if rotation_angle not in [90, 180, 270]:
+                raise ValueError("Invalid rotation")
+        except:
+             messages.error(request, "Invalid rotation angle.")
+             return redirect('rotate_pdf_tool')
+             
+        temp_files_to_clean = []
+        
+        try:
+            # Handle Single File for now (simplest for rotation)
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            doc = fitz.open(input_path)
+            
+            for page in doc:
+                page.set_rotation(page.rotation + rotation_angle)
+            
+            filename_suffix = f"_rotated_{rotation_angle}"
+            output_filename = uploaded_file.name.replace('.pdf', '') + filename_suffix + ".pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            doc.save(output_path)
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error rotating PDF: {str(e)}")
+            return redirect('rotate_pdf_tool')
+            
+    return render(request, 'core/rotate_pdf.html')
+
+def add_watermark_tool(request):
+    """
+    View to handle Free Add Watermark tool.
+    Adds text watermark to all pages of a PDF.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        watermark_text = request.POST.get('watermark_text', 'CONFIDENTIAL')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('add_watermark_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0] # Single file support for now
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            doc = fitz.open(input_path)
+            
+            for page in doc:
+                # Calculate center
+                rect = page.rect
+                center = fitz.Point(rect.width / 2, rect.height / 2)
+                
+                # Insert Text
+                # fontname="helv", fontsize=50, rotate=45, color=(0.5, 0.5, 0.5), opacity=0.3
+                page.insert_text(
+                    center,
+                    watermark_text,
+                    fontname="helv",
+                    fontsize=50,
+                    rotate=0,
+                    color=(0.5, 0.5, 0.5)
+                )
+                
+
+
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_watermarked.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            doc.save(output_path)
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error creating watermark: {str(e)}")
+            return redirect('add_watermark_tool')
+            
+    return render(request, 'core/add_watermark.html')
+
+def protect_pdf_tool(request):
+    """
+    View to handle Free Protect PDF tool.
+    Encrypts PDF with a password using pikepdf.
+    """
+    import pikepdf
+    
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        password = request.POST.get('password')
+        
+        if not files or not password:
+            messages.error(request, "Please provide a PDF and a password.")
+            return redirect('protect_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            # Encrypt
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_protected.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            with pikepdf.Pdf.open(input_path) as pdf:
+                pdf.save(output_path, encryption=pikepdf.Encryption(owner=password, user=password, R=6))
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error protecting PDF: {str(e)}")
+            return redirect('protect_pdf_tool')
+            
+    return render(request, 'core/protect_pdf.html')
+
+def unlock_pdf_tool(request):
+    """
+    View to handle Free Unlock PDF tool.
+    Removes password from a PDF using pikepdf.
+    """
+    import pikepdf
+    
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        password = request.POST.get('password', '')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('unlock_pdf_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_unlocked.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            try:
+                # Try opening. If password needed and not provided, it will raise PasswordError
+                with pikepdf.Pdf.open(input_path, password=password) as pdf:
+                    pdf.save(output_path)
+            except pikepdf.PasswordError:
+                messages.error(request, "Incorrect password or password required.")
+                return redirect('unlock_pdf_tool')
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error unlocking PDF: {str(e)}")
+            return redirect('unlock_pdf_tool')
+            
+    return render(request, 'core/unlock_pdf.html')
+
+def add_page_numbers_tool(request):
+    """
+    View to handle Free Add Page Numbers tool.
+    Adds 'Page X of Y' to the bottom of all pages.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        position = request.POST.get('position', 'bottom-center') # simple for now
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('add_page_numbers_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            doc = fitz.open(input_path)
+            total_pages = len(doc)
+            
+            for i, page in enumerate(doc):
+                page_num = i + 1
+                text = f"Page {page_num} of {total_pages}"
+                
+                rect = page.rect
+                # Default: Bottom Center
+                # y = rect.height - 20
+                # x = rect.width / 2
+                
+                point = fitz.Point(rect.width / 2, rect.height - 20)
+                
+                # Textbox approach for better centering:
+                footer_rect = fitz.Rect(0, rect.height - 40, rect.width, rect.height - 5)
+                page.insert_textbox(footer_rect, text, fontsize=10, fontname="helv", align=1)
+
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_numbered.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            doc.save(output_path)
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error adding page numbers: {str(e)}")
+            return redirect('add_page_numbers_tool')
+            
+    return render(request, 'core/add_page_numbers.html')
+
+def remove_pages_tool(request):
+    """
+    View to handle Free Remove Pages tool.
+    Deletes specified pages from a PDF.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        pages_to_remove_str = request.POST.get('pages_to_remove', '')
+        
+        if not files or not pages_to_remove_str:
+            messages.error(request, "Please upload a PDF and specify pages to remove.")
+            return redirect('remove_pages_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            doc = fitz.open(input_path)
+            total_pages = len(doc)
+            
+            # Parse Page Numbers
+            # Input format: "1, 3-5, 7" -> remove these 1-based indexes
+            pages_to_delete = set()
+            try:
+                parts = [p.strip() for p in pages_to_remove_str.split(',')]
+                for part in parts:
+                    if '-' in part:
+                        start, end = part.split('-')
+                        start, end = int(start), int(end)
+                        for p in range(start, end + 1):
+                            if 1 <= p <= total_pages:
+                                pages_to_delete.add(p - 1) # 0-indexed
+                    else:
+                        p = int(part)
+                        if 1 <= p <= total_pages:
+                            pages_to_delete.add(p - 1)
+            except ValueError:
+                 messages.error(request, "Invalid page number format. Use '1, 3-5'.")
+                 return redirect('remove_pages_tool')
+            
+            if len(pages_to_delete) == total_pages:
+                 messages.error(request, "Cannot remove all pages.")
+                 return redirect('remove_pages_tool')
+            
+            # Create new PDF with ONLY kept pages
+            # Removing pages in fitz: doc.delete_pages(list)
+            doc.delete_pages(list(pages_to_delete))
+            
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_removed.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            doc.save(output_path)
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error removing pages: {str(e)}")
+            return redirect('remove_pages_tool')
+            
+    return render(request, 'core/remove_pages.html')
+
+def extract_pages_tool(request):
+    """
+    View to handle Free Extract Pages tool.
+    Extracts specified pages from a PDF.
+    """
+    if request.method == 'POST':
+        files = request.FILES.getlist('pdf_files')
+        pages_to_extract_str = request.POST.get('pages_to_extract', '')
+        
+        if not files or not pages_to_extract_str:
+            messages.error(request, "Please upload a PDF and specify pages to extract.")
+            return redirect('extract_pages_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            uploaded_file = files[0]
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                for chunk in uploaded_file.chunks():
+                    tmp_pdf.write(chunk)
+                input_path = tmp_pdf.name
+                temp_files_to_clean.append(input_path)
+            
+            doc = fitz.open(input_path)
+            total_pages = len(doc)
+            
+            # Parse Page Numbers
+            pages_to_keep = [] # Ordered list for select
+            try:
+                parts = [p.strip() for p in pages_to_extract_str.split(',')]
+                for part in parts:
+                    if '-' in part:
+                        start, end = part.split('-')
+                        start, end = int(start), int(end)
+                        for p in range(start, end + 1):
+                            if 1 <= p <= total_pages:
+                                pages_to_keep.append(p - 1)
+                    else:
+                        p = int(part)
+                        if 1 <= p <= total_pages:
+                            pages_to_keep.append(p - 1)
+            except ValueError:
+                 messages.error(request, "Invalid page number format. Use '1, 3-5'.")
+                 return redirect('extract_pages_tool')
+            
+            if not pages_to_keep:
+                 messages.error(request, "No valid pages selected.")
+                 return redirect('extract_pages_tool')
+            
+            # Select pages (keep only these)
+            doc.select(pages_to_keep)
+            
+            output_filename = uploaded_file.name.replace('.pdf', '') + "_extracted.pdf"
+            
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_out:
+                output_path = tmp_out.name
+                temp_files_to_clean.append(output_path)
+            
+            doc.save(output_path)
+            
+            with open(output_path, 'rb') as f:
+                pdf_data = f.read()
+                
+            response = HttpResponse(pdf_data, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{output_filename}"'
+            
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            return response
+            
+        except Exception as e:
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    os.remove(path)
+            messages.error(request, f"Error extracting pages: {str(e)}")
+            return redirect('extract_pages_tool')
+            
+    return render(request, 'core/extract_pages.html')
+
+def whiteboard_tool(request):
+    """
+    View to handle the Whiteboard tool.
+    Renders a full-screen or large canvas for drawing.
+    """
+    return render(request, 'core/whiteboard.html')

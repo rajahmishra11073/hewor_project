@@ -95,6 +95,30 @@
             --input-bg: rgba(255, 255, 255, 0.9);
             --input-border: #e2e8f0;
             --input-text: #0f172a;
+
+            /* --- PREMIUM TOOL THEME (Light) --- */
+            --pt-card-bg: #ffffff;
+            --pt-card-border: rgba(255, 255, 255, 0.8);
+            --pt-shadow: 0 30px 60px rgba(0, 0, 0, 0.08), 0 10px 20px rgba(0, 0, 0, 0.03);
+
+            --pt-icon-bg: #eff6ff;
+            --pt-icon-color: #3b82f6;
+
+            --pt-upload-bg: #f9fafb;
+            --pt-upload-border: #e2e8f0;
+            --pt-upload-hover-bg: #f5f3ff;
+            --pt-upload-hover-border: #8b5cf6;
+
+            --pt-text-main: #0f172a;
+            --pt-text-muted: #64748b;
+            --pt-page-bg: linear-gradient(180deg, #f3f4f6 0%, #e0e7ff 100%);
+
+            /* Mega Menu Variables (Light) */
+            --mm-bg: #ffffff;
+            --mm-text: #334155;
+            --mm-hover-bg: #f8fafc;
+            --mm-hover-text: #0f172a;
+            --mm-border: rgba(0, 0, 0, 0.05);
         }
 
         [data-theme="dark"] {
@@ -119,6 +143,33 @@
             --input-bg: rgba(15, 23, 42, 0.8);
             --input-border: #1e293b;
             --input-text: #f1f5f9;
+
+            /* --- PREMIUM TOOL THEME (Dark) --- */
+            --pt-card-bg: rgba(30, 41, 59, 1);
+            /* Solid dark slate for contrast */
+            --pt-card-border: rgba(255, 255, 255, 0.05);
+            --pt-shadow: 0 30px 60px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.3);
+
+            --pt-icon-bg: rgba(59, 130, 246, 0.15);
+            /* Low opacity blue */
+            --pt-icon-color: #60a5fa;
+            /* Brighter blue for dark mode */
+
+            --pt-upload-bg: rgba(15, 23, 42, 0.6);
+            --pt-upload-border: #334155;
+            --pt-upload-hover-bg: rgba(59, 130, 246, 0.1);
+            --pt-upload-hover-border: #8b5cf6;
+
+            --pt-text-main: #f8fafc;
+            --pt-text-muted: #94a3b8;
+            --pt-page-bg: linear-gradient(180deg, #0f172a 0%, #020617 100%);
+
+            /* Mega Menu Variables (Dark) */
+            --mm-bg: #0f172a;
+            --mm-text: #e2e8f0;
+            --mm-hover-bg: rgba(255, 255, 255, 0.1);
+            --mm-hover-text: #ffffff;
+            --mm-border: rgba(255, 255, 255, 0.1);
         }
 
         body {
@@ -794,12 +845,12 @@
                 text-align: center;
             }
 
+
             /* Stack buttons in navbar on mobile */
             .d-flex.flex-column.flex-lg-row {
                 width: 100%;
             }
 
-            /* Ensure buttons take full width for easier tapping */
             .d-flex.flex-column.flex-lg-row .btn {
                 width: 100%;
                 margin: 0.25rem 0;
@@ -818,6 +869,122 @@
             footer h5 {
                 margin-top: 1rem;
             }
+        }
+
+        /* --- GLOBAL PREMIUM COMPONENTS (Theme Aware) --- */
+        .premium-card {
+            background-color: var(--pt-card-bg);
+            border: 1px solid var(--pt-card-border);
+            border-radius: 30px;
+            box-shadow: var(--pt-shadow);
+            transition: all 0.3s ease;
+        }
+
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: var(--pt-icon-bg);
+            color: var(--pt-icon-color);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .upload-area-premium {
+            border: 2px dashed var(--pt-upload-border);
+            border-radius: 20px;
+            padding: 3rem;
+            transition: all 0.3s ease;
+            background: var(--pt-upload-bg);
+            position: relative;
+        }
+
+        .upload-area-premium:hover,
+        .upload-area-premium.dragover {
+            border-color: var(--pt-upload-hover-border);
+            background: var(--pt-upload-hover-bg);
+            transform: scale(1.005);
+        }
+
+        .cloud-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--primary-color);
+            border-radius: 16px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+            color: white;
+        }
+
+        .file-input-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .btn-premium-gradient {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn-premium-gradient:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 25px -5px rgba(124, 58, 237, 0.5);
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            color: white;
+        }
+
+        .btn-premium-gradient:disabled {
+            background: #e2e8f0;
+            color: #94a3b8;
+            transform: none;
+            box-shadow: none;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        [data-theme="dark"] .btn-premium-gradient:disabled {
+            background: #334155;
+            color: #64748b;
+        }
+
+        .custom-scrollbar {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* Dark Mode Text Overrides for Premium Card Context */
+        .premium-card h1,
+        .premium-card h2,
+        .premium-card h3,
+        .premium-card h4,
+        .premium-card h5,
+        .premium-card h6 {
+            color: var(--pt-text-main);
+        }
+
+        .premium-card p,
+        .premium-card .text-muted {
+            color: var(--pt-text-muted) !important;
+        }
+
+        .premium-card .text-dark {
+            color: var(--pt-text-main) !important;
         }
 
         .btn-premium:active,
@@ -843,6 +1010,33 @@
 
         .floating-badge {
             animation: float 4s ease-in-out infinite;
+        }
+
+        /* Premium Nav Tabs */
+        .nav-pills .nav-link {
+            color: var(--pt-text-muted);
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link.active {
+            background-color: var(--pt-card-bg);
+            color: var(--primary-color);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-theme="dark"] .nav-pills .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        /* Signature Pad */
+        .signature-pad-wrapper {
+            border: 2px solid var(--pt-upload-border);
+            transition: border-color 0.3s ease;
+        }
+
+        .signature-pad-wrapper:hover {
+            border-color: var(--primary-color);
         }
     </style>
 
@@ -891,6 +1085,154 @@
                         <a href="{% url 'services' %}"
                             class="nav-link {% if request.resolver_match.url_name == 'services' %}active{% endif %}">Our
                             Services</a>
+                    </li>
+                    <li class="nav-item dropdown position-static">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                            Tools
+                        </a>
+                        <div class="dropdown-menu w-100 border-0 shadow-lg mt-2"
+                            style="background: var(--mm-bg); backdrop-filter: blur(20px); border-radius: 20px; left: 0; border: 1px solid var(--mm-border);">
+                            <div class="container py-4">
+                                <div class="row g-4">
+                                    <style>
+                                        /* Dropdown Item Theme Fix */
+                                        .dropdown-item {
+                                            color: var(--mm-text);
+                                            transition: all 0.2s;
+                                        }
+
+                                        .dropdown-item:hover {
+                                            color: var(--mm-hover-text) !important;
+                                            background: var(--mm-hover-bg);
+                                            transform: translateX(5px);
+                                        }
+
+                                        /* Ensure icons have consistent color */
+                                        .dropdown-item i {
+                                            opacity: 0.9;
+                                        }
+                                    </style>
+                                    <!-- Col 1: Core & Modify -->
+                                    <div class="col-lg-3 col-md-6">
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-primary mb-3">Core &
+                                            Modify</h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'merge_pdf_tool' %}"><i
+                                                        class="fas fa-file-pdf me-2 text-primary width-20"></i>Merge
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'split_pdf_tool' %}"><i
+                                                        class="fas fa-cut me-2 text-primary width-20"></i>Split PDF</a>
+                                            </li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'compress_pdf_tool' %}"><i
+                                                        class="fas fa-compress-arrows-alt me-2 text-primary width-20"></i>Compress
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'rotate_pdf_tool' %}"><i
+                                                        class="fas fa-sync-alt me-2 text-primary width-20"></i>Rotate
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'add_page_numbers_tool' %}"><i
+                                                        class="fas fa-list-ol me-2 text-primary width-20"></i>Page
+                                                    Numbers</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'remove_pages_tool' %}"><i
+                                                        class="fas fa-trash-alt me-2 text-danger width-20"></i>Remove
+                                                    Pages</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'extract_pages_tool' %}"><i
+                                                        class="fas fa-file-export me-2 text-primary width-20"></i>Extract
+                                                    Pages</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Col 2: Convert From PDF -->
+                                    <div class="col-lg-3 col-md-6">
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-success mb-3">Convert
+                                            From PDF</h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'pdf_to_word_tool' %}"><i
+                                                        class="fas fa-file-word me-2 text-primary width-20"></i>PDF to
+                                                    Word</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'pdf_to_excel_tool' %}"><i
+                                                        class="fas fa-file-excel me-2 text-success width-20"></i>PDF to
+                                                    Excel</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'pdf_to_ppt_tool' %}"><i
+                                                        class="fas fa-file-powerpoint me-2 text-warning width-20"></i>PDF
+                                                    to PPT</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'pdf_to_jpg_tool' %}"><i
+                                                        class="fas fa-file-image me-2 text-info width-20"></i>PDF to
+                                                    JPG</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'html_to_pdf_tool' %}"><i
+                                                        class="fas fa-globe me-2 text-secondary width-20"></i>HTML to
+                                                    PDF</a></li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Col 3: Convert To PDF -->
+                                    <div class="col-lg-3 col-md-6">
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-info mb-3">Convert to PDF
+                                        </h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'word_to_pdf_tool' %}"><i
+                                                        class="fas fa-file-word me-2 text-primary width-20"></i>Word to
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'excel_to_pdf_tool' %}"><i
+                                                        class="fas fa-file-excel me-2 text-success width-20"></i>Excel
+                                                    to PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'ppt_to_pdf_tool' %}"><i
+                                                        class="fas fa-file-powerpoint me-2 text-warning width-20"></i>PPT
+                                                    to PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'jpg_to_pdf_tool' %}"><i
+                                                        class="fas fa-images me-2 text-info width-20"></i>JPG to PDF</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+
+                                    <!-- Col 4: Security & Extras -->
+                                    <div class="col-lg-3 col-md-6">
+                                        <h6 class="dropdown-header text-uppercase fw-bold text-danger mb-3">Security &
+                                            Sign</h6>
+                                        <ul class="list-unstyled mb-0">
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'sign_pdf_tool' %}"><i
+                                                        class="fas fa-signature me-2 text-primary width-20"></i>Sign
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'protect_pdf_tool' %}"><i
+                                                        class="fas fa-lock me-2 text-success width-20"></i>Protect
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'unlock_pdf_tool' %}"><i
+                                                        class="fas fa-unlock-alt me-2 text-danger width-20"></i>Unlock
+                                                    PDF</a></li>
+                                            <li><a class="dropdown-item rounded-3 py-2"
+                                                    href="{% url 'add_watermark_tool' %}"><i
+                                                        class="fas fa-stamp me-2 text-warning width-20"></i>Watermark</a>
+                                            </li>
+                                            <li>
+                                                <hr class="dropdown-divider my-2">
+                                            </li>
+                                            <li><a class="dropdown-item rounded-3 py-2 fw-bold bg-success-subtle text-success"
+                                                    href="{% url 'whiteboard_tool' %}"><i
+                                                        class="fas fa-pen-nib me-2 width-20"></i>Whiteboard</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </li>
                     <li class="nav-item">
                         <a href="{% url 'case_studies' %}"

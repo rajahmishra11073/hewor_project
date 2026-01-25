@@ -68,11 +68,14 @@
             We Handle the <span class="text-gradient">Grind.</span>
         </h1>
         <p class="lead text-muted mb-5 pe-lg-5" style="font-size: 1.25rem;">
-            Your dedicated <b>Academic Assistant</b>. We specialize in <span class="text-primary">Book Typing</span>,
-            <span class="text-primary">Thesis Formatting</span>, and <span class="text-primary">PPT Design</span>.
+            Your dedicated <b>Academic Assistant</b>. We specialize in <span class="text-primary">Book
+                Typing</span>,
+            <span class="text-primary">Thesis Formatting</span>, and <span class="text-primary">PPT
+                Design</span>.
             Focus on your research while we handle the document formatting, typing, and design perfection you
             deserve.<br><br>
-            We adhere to strict university guidelines and professional standards to ensure your work stands out with
+            We adhere to strict university guidelines and professional standards to ensure your work stands out
+            with
             precision and clarity.
         </p>
 
@@ -86,13 +89,9 @@
             <a href="{% url 'signup' %}" class="btn btn-premium btn-lg px-4 py-3 fw-bold" style="min-width: 180px;">
                 Hire Assistant
             </a>
-            <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg px-4 py-3 fw-bold"
-                style="min-width: 140px;">
-                Login
-            </a>
             {% endif %}
-            <a href="#services" class="btn btn-link text-muted text-decoration-none align-self-center">How it works <i
-                    class="fas fa-arrow-down ms-1"></i></a>
+            <a href="#services" class="btn btn-link text-muted text-decoration-none align-self-center">How it
+                works <i class="fas fa-arrow-down ms-1"></i></a>
         </div>
 
         <!-- Service Highlights (Premium Addition) -->
@@ -119,24 +118,11 @@
                 <span class="small fw-semibold">On-Time Delivery</span>
             </div>
         </div>
-        <!-- Removed "Fake Ratings" section as requested -->
     </div>
 
     <!-- 3D Model Container -->
     <div class="col-lg-6 position-relative text-center hero-model-container" style="height: 600px;"
         data-aos="fade-left">
-
-
-        <!-- 
-            CURRENT: Robot Placeholder (Tracks Mouse)
-            
-            TO REPLACE WITH "PROFESSOR WITH BOOK":
-            1. Go to spline.design and find/create a "Professor" 3D model.
-            2. Select the Head/Eyes of the character.
-            3. Add Event: "Mouse Hover" -> Action: "Look At" -> Target: "Mouse".
-            4. Click "Export" -> "Viewer" -> Copy the "Embed URL".
-            5. Paste the URL below in the 'url' attribute.
-        -->
         <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
             background="transparent"></spline-viewer>
 
@@ -150,12 +136,32 @@
                 </div>
                 <span class="fw-bold small text-success">Verified Service</span>
             </div>
-            <p class="mb-0 small text-muted" style="line-height: 1.4;">Trusted by <strong>50+</strong> Professors
+            <p class="mb-0 small text-muted" style="line-height: 1.4;">Trusted by <strong>50+</strong>
+                Professors
                 across
                 India.</p>
         </div>
     </div>
 </div>
+
+<script>
+    // Hide Spline Logo
+    document.addEventListener('DOMContentLoaded', () => {
+        const hideLogo = () => {
+            const viewers = document.querySelectorAll('spline-viewer');
+            viewers.forEach(v => {
+                if (v.shadowRoot) {
+                    const style = document.createElement('style');
+                    style.textContent = '#logo { display: none !important; visibility: hidden !important; opacity: 0 !important; }';
+                    v.shadowRoot.appendChild(style);
+                }
+            });
+        };
+        setTimeout(hideLogo, 1000);
+        setTimeout(hideLogo, 3000);
+    });
+</script>
+
 
 <!-- Trust/Marquee Section (Infinite Scroll) -->
 <!-- Trust/Marquee Section (Infinite Scroll) -->
@@ -322,6 +328,355 @@
     </div>
 </div>
 
+</div>
+</div>
+
+<!-- Free Tools Section (Premium Polish) -->
+<div class="py-5 position-relative tools-section-wrapper" id="tools">
+    <style>
+        .tools-section-wrapper {
+            background: radial-gradient(circle at 10% 20%, rgb(242, 246, 255) 0%, rgb(255, 255, 255) 90%);
+        }
+
+        [data-theme="dark"] .tools-section-wrapper {
+            background: radial-gradient(circle at 10% 20%, #0f172a 0%, #020617 90%);
+        }
+    </style>
+
+    <!-- Background Decor (Subtle) -->
+    <div class="position-absolute top-0 end-0 opacity-25"
+        style="transform: translate(30%, -30%); pointer-events: none;">
+        <div class="bg-primary rounded-circle blur-3xl" style="width: 600px; height: 600px; filter: blur(120px);"></div>
+    </div>
+
+    <div class="container position-relative z-1">
+        <div class="row align-items-center justify-content-center">
+            <div class="col-lg-11">
+                <div class="card glass-panel border-0 overflow-hidden shadow-xl rounded-5">
+                    <div class="row g-0">
+                        <!-- Left Side: Banner info -->
+                        <div class="col-lg-4 bg-gradient-premium text-white p-5 d-flex flex-column justify-content-center position-relative overflow-hidden"
+                            style="min-height: 500px;">
+
+                            <!-- Abstract Shapes -->
+                            <div class="shape-circle shape-1"></div>
+                            <div class="shape-circle shape-2"></div>
+
+                            <div class="position-relative z-2">
+                                <div class="mb-4">
+                                    <span
+                                        class="badge bg-white bg-opacity-20 backdrop-blur border border-white border-opacity-20 rounded-pill px-3 py-2 fw-medium text-white shadow-sm">
+                                        <i class="fas fa-magic me-2 text-warning"></i>100% Free
+                                    </span>
+                                </div>
+
+                                <h2 class="display-6 fw-bold mb-3 ls-tighter">
+                                    Premium Utilities.<br>
+                                    <span class="text-white-50">Zero Cost.</span>
+                                </h2>
+                                <p class="lead text-white-75 mb-4 fw-light small">
+                                    Professional-grade tools for your daily workflow. No limits, watermarks, or sign-ups
+                                    required.
+                                </p>
+
+                                <ul class="list-unstyled mt-2 d-flex flex-column gap-3">
+                                    <li
+                                        class="d-flex align-items-center bg-white bg-opacity-10 p-3 rounded-4 backdrop-blur transition-hover">
+                                        <i class="fas fa-infinity fa-lg me-3 text-white-50"></i>
+                                        <div>
+                                            <span class="d-block fw-bold small">Unlimited Access</span>
+                                            <span class="d-block x-small text-white-50">No daily usage caps</span>
+                                        </div>
+                                    </li>
+                                    <li
+                                        class="d-flex align-items-center bg-white bg-opacity-10 p-3 rounded-4 backdrop-blur transition-hover">
+                                        <i class="fas fa-shield-alt fa-lg me-3 text-white-50"></i>
+                                        <div>
+                                            <span class="d-block fw-bold small">Bank-Grade Security</span>
+                                            <span class="d-block x-small text-white-50">Auto-delete after 1h</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Tools Grid -->
+                        <div class="col-lg-8 p-4 p-md-5 tools-panel-bg">
+                            <style>
+                                .tools-panel-bg {
+                                    background-color: #ffffff;
+                                }
+
+                                [data-theme="dark"] .tools-panel-bg {
+                                    background-color: rgba(255, 255, 255, 0.05);
+                                }
+                            </style>
+                            <div
+                                class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-light">
+                                <h5 class="fw-bold mb-0 text-dark ls-tight">Available Tools</h5>
+                                <a href="{% url 'tools_list' %}"
+                                    class="small text-decoration-none fw-bold text-primary">View All <i
+                                        class="fas fa-arrow-right ms-1"></i></a>
+                            </div>
+
+                            <div class="row g-3">
+                                <!-- Mixin for Premium Card -->
+                                <!-- Merge PDF -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'merge_pdf_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-danger-subtle text-danger">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">Merge PDF</h6>
+                                            <p class="x-small text-muted mb-0">Combine files into one.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Split PDF -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'split_pdf_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-warning-subtle text-warning">
+                                                    <i class="fas fa-cut"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">Split PDF</h6>
+                                            <p class="x-small text-muted mb-0">Extract/separate pages.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- Compress PDF -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'compress_pdf_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-success-subtle text-success">
+                                                    <i class="fas fa-compress-arrows-alt"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">Compress PDF</h6>
+                                            <p class="x-small text-muted mb-0">Reduce size, keep quality.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- PDF to Word -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'pdf_to_word_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-primary-subtle text-primary">
+                                                    <i class="fas fa-file-word"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">PDF to Word</h6>
+                                            <p class="x-small text-muted mb-0">Convert to editable Docx.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- PDF to PowerPoint -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'pdf_to_ppt_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-danger-subtle text-danger">
+                                                    <i class="fas fa-file-powerpoint"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">PDF to PPT</h6>
+                                            <p class="x-small text-muted mb-0">Convert to Slides.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- PDF to Excel -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'pdf_to_excel_tool' %}" class="text-decoration-none">
+                                        <div class="tool-card-modern p-3 h-100">
+                                            <div class="d-flex align-items-start mb-3">
+                                                <div class="icon-modern bg-success-subtle text-success">
+                                                    <i class="fas fa-file-excel"></i>
+                                                </div>
+                                                <div class="ms-auto opacity-0 arrow-icon text-muted">
+                                                    <i class="fas fa-external-link-alt small"></i>
+                                                </div>
+                                            </div>
+                                            <h6 class="fw-bold text-dark mb-1">PDF to Excel</h6>
+                                            <p class="x-small text-muted mb-0">Tables to Spreadsheets.</p>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- More Tools / Placeholder -->
+                                <div class="col-md-6 col-xl-4">
+                                    <a href="{% url 'tools_list' %}" class="text-decoration-none">
+                                        <div
+                                            class="tool-card-modern p-3 h-100 d-flex flex-column justify-content-center align-items-center dashed-border">
+                                            <span class="badge bg-light text-dark mb-2">More</span>
+                                            <small class="text-muted fw-bold x-small">View All 20+ Tools</small>
+                                        </div>
+                                    </a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Modern Utilities */
+        .ls-tighter {
+            letter-spacing: -0.05em;
+        }
+
+        .ls-tight {
+            letter-spacing: -0.025em;
+        }
+
+        .x-small {
+            font-size: 0.75rem;
+        }
+
+        .blur-3xl {
+            filter: blur(64px);
+        }
+
+        .backdrop-blur {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .shadow-xl {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Left Banner Styles */
+        .bg-gradient-premium {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            /* Deep Indigo */
+            position: relative;
+        }
+
+        .shape-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+            z-index: 1;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            top: -100px;
+            right: -100px;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            bottom: -50px;
+            left: -50px;
+        }
+
+        .transition-hover {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .transition-hover:hover {
+            background: rgba(255, 255, 255, 0.15) !important;
+            border-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        /* Modern Card Styles */
+        .tool-card-modern {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        [data-theme="dark"] .tool-card-modern {
+            background: var(--pt-card-bg);
+            border-color: var(--pt-card-border);
+        }
+
+        .tool-card-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-color: #e2e8f0;
+        }
+
+        [data-theme="dark"] .tool-card-modern:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        .tool-card-modern:hover .arrow-icon {
+            opacity: 1 !important;
+            transform: translate(2px, -2px);
+        }
+
+        .arrow-icon {
+            transition: all 0.2s ease;
+        }
+
+        /* Modern Icon Box */
+        .icon-modern {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .tool-card-modern:hover .icon-modern {
+            transform: scale(1.05);
+        }
+
+        .dashed-border {
+            border: 2px dashed #cbd5e1;
+            background: #f8fafc;
+        }
+
+        [data-theme="dark"] .dashed-border {
+            background: rgba(255, 255, 255, 0.02);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</div>
+
 <!-- Process Section -->
 <div class="py-5">
     <div class="text-center mb-5">
@@ -424,134 +779,4 @@
         /* Very subtle white for dark mode */
     }
 </style>
-
-<script>
-    // Remove "Built with Spline" badge from Shadow DOM
-    document.addEventListener('DOMContentLoaded', () => {
-        const checkSpline = setInterval(() => {
-            const viewer = document.querySelector('spline-viewer');
-            if (viewer && viewer.shadowRoot) {
-                const logo = viewer.shadowRoot.querySelector('#logo');
-                if (logo) {
-                    logo.style.display = 'none';
-                    // Optional: Stop checking once found and hidden, 
-                    // but sometimes it gets recreated, so we might want to keep the style injection strictly.
-                    // Better approach: Inject style tag once.
-                    const style = document.createElement('style');
-                    style.textContent = '#logo { display: none !important; }';
-                    viewer.shadowRoot.appendChild(style);
-                    clearInterval(checkSpline); // Stop the interval
-                }
-            }
-        }, 100); // Check every 100ms
-
-        // Safety timeout to stop checking after 10 seconds
-        setTimeout(() => clearInterval(checkSpline), 10000);
-    });
-</script>
-
-<!-- GSAP Home Page Animations -->
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Helper: Simple Split Text (Wraps characters in spans)
-        const splitText = (selector) => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.innerHTML = el.innerText.split("").map(char =>
-                    char === " " ? "&nbsp;" : `<span class="char" style="display:inline-block; opacity:0;">${char}</span>`
-                ).join("");
-            });
-        };
-
-        // 1. Hero Animations
-        // Badge
-        gsap.from('.badge', {
-            duration: 0.8,
-            y: -20,
-            opacity: 0,
-            delay: 0.5,
-            ease: "back.out(1.7)"
-        });
-
-        // Split Headline
-        // Note: targeting the h1 but avoiding nested spans if possible, 
-        // simpler approach for Mixed HTML: just animate the h1 container for now 
-        // to avoid breaking the <span class="text-gradient">.
-        // If we want split text, we have to be careful. Let's do a simple slide up for now.
-        gsap.from('h1.display-3', {
-            duration: 1,
-            y: 50,
-            opacity: 0,
-            delay: 0.7,
-            ease: "power3.out"
-        });
-
-        // Lead Text
-        gsap.from('.lead', {
-            duration: 1,
-            y: 30,
-            opacity: 0,
-            delay: 0.9,
-            ease: "power3.out"
-        });
-
-        // Buttons
-        gsap.from('.d-flex.gap-3 a', {
-            duration: 0.8,
-            y: 20,
-            opacity: 0,
-            stagger: 0.2,
-            delay: 1.1,
-            ease: "back.out(1.7)"
-        });
-
-        // 3D Model Floating Effect
-        gsap.to('spline-viewer', {
-            y: 20,
-            duration: 3,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut"
-        });
-
-        // 2. Services Section Stagger
-        gsap.from('#services .card', {
-            scrollTrigger: {
-                trigger: '#services',
-                start: "top 85%", // Trigger earlier
-            },
-            duration: 0.5, // Faster duration
-            y: 50, // Shorter distance
-            opacity: 0,
-            stagger: 0.1, // Quicker sequence
-            ease: "power3.out"
-        });
-
-        // 3. Process Section Reveal
-        gsap.from('.py-5 .col-md-4', {
-            scrollTrigger: {
-                trigger: '.py-5 .display-1',
-                start: "top 90%", // Trigger much earlier
-            },
-            duration: 0.5,
-            y: 30,
-            opacity: 0,
-            stagger: 0.1,
-            ease: "power3.out"
-        });
-
-        // 4. Testimonials Section
-        gsap.from('#testimonials .card', {
-            scrollTrigger: {
-                trigger: '#testimonials',
-                start: "top 80%",
-            },
-            duration: 0.8,
-            y: 50,
-            opacity: 0,
-            stagger: 0.2,
-            ease: "back.out(1.2)"
-        });
-    });
-</script>
 {% endblock %}
