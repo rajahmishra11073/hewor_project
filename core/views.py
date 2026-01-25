@@ -980,6 +980,26 @@ def freelancer_reject_order(request, order_id):
     messages.info(request, f"You've rejected the order: {order.title}")
     return redirect('freelancer_dashboard')
 
+@login_required(login_url='freelancer_login')
+def freelancer_profile(request):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        logout(request)
+        return redirect('freelancer_login')
+    
+    if request.method == 'POST':
+        # Update profile
+        freelancer.name = request.POST.get('name', freelancer.name)
+        freelancer.phone = request.POST.get('phone', freelancer.phone)
+        freelancer.email = request.POST.get('email', freelancer.email)
+        freelancer.save()
+        
+        messages.success(request, "Profile updated successfully!")
+        return redirect('freelancer_profile')
+    
+    return render(request, 'core/freelancer_profile.html', {'freelancer': freelancer})
+
 # --- FREE TOOLS ---
 
 def merge_pdf_tool(request):
