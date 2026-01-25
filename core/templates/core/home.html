@@ -665,6 +665,27 @@
             transform: scale(1.05);
         }
 
+        /* Fix Dark Mode Text Visibility */
+        .tool-card-modern h6 {
+            color: #1e293b;
+            /* Dark text for light mode */
+        }
+
+        [data-theme="dark"] .tool-card-modern h6 {
+            color: #f1f5f9 !important;
+            /* Light text for dark mode */
+        }
+
+        .tool-card-modern p {
+            color: #64748b;
+            /* Muted text for light mode */
+        }
+
+        [data-theme="dark"] .tool-card-modern p {
+            color: #94a3b8 !important;
+            /* Lighter muted for dark mode */
+        }
+
         .dashed-border {
             border: 2px dashed #cbd5e1;
             background: #f8fafc;

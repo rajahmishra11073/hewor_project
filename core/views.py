@@ -808,6 +808,34 @@ def freelancer_accept_order(request, order_id):
     if order.freelancer_status != 'pending_acceptance':
         messages.error(request, "Order is not pending acceptance.")
         return redirect('freelancer_dashboard')
+    
+    # Accept the order
+    order.freelancer_status = 'accepted'
+    order.status = 'in_progress'  # Update main order status
+    order.save()
+    
+    messages.success(request, f"You've successfully accepted the order: {order.title}")
+    return redirect('freelancer_order_detail', order_id=order.id)
+
+def freelancer_reject_order(request, order_id):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        return redirect('freelancer_login')
+        
+    order = get_object_or_404(ServiceOrder, id=order_id, freelancer=freelancer)
+    
+    if order.freelancer_status != 'pending_acceptance':
+        messages.error(request, "Order is not pending acceptance.")
+        return redirect('freelancer_dashboard')
+    
+    # Reject the order and unassign freelancer
+    order.freelancer_status = 'unassigned'
+    order.freelancer = None
+    order.save()
+    
+    messages.info(request, f"You've rejected the order: {order.title}")
+    return redirect('freelancer_dashboard')
 
 # --- FREE TOOLS ---
 
