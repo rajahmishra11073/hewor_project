@@ -142,8 +142,8 @@
                                                     class='w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:border-blue-500 outline-none'>
                                                     <option value=''>-- Choose Freelancer --</option>
                                                     {% for f in freelancers %}
-                                                    <option value='{{ f.id }}' {% if order.freelancer.id==f.id
-                                                        %}selected{% endif %}>{{ f.name }} ({{ f.freelancer_id }})
+                                                    <option value='{{ f.id }}' {% if order.freelancer.id==f.id %}selected{% endif %}>{{ f.name }} ({{ f.freelancer_id }})
+                                                    </option>
                                                     </option>
                                                     {% endfor %}
                                                 </select>
