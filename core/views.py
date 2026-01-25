@@ -1994,9 +1994,14 @@ def html_to_pdf_tool(request):
     """
     View to handle Free HTML to PDF tool.
     Converts uploaded HTML files or URL to PDF.
+    Note: This is a simplified implementation using reportlab.
+    For complex HTML rendering, consider using a headless browser.
     """
-    from xhtml2pdf import pisa
     import requests
+    from bs4 import BeautifulSoup
+    from reportlab.lib.pagesizes import letter
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
     
     if request.method == 'POST':
         conversion_type = request.POST.get('conversion_type') # 'url' or 'file'
@@ -2014,8 +2019,7 @@ def html_to_pdf_tool(request):
                 
                 # Fetch URL content
                 try:
-                    # Fake user agent to avoid some blocks
-                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                     response = requests.get(url, headers=headers, timeout=30)
                     response.raise_for_status()
                     source_html = response.text
@@ -2030,10 +2034,6 @@ def html_to_pdf_tool(request):
                     messages.error(request, "Please upload an HTML file.")
                     return redirect('html_to_pdf_tool')
                 
-                # For now, handle single file or batch? Request says "one by one" usually implies single user flow, but our previous tools support batch.
-                # However, HTML to PDF is complex. Let's stick to single file or simple batch zip.
-                # Simplest: Single file for best "working" quality focus.
-                
                 uploaded_file = files[0]
                 source_html = uploaded_file.read().decode('utf-8', errors='ignore')
                 filename_prefix = uploaded_file.name.replace('.html', '').replace('.htm', '')
@@ -2042,17 +2042,32 @@ def html_to_pdf_tool(request):
                  messages.error(request, "Invalid request.")
                  return redirect('html_to_pdf_tool')
 
-            # Create PDF
+            # Create PDF using reportlab (simple text extraction)
             with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
                 output_path = tmp_pdf.name
                 temp_files_to_clean.append(output_path)
             
-            # Convert
-            with open(output_path, "w+b") as result_file:
-                pisa_status = pisa.CreatePDF(source_html, dest=result_file)
+            # Extract text from HTML
+            soup = BeautifulSoup(source_html, 'html.parser')
+            text_content = soup.get_text(separator='\n', strip=True)
             
-            if pisa_status.err:
-                raise Exception("PDF Creation Failed")
+            # Create PDF
+            doc = SimpleDocTemplate(output_path, pagesize=letter)
+            story = []
+            styles = getSampleStyleSheet()
+            
+            # Split into paragraphs and add to story
+            for line in text_content.split('\n'):
+                if line.strip():
+                    try:
+                        p = Paragraph(line, styles['BodyText'])
+                        story.append(p)
+                        story.append(Spacer(1, 6))
+                    except:
+                        # Skip problematic lines
+                        continue
+                        
+            doc.build(story)
                 
             # Serve File
             with open(output_path, 'rb') as f:
