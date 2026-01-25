@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python312", "gcc", "mysql-client", "pkg-config", "mysql-dev"]
+nixPkgs = ["python312", "gcc", "mysql-client", "pkg-config", "mysql-dev", "ffmpeg", "libsm", "libxext"]
 
 [phases.build]
 cmds = [

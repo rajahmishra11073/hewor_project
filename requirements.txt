@@ -11,6 +11,7 @@ pandas
 openpyxl
 pdf2docx
 python-docx
+opencv-python-headless
 PyMuPDF
 django-cleanup
 firebase-admin
