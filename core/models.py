@@ -64,6 +64,13 @@ class ServiceOrder(models.Model):
         default='pending_acceptance',
         blank=True, null=True
     )
+    freelancer_payment = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        null=True, 
+        blank=True,
+        help_text="Payment amount for freelancer (₹)"
+    )
     is_freelancer_paid = models.BooleanField(default=False)
     freelancer_transaction_id = models.CharField(max_length=100, blank=True, null=True, help_text="Transaction ID for payment to freelancer")
     freelancer_payment_screenshot = models.ImageField(upload_to='freelancer_payments/', blank=True, null=True)

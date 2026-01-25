@@ -598,6 +598,16 @@ def order_panel_assign_freelancer(request, order_id):
                 order.freelancer_roadmap = roadmap
             if description:
                 order.freelancer_description = description
+           
+            # Handle Payment Amount
+            freelancer_payment = request.POST.get('freelancer_payment')
+            if freelancer_payment:
+                from decimal import Decimal, InvalidOperation
+                try:
+                    order.freelancer_payment = Decimal(freelancer_payment)
+                except (ValueError, InvalidOperation):
+                    messages.error(request, "Invalid payment amount.")
+                    return redirect('order_panel_dashboard')
             
             # Set Assignment Details
             order.assigned_at = timezone.now()
