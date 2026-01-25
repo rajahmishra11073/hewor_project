@@ -14,7 +14,6 @@ python-docx
 python-pptx
 reportlab
 pikepdf
-xhtml2pdf
 opencv-python-headless
 PyMuPDF
 django-cleanup
