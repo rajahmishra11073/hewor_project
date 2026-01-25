@@ -824,7 +824,7 @@ def merge_pdf_tool(request):
             return redirect('merge_pdf_tool')
 
         # 1. Size Validation (Max 200MB)
-        MAX_SIZE_MB = 200
+        MAX_SIZE_MB = 100
         total_size = sum(f.size for f in files)
         if total_size > MAX_SIZE_MB * 1024 * 1024:
             messages.error(request, f"Total file size exceeds {MAX_SIZE_MB}MB limit. Your files: {round(total_size / (1024*1024), 2)}MB")
@@ -886,7 +886,7 @@ def split_pdf_tool(request):
                 
                 for file_idx, file in enumerate(files):
                     # Check Limit
-                    MAX_SIZE_MB = 200
+                    MAX_SIZE_MB = 100
                     if file.size > MAX_SIZE_MB * 1024 * 1024:
                          messages.error(request, f"File {file.name} exceeds limit.")
                          return redirect('split_pdf_tool')
@@ -967,7 +967,7 @@ def compress_pdf_tool(request):
             messages.error(request, "Please upload at least one PDF file.")
             return redirect('compress_pdf_tool')
 
-        MAX_SIZE_MB = 200
+        MAX_SIZE_MB = 100
         # Check total size logic if desired, or per file. 
         # Using per file for now or simple sum.
         
@@ -1039,7 +1039,7 @@ def pdf_to_ppt_tool(request):
             messages.error(request, "Please upload a PDF file.")
             return redirect('pdf_to_ppt_tool')
 
-        MAX_SIZE_MB = 200
+        MAX_SIZE_MB = 100
         temp_files_to_clean = []
         
         try:
