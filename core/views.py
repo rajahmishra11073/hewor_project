@@ -843,12 +843,15 @@ def freelancer_dashboard(request):
             'link': '?filter=due_soon'
         })
     
-    # Get notifications for this freelancer
+    # Get notifications for this freelancer (individual + broadcast)
+    from django.db.models import Q
     notifications = FreelancerNotification.objects.filter(
-        freelancer=freelancer
-    ) | FreelancerNotification.objects.filter(is_broadcast=True)
-    notifications = notifications.distinct()[:5]  # Latest 5
-    unread_count = notifications.filter(is_read=False).count()
+        Q(freelancer=freelancer) | Q(is_broadcast=True)
+    ).distinct().order_by('-created_at')[:5]
+    unread_count = FreelancerNotification.objects.filter(
+        Q(freelancer=freelancer) | Q(is_broadcast=True), 
+        is_read=False
+    ).count()
     
     stats = {
         'total_earned': total_earned,
