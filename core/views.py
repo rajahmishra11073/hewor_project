@@ -696,20 +696,161 @@ def freelancer_dashboard(request):
         return redirect('freelancer_login')
         
     # --- AUTO-TIMEOUT LOGIC ---
-    # Check for pending orders that have exceeded 30 minutes
     timeout_threshold = timezone.now() - datetime.timedelta(minutes=30)
     expired_orders = ServiceOrder.objects.filter(
         freelancer=freelancer,
         freelancer_status='pending_acceptance',
         assigned_at__lt=timeout_threshold
     )
-    # Update them to 'timeout'
     if expired_orders.exists():
         count = expired_orders.update(freelancer_status='timeout')
         print(f"Auto-timed out {count} orders for {freelancer.name}")
 
-    orders = ServiceOrder.objects.filter(freelancer=freelancer).order_by('-created_at')
-    return render(request, 'core/freelancer_dashboard.html', {'orders': orders})
+    # Get filter parameter
+    filter_status = request.GET.get('filter', 'all')
+    
+    # Base query
+    orders_query = ServiceOrder.objects.filter(freelancer=freelancer)
+    
+    # Apply filters
+    if filter_status == 'pending':
+        orders = orders_query.filter(freelancer_status='pending_acceptance')
+    elif filter_status == 'active':
+        orders = orders_query.filter(freelancer_status='accepted', status='in_progress')
+    elif filter_status == 'due_soon':
+        # Due within 3 days
+        three_days_later = timezone.now() + datetime.timedelta(days=3)
+        orders = orders_query.filter(
+            freelancer_status='accepted',
+            freelancer_deadline__lte=three_days_later,
+            status='in_progress'
+        )
+    elif filter_status == 'completed':
+        orders = orders_query.filter(status='completed')
+    else:  # 'all'
+        orders = orders_query
+    
+    orders = orders.order_by('-created_at')
+    
+    # --- CALCULATE STATS ---
+    from django.db.models import Sum, Count, Q, Avg
+    from datetime import timedelta
+    
+    # Total stats
+    total_earned = orders_query.filter(is_freelancer_paid=True).count() * 1000  # Placeholder calculation
+    active_count = orders_query.filter(freelancer_status='accepted', status='in_progress').count()
+    completed_count = orders_query.filter(status='completed').count()
+    pending_count = orders_query.filter(freelancer_status='pending_acceptance').count()
+    
+    # Earnings this week/month
+    now = timezone.now()
+    week_start = now - timedelta(days=now.weekday())
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    week_earnings = orders_query.filter(
+        is_freelancer_paid=True,
+        created_at__gte=week_start
+    ).count() * 1000  # Placeholder
+    
+    month_earnings = orders_query.filter(
+        is_freelancer_paid=True,
+        created_at__gte=month_start
+    ).count() * 1000  # Placeholder
+    
+    # Due soon projects
+    three_days_later = timezone.now() + datetime.timedelta(days=3)
+    due_soon_count = orders_query.filter(
+        freelancer_status='accepted',
+        freelancer_deadline__lte=three_days_later,
+        freelancer_deadline__gte=timezone.now(),
+        status='in_progress'
+    ).count()
+    
+    # --- NOTIFICATIONS ---
+    notifications = []
+    
+    # New pending orders
+    if pending_count > 0:
+        notifications.append({
+            'type': 'new_order',
+            'icon': 'fa-inbox',
+            'color': 'blue-500',
+            'message': f'{pending_count} new order{"s" if pending_count > 1 else ""} waiting for acceptance',
+            'time': 'Just now'
+        })
+    
+    # Due soon alerts
+    if due_soon_count > 0:
+        notifications.append({
+            'type': 'deadline',
+            'icon': 'fa-clock',
+            'color': 'yellow-500',
+            'message': f'{due_soon_count} project{"s" if due_soon_count > 1 else ""} due within 3 days',
+            'time': 'Today'
+        })
+    
+    # Payment received (recent)
+    recent_paid = orders_query.filter(
+        is_freelancer_paid=True,
+        created_at__gte=now - timedelta(days=7)
+    ).count()
+    if recent_paid > 0:
+        notifications.append({
+            'type': 'payment',
+            'icon': 'fa-money-bill-wave',
+            'color': 'green-500',
+            'message': f'Payment received for {recent_paid} project{"s" if recent_paid > 1 else ""}',
+            'time': 'This week'
+        })
+    
+    # --- QUICK ACTIONS ---
+    quick_actions = []
+    
+    # Pending acceptance
+    if pending_count > 0:
+        quick_actions.append({
+            'icon': 'fa-check-circle',
+            'color': 'green',
+            'text': f'Accept {pending_count} new order{"s" if pending_count > 1 else ""}',
+            'link': '?filter=pending'
+        })
+    
+    # Active projects
+    if active_count > 0:
+        quick_actions.append({
+            'icon': 'fa-tasks',
+            'color': 'blue',
+            'text': f'Continue {active_count} active project{"s" if active_count > 1 else ""}',
+            'link': '?filter=active'
+        })
+    
+    # Due soon
+    if due_soon_count > 0:
+        quick_actions.append({
+            'icon': 'fa-exclamation-triangle',
+            'color': 'yellow',
+            'text': f'Check {due_soon_count} urgent deadline{"s" if due_soon_count > 1 else ""}',
+            'link': '?filter=due_soon'
+        })
+    
+    context = {
+        'orders': orders,
+        'filter_status': filter_status,
+        'stats': {
+            'total_earned': total_earned,
+            'week_earnings': week_earnings,
+            'month_earnings': month_earnings,
+            'active_count': active_count,
+            'completed_count': completed_count,
+            'pending_count': pending_count,
+            'due_soon_count': due_soon_count,
+            'rating': 4.8,  # Placeholder - implement rating system later
+        },
+        'notifications': notifications[:5],  # Show max 5
+        'quick_actions': quick_actions,
+    }
+    
+    return render(request, 'core/freelancer_dashboard.html', context)
 
 @login_required(login_url='order_panel_login')
 def order_panel_pay_freelancer(request, order_id):

@@ -1,0 +1,171 @@
+{% load static %}
+<div x-data="{ 
+    status: '{{ order.freelancer_status }}',
+    endTime: new Date('{{ order.assigned_at|date:'c' }}').getTime() + 1800000, 
+    now: new Date().getTime(),
+    timer: '',
+    expired: false,
+    init() {
+        if (this.status === 'pending_acceptance') {
+            this.updateTimer();
+            setInterval(() => this.updateTimer(), 1000);
+        }
+    },
+    updateTimer() {
+        this.now = new Date().getTime();
+        let distance = this.endTime - this.now;
+        
+        if (distance < 0) {
+            this.expired = true;
+            this.timer = 'Expired';
+        } else {
+            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            this.timer = minutes + 'm ' + seconds + 's';
+        }
+    }
+}"
+    class="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 hover:border-blue-500/30 transition shadow-lg relative overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+            <span class="text-xs font-mono text-slate-500">Order #{{ order.id }}</span>
+            <h3 class="text-lg font-bold text-white mt-1 mb-1">{{ order.title }}</h3>
+            <span class="text-xs text-slate-400"><i class="fas fa-tag mr-1"></i>{{ order.get_service_type_display
+                }}</span>
+        </div>
+
+        <div class="flex flex-col items-end gap-2">
+            <!-- Status Badge -->
+            {% with uploads=order.get_freelancer_uploads %}
+            {% if uploads %}
+            <span
+                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5 shadow-[0_0_10px_rgba(99,102,241,0.2)]">
+                <i class="fas fa-check-circle"></i> Submitted
+            </span>
+            {% else %}
+            <span class="px-3 py-1.5 rounded-lg text-xs font-semibold" :class="{
+                    'bg-green-500/10 text-green-400 border border-green-500/30': status === 'accepted',
+                    'bg-red-500/10 text-red-400 border border-red-500/30': status === 'rejected' || status === 'timeout',
+                    'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30': status === 'pending_acceptance'
+                }">
+                {{ order.get_freelancer_status_display }}
+            </span>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Payment Badge -->
+            {% if order.is_freelancer_paid %}
+            <span
+                class="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1.5 shadow-[0_0_10px_rgba(74,222,128,0.2)]">
+                <i class="fas fa-money-bill-wave"></i> PAID
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Deadline & Payment Info (For Active Orders) -->
+    {% if order.freelancer_status == 'accepted' %}
+    <div class="grid grid-cols-2 gap-3 mb-4 p-3 bg-slate-900/50 rounded-lg border border-slate-700/50">
+        {% if order.freelancer_deadline %}
+        <div>
+            <div class="text-xs text-slate-500 mb-1"><i class="fas fa-clock mr-1"></i>Deadline</div>
+            {% load tz %}
+            {% now "U" as current_timestamp %}
+            {% with deadline_timestamp=order.freelancer_deadline|date:"U"|add:"0" %}
+            {% with time_left=deadline_timestamp|add:"-"|add:current_timestamp %}
+            {% if time_left < 86400 %} <div class="text-sm font-bold text-red-400">
+                <i class="fas fa-exclamation-triangle mr-1"></i>{{ order.freelancer_deadline|date:"M d, h:i A" }}
+        </div>
+        <div class="text-xs text-red-400/70 mt-0.5">Due soon!</div>
+        {% elif time_left < 259200 %} <div class="text-sm font-bold text-yellow-400">{{
+            order.freelancer_deadline|date:"M d, h:i A" }}
+    </div>
+    <div class="text-xs text-yellow-400/70 mt-0.5">{{ time_left|floatformat:0|add:"0"|division:86400 }} days left</div>
+    {% else %}
+    <div class="text-sm font-bold text-slate-300">{{ order.freelancer_deadline|date:"M d, h:i A" }}</div>
+    <div class="text-xs text-slate-500 mt-0.5">{{ time_left|floatformat:0|add:"0"|division:86400 }} days left</div>
+    {% endif %}
+    {% endwith %}
+    {% endwith %}
+    {% else %}
+    <div>
+        <div class="text-xs text-slate-500 mb-1"><i class="fas fa-clock mr-1"></i>Deadline</div>
+        <div class="text-sm text-slate-400">Not set</div>
+    </div>
+    {% endif %}
+    <div>
+        <div class="text-xs text-slate-500 mb-1"><i class="fas fa-rupee-sign mr-1"></i>Payment</div>
+        <div class="text-sm font-bold text-green-400">₹2,500</div>
+        <div class="text-xs text-slate-500 mt-0.5">Expected</div>
+    </div>
+</div>
+
+<!-- Progress Bar -->
+<div class="mb-4">
+    <div class="flex justify-between items-center mb-2">
+        <span class="text-xs text-slate-400">Progress</span>
+        <span class="text-xs font-bold text-blue-400">75%</span>
+    </div>
+    <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+        <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500"
+            style="width: 75%"></div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Description -->
+<p class="text-sm text-slate-400 mb-4 line-clamp-2">
+    {{ order.freelancer_description|default:order.description }}
+</p>
+
+<!-- Actions based on Status -->
+<div class="pt-4 border-t border-slate-700">
+
+    <!-- Pending Acceptance Logic -->
+    <div x-show="status === 'pending_acceptance' && !expired">
+        <div class="flex justify-between items-center mb-3">
+            <span class="text-xs text-yellow-500 font-bold"><i class="fas fa-clock mr-1"></i>Accept in:
+                <span x-text="timer"></span></span>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <a href="{% url 'freelancer_accept_order' order.id %}"
+                class="bg-green-600 hover:bg-green-500 text-white py-2.5 rounded-lg text-sm font-medium text-center transition flex items-center justify-center gap-2">
+                <i class="fas fa-check"></i> Accept
+            </a>
+            <a href="{% url 'freelancer_reject_order' order.id %}"
+                onclick="return confirm('Are you sure you want to reject this order?');"
+                class="bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2.5 rounded-lg text-sm font-medium text-center transition border border-red-500/30 flex items-center justify-center gap-2">
+                <i class="fas fa-times"></i> Reject
+            </a>
+        </div>
+    </div>
+
+    <!-- Expired State -->
+    <div x-show="status === 'pending_acceptance' && expired" class="text-center">
+        <span class="text-red-400 text-sm font-bold"><i class="fas fa-times-circle mr-1"></i>Offer
+            Expired</span>
+    </div>
+
+    <!-- Accepted Logic -->
+    <div x-show="status === 'accepted'">
+        <div class="flex justify-between items-center gap-3">
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <i class="fas fa-calendar-check"></i>
+                <span>Assigned: {{ order.assigned_at|date:'M d, H:i' }}</span>
+            </div>
+            <a href="{% url 'freelancer_order_detail' order.id %}"
+                class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition flex items-center gap-2 shadow-lg shadow-blue-500/25">
+                Open Workspace <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Rejected Logic -->
+    <div x-show="status === 'rejected' || status === 'timeout'">
+        <p class="text-xs text-slate-500 text-center italic">You rejected this order or it timed out.</p>
+    </div>
+
+</div>
+</div>

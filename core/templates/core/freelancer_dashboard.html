@@ -15,15 +15,53 @@
             color: #e2e8f0;
             font-family: 'Inter', sans-serif;
         }
+
+        .stat-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .gradient-border {
+            position: relative;
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border: 1px solid transparent;
+        }
+
+        .gradient-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(145deg, rgb(59, 130, 246), rgb(139, 92, 246));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
     </style>
 </head>
 
 <body class="min-h-screen">
+    <!-- Header -->
     <header
         class="h-16 border-b border-slate-700 flex items-center justify-between px-6 bg-slate-900/80 backdrop-blur-md sticky top-0 z-40">
-        <h1 class="text-xl font-bold text-white">My Projects</h1>
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl font-bold text-white">Freelancer Dashboard</h1>
+        </div>
         <div class="flex items-center gap-4">
             <span class="text-sm text-slate-400">Hi, <b>{{ request.user.freelancer.name }}</b></span>
+            <a href="{% url 'freelancer_profile' %}" class="text-xs text-blue-400 hover:text-blue-300">
+                <i class="fas fa-user-circle mr-1"></i>Profile
+            </a>
             <a href="{% url 'logout' %}" class="text-xs text-red-400 hover:text-red-300">Logout</a>
         </div>
     </header>
@@ -35,129 +73,173 @@
         {% endfor %}
         {% endif %}
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {% for order in orders %}
-            <div x-data="{ 
-                    status: '{{ order.freelancer_status }}',
-                    endTime: new Date('{{ order.assigned_at|date:'c' }}').getTime() + 1800000, 
-                    now: new Date().getTime(),
-                    timer: '',
-                    expired: false,
-                    init() {
-                        if (this.status === 'pending_acceptance') {
-                            this.updateTimer();
-                            setInterval(() => this.updateTimer(), 1000);
-                        }
-                    },
-                    updateTimer() {
-                        this.now = new Date().getTime();
-                        let distance = this.endTime - this.now;
-                        
-                        if (distance < 0) {
-                            this.expired = true;
-                            this.timer = 'Expired';
-                        } else {
-                            let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                            let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                            this.timer = minutes + 'm ' + seconds + 's';
-                        }
-                    }
-                }"
-                class="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl p-6 hover:border-blue-500/30 transition shadow-lg relative overflow-hidden">
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Earnings This Month -->
+            <div
+                class="stat-card bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <i class="fas fa-rupee-sign text-2xl text-green-400"></i>
+                    <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">This Month</span>
+                </div>
+                <div class="text-2xl font-bold text-white">₹{{ stats.month_earnings|floatformat:0 }}</div>
+                <div class="text-xs text-slate-400 mt-1">Total Earned</div>
+            </div>
 
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <span class="text-xs font-mono text-slate-500">Order #{{ order.id }}</span>
-                        <h3 class="text-lg font-bold text-white mt-1">{{ order.title }}</h3>
-                        <span class="text-xs text-slate-400">{{ order.get_service_type_display }}</span>
-                    </div>
+            <!-- Active Projects -->
+            <div
+                class="stat-card bg-gradient-to-br from-blue-500/10 to-indigo-500/5 border border-blue-500/20 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <i class="fas fa-tasks text-2xl text-blue-400"></i>
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">Active</span>
+                </div>
+                <div class="text-2xl font-bold text-white">{{ stats.active_count }}</div>
+                <div class="text-xs text-slate-400 mt-1">In Progress</div>
+            </div>
 
-                    <div class="flex flex-col items-end gap-2">
-                        <!-- Status Badge -->
-                        {% with uploads=order.get_freelancer_uploads %}
-                        {% if uploads %}
-                        <span
-                            class="px-2 py-1 rounded text-xs font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1 shadow-[0_0_10px_rgba(99,102,241,0.2)]">
-                            <i class="fas fa-check-circle"></i> Order Submitted
-                        </span>
-                        {% else %}
-                        <span class="px-2 py-1 rounded text-xs font-semibold" :class="{
-                                'bg-green-500/10 text-green-400': status === 'accepted',
-                                'bg-red-500/10 text-red-400': status === 'rejected' || status === 'timeout',
-                                'bg-yellow-500/10 text-yellow-400': status === 'pending_acceptance'
-                            }">
-                            {{ order.get_freelancer_status_display }}
-                        </span>
-                        {% endif %}
-                        {% endwith %}
+            <!-- Completed Projects -->
+            <div
+                class="stat-card bg-gradient-to-br from-purple-500/10 to-pink-500/5 border border-purple-500/20 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <i class="fas fa-check-circle text-2xl text-purple-400"></i>
+                    <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">Done</span>
+                </div>
+                <div class="text-2xl font-bold text-white">{{ stats.completed_count }}</div>
+                <div class="text-xs text-slate-400 mt-1">Completed</div>
+            </div>
 
-                        <!-- Payment Badge -->
-                        {% if order.is_freelancer_paid %}
-                        <span
-                            class="px-2 py-1 rounded text-xs font-bold bg-green-500/20 text-green-400 border border-green-500/30 flex items-center gap-1 shadow-[0_0_10px_rgba(74,222,128,0.2)]">
-                            PAID <i class="fas fa-check-circle"></i>
-                        </span>
-                        {% endif %}
+            <!-- Rating -->
+            <div
+                class="stat-card bg-gradient-to-br from-yellow-500/10 to-orange-500/5 border border-yellow-500/20 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <i class="fas fa-star text-2xl text-yellow-400"></i>
+                    <span class="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded-full">Rating</span>
+                </div>
+                <div class="text-2xl font-bold text-white">{{ stats.rating }}</div>
+                <div class="text-xs text-slate-400 mt-1">Performance</div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout -->
+        <div class="grid lg:grid-cols-3 gap-6 mb-6">
+            <!-- Left: Quick Actions & Notifications -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Quick Actions -->
+                {% if quick_actions %}
+                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                        <i class="fas fa-bolt text-yellow-400 mr-2"></i> Quick Actions
+                    </h3>
+                    <div class="space-y-2">
+                        {% for action in quick_actions %}
+                        <a href="{{ action.link }}"
+                            class="flex items-center gap-3 p-3 bg-{{ action.color }}-500/10 hover:bg-{{ action.color }}-500/20 border border-{{ action.color }}-500/30 rounded-lg transition group">
+                            <i
+                                class="fas {{ action.icon }} text-{{ action.color }}-400 group-hover:scale-110 transition"></i>
+                            <span class="text-sm text-slate-200">{{ action.text }}</span>
+                        </a>
+                        {% endfor %}
                     </div>
                 </div>
+                {% endif %}
 
-                <p class="text-sm text-slate-400 mb-4 line-clamp-2">
-                    {{ order.freelancer_description|default:order.description }}
-                </p>
-
-                <!-- Actions based on Status -->
-                <div class="pt-4 border-t border-slate-700">
-
-                    <!-- Pending Acceptance Logic -->
-                    <div x-show="status === 'pending_acceptance' && !expired">
-                        <div class="flex justify-between items-center mb-3">
-                            <span class="text-xs text-yellow-500 font-bold"><i class="fas fa-clock mr-1"></i> Accept in:
-                                <span x-text="timer"></span></span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="{% url 'freelancer_accept_order' order.id %}"
-                                class="bg-green-600 hover:bg-green-500 text-white py-2 rounded-lg text-sm font-medium text-center transition">
-                                Accept
-                            </a>
-                            <a href="{% url 'freelancer_reject_order' order.id %}"
-                                onclick="return confirm('Are you sure you want to reject this order?');"
-                                class="bg-red-600/20 hover:bg-red-600/30 text-red-400 py-2 rounded-lg text-sm font-medium text-center transition border border-red-500/30">
-                                Reject
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Expired State -->
-                    <div x-show="status === 'pending_acceptance' && expired" class="text-center">
-                        <span class="text-red-400 text-sm font-bold"><i class="fas fa-times-circle mr-1"></i> Offer
-                            Expired</span>
-                    </div>
-
-                    <!-- Accepted Logic -->
-                    <div x-show="status === 'accepted'">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-500">Assigned: {{ order.assigned_at|date:'M d, H:i'
+                <!-- Earnings Tracker -->
+                <div
+                    class="bg-gradient-to-br from-green-500/5 to-emerald-500/5 border border-green-500/20 rounded-xl p-5">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+                        <i class="fas fa-chart-line text-green-400 mr-2"></i> Earnings Tracker
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-700/50">
+                            <span class="text-sm text-slate-400">This Week</span>
+                            <span class="text-lg font-bold text-green-400">₹{{ stats.week_earnings|floatformat:0
                                 }}</span>
-                            <a href="{% url 'freelancer_order_detail' order.id %}"
-                                class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
-                                Open Workspace <i class="fas fa-arrow-right ml-1"></i>
-                            </a>
+                        </div>
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-700/50">
+                            <span class="text-sm text-slate-400">This Month</span>
+                            <span class="text-lg font-bold text-green-400">₹{{ stats.month_earnings|floatformat:0
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-slate-400">All Time</span>
+                            <span class="text-lg font-bold text-white">₹{{ stats.total_earned|floatformat:0 }}</span>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Rejected Logic -->
-                    <div x-show="status === 'rejected' || status === 'timeout'">
-                        <p class="text-xs text-slate-500 text-center">You rejected this order or it timed out.</p>
+                <!-- Notifications -->
+                {% if notifications %}
+                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i class="fas fa-bell text-blue-400 mr-2"></i> Notifications
+                        </h3>
+                        <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">{{
+                            notifications|length }}</span>
                     </div>
+                    <div class="space-y-3">
+                        {% for notif in notifications %}
+                        <div class="flex items-start gap-3 p-3 bg-slate-700/30 rounded-lg">
+                            <i class="fas {{ notif.icon }} text-{{ notif.color }} mt-1"></i>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-slate-200">{{ notif.message }}</p>
+                                <span class="text-xs text-slate-500">{{ notif.time }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
 
+            <!-- Right: Projects -->
+            <div class="lg:col-span-2">
+                <!-- Filters -->
+                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 mb-6">
+                    <div class="flex flex-wrap gap-2">
+                        <a href="?"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition
+                            {% if filter_status == 'all' %}bg-blue-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
+                            <i class="fas fa-th-large mr-1"></i> All
+                        </a>
+                        <a href="?filter=pending"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition
+                            {% if filter_status == 'pending' %}bg-yellow-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
+                            <i class="fas fa-clock mr-1"></i> Pending {% if stats.pending_count > 0 %}({{
+                            stats.pending_count }}){% endif %}
+                        </a>
+                        <a href="?filter=active"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition
+                            {% if filter_status == 'active' %}bg-green-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
+                            <i class="fas fa-play-circle mr-1"></i> Active {% if stats.active_count > 0 %}({{
+                            stats.active_count }}){% endif %}
+                        </a>
+                        <a href="?filter=due_soon"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition
+                            {% if filter_status == 'due_soon' %}bg-red-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Due Soon {% if stats.due_soon_count > 0
+                            %}({{ stats.due_soon_count }}){% endif %}
+                        </a>
+                        <a href="?filter=completed"
+                            class="px-4 py-2 rounded-lg text-sm font-medium transition
+                            {% if filter_status == 'completed' %}bg-purple-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
+                            <i class="fas fa-check-double mr-1"></i> Completed
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project Cards -->
+                <div class="space-y-4">
+                    {% for order in orders %}
+                    {% include 'core/partials/freelancer_project_card.html' with order=order %}
+                    {% empty %}
+                    <div class="text-center py-20 bg-slate-800/30 border border-slate-700 rounded-xl">
+                        <i class="fas fa-box-open text-4xl mb-4 text-slate-600"></i>
+                        <p class="text-slate-400">No projects found in this filter.</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            {% empty %}
-            <div class="col-span-full text-center py-20 text-slate-500">
-                <i class="fas fa-box-open text-4xl mb-4 opacity-50"></i>
-                <p>No projects assigned yet.</p>
-            </div>
-            {% endfor %}
         </div>
     </main>
 </body>
