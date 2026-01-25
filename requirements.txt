@@ -11,6 +11,10 @@ pandas
 openpyxl
 pdf2docx
 python-docx
+python-pptx
+reportlab
+pikepdf
+xhtml2pdf
 opencv-python-headless
 PyMuPDF
 django-cleanup
