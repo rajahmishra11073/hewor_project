@@ -60,8 +60,12 @@ class OisaAssistant:
         if self._check_intent(message, [r'\bhi\b', r'\bhello\b', r'\bhey\b', r'good morning']):
             return self._greeting_response()
 
+        # Tool count question
+        if self._check_intent(message, [r'how many tool', r'number of tool', r'tool count', r'tools you have']):
+            return self._tool_count_response()
+
         # Services
-        if self._check_intent(message, [r'service', r'price', r'cost', r'do for me', r'offer']):
+        if self._check_intent(message, [r'service', r'price', r'cost', r'do for me', r'offer', r'what do you do']):
             return self._services_response()
             
         # Support
@@ -270,6 +274,17 @@ class OisaAssistant:
 
     def _fallback_response(self):
         return "I'm not sure about that. Try asking about our services, check your order status, or explore our <a href='/tools/'>free PDF tools</a>! 🤔"
+
+    def _tool_count_response(self):
+        return """We have <b>20+ FREE PDF tools</b> available right now! 🔧
+
+Here are some popular ones:
+• <b>Core Tools:</b> Merge, Split, Compress, Rotate PDF
+• <b>Conversions:</b> PDF ↔ Word, Excel, PowerPoint, JPG
+• <b>Security:</b> Password protect, unlock, sign PDF
+• <b>Editing:</b> Add watermark, page numbers, extract pages
+
+<a href='/tools/'>Explore all tools →</a>"""
 
     def _add_proactive_suggestions(self, response, user_message):
         """Add proactive suggestions based on keywords in user message"""

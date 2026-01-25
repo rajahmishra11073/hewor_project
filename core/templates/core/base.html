@@ -1425,6 +1425,19 @@
             overflow: hidden;
             font-family: 'Poppins', sans-serif;
             color: var(--text-main);
+            cursor: auto !important;
+            /* Override custom cursor */
+            pointer-events: auto;
+        }
+
+        /* Fix cursor visibility in chat widget */
+        .chat-widget * {
+            cursor: auto !important;
+        }
+
+        .chat-widget input,
+        .chat-widget button {
+            cursor: pointer !important;
         }
 
         .chat-header {
@@ -1500,7 +1513,7 @@
             border: none;
             font-size: 24px;
             box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
-            cursor: pointer;
+            cursor: pointer !important;
             z-index: 10001;
             transition: transform 0.3s;
         }
