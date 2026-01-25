@@ -20,7 +20,6 @@ import logging
 import firebase_admin
 from firebase_admin import auth as firebase_auth
 import fitz  # PyMuPDF
-from pdf2docx import Converter
 import tempfile
 import os
 from pptx import Presentation
@@ -1015,93 +1014,12 @@ def compress_pdf_tool(request):
 def pdf_to_word_tool(request):
     """
     View to handle Free PDF to Word tool.
-    Uses pdf2docx library. Supports batch.
+    Note: pdf2docx library removed due to deployment issues.
+    This tool is temporarily disabled.
     """
     if request.method == 'POST':
-        files = request.FILES.getlist('pdf_files')
-        
-        if not files:
-            messages.error(request, "Please upload a PDF file.")
-            return redirect('pdf_to_word_tool')
-
-        MAX_SIZE_MB = 200
-        
-        temp_files_to_clean = []
-        
-        try:
-            # Single File Case
-            if len(files) == 1:
-                file = files[0]
-                if file.size > MAX_SIZE_MB * 1024 * 1024:
-                     messages.error(request, f"File size exceeds {MAX_SIZE_MB}MB limit.")
-                     return redirect('pdf_to_word_tool')
-
-                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
-                    for chunk in file.chunks():
-                        tmp_pdf.write(chunk)
-                    temp_pdf_path = tmp_pdf.name
-                    temp_files_to_clean.append(temp_pdf_path)
-
-                temp_docx_path = temp_pdf_path.replace('.pdf', '.docx')
-                temp_files_to_clean.append(temp_docx_path)
-
-                cv = Converter(temp_pdf_path)
-                cv.convert(temp_docx_path, start=0, end=None)
-                cv.close()
-
-                with open(temp_docx_path, 'rb') as docx_file:
-                    response = HttpResponse(docx_file.read(), content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-                    base_name = os.path.splitext(file.name)[0]
-                    response['Content-Disposition'] = f'attachment; filename="{base_name}.docx"'
-                
-                return response
-            
-            # Batch Case
-            else:
-                zip_buffer = io.BytesIO()
-                with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                    for file in files:
-                        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
-                             for chunk in file.chunks():
-                                 tmp_pdf.write(chunk)
-                             temp_pdf_path = tmp_pdf.name
-                             temp_files_to_clean.append(temp_pdf_path)
-                        
-                        temp_docx_path = temp_pdf_path.replace('.pdf', '.docx')
-                        temp_files_to_clean.append(temp_docx_path)
-                        
-                        try:
-                            cv = Converter(temp_pdf_path)
-                            cv.convert(temp_docx_path, start=0, end=None)
-                            cv.close()
-                            
-                            base_name = os.path.splitext(file.name)[0]
-                            zip_file.write(temp_docx_path, f"{base_name}.docx")
-                            
-                        except Exception as sub_e:
-                            logger.error(f"Error in batch pdf2docx for {file.name}: {sub_e}")
-                            # Continue with other files or fail? user preference usually 'continue'
-                            # We'll just skip this one or add error log
-                            pass
-
-                zip_buffer.seek(0)
-                response = HttpResponse(zip_buffer, content_type='application/zip')
-                response['Content-Disposition'] = 'attachment; filename="hewor_converted_batch.zip"'
-                return response
-
-        except Exception as e:
-            logger.error(f"Error converting PDF to Word: {e}")
-            messages.error(request, f"Error processing file: {str(e)}")
-            return redirect('pdf_to_word_tool')
-        
-        finally:
-            # Cleanup all temp files
-            for path in temp_files_to_clean:
-                if os.path.exists(path):
-                    try:
-                        os.remove(path)
-                    except:
-                        pass
+        messages.error(request, "PDF to Word conversion is temporarily unavailable. Please try Word to PDF instead!")
+        return redirect('pdf_to_word_tool')
 
     return render(request, 'core/pdf_to_word.html')
         
