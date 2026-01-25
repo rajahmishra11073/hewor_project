@@ -217,8 +217,7 @@
                         <a href="?filter=due_soon"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
                             {% if filter_status == 'due_soon' %}bg-red-600 text-white{% else %}bg-slate-700/50 text-slate-300 hover:bg-slate-700{% endif %}">
-                            <i class="fas fa-exclamation-triangle mr-1"></i> Due Soon {% if stats.due_soon_count > 0
-                            %}({{ stats.due_soon_count }}){% endif %}
+                            <i class="fas fa-exclamation-triangle mr-1"></i> Due Soon {% if stats.due_soon_count > 0 %}({{ stats.due_soon_count }}){% endif %}
                         </a>
                         <a href="?filter=completed"
                             class="px-4 py-2 rounded-lg text-sm font-medium transition
