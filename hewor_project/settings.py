@@ -341,3 +341,10 @@ LOGGING = {
 
 # Default Login URL
 LOGIN_URL = 'login'
+
+# --- FILE CLEANUP CONFIGURATION ---
+# Automatically delete files when ServiceOrder is marked as completed
+FILE_CLEANUP_ON_COMPLETION = os.environ.get('FILE_CLEANUP_ON_COMPLETION', 'True') == 'True'
+
+# Time-to-live for completed order files (used by cleanup_old_orders management command)
+FILE_TTL_DAYS = int(os.environ.get('FILE_TTL_DAYS', '30'))  # Delete files after 30 days
