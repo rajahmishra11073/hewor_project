@@ -380,10 +380,11 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
 
 # --- CACHING CONFIGURATION FOR PERFORMANCE ---
+# Using LocMemCache (in-memory) for Railway - no database table required
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'cache_table',
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'hewor-cache',
         'TIMEOUT': 300,
         'OPTIONS': {
             'MAX_ENTRIES': 1000,
