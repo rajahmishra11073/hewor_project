@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+
+# Block admin and internal areas
+Disallow: /admin/
+Disallow: /order-panel/
+Disallow: /freelancer/
+Disallow: /api/
+Disallow: /media/
+Disallow: /static/admin/
+
+# Allow PDF tools for indexing
+Allow: /tools/
+
+# Sitemap location
+Sitemap: https://hewor.in/sitemap.xml
+
+# Crawl-delay for polite crawling
+Crawl-delay: 1
