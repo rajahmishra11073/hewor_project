@@ -123,8 +123,15 @@
     <!-- 3D Model Container -->
     <div class="col-lg-6 position-relative text-center hero-model-container" style="height: 600px;"
         data-aos="fade-left">
-        <spline-viewer url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
-            background="transparent"></spline-viewer>
+        <!-- Placeholder while 3D loads -->
+        <div id="spline-placeholder"
+            style="width: 100%; height: 100%; background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1)); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading 3D model...</span>
+            </div>
+        </div>
+        <spline-viewer id="spline-3d-model" url="https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode"
+            background="transparent" style="display: none;"></spline-viewer>
 
         <!-- Floating Trust Badge -->
         <div class="glass-card position-absolute top-50 end-0 translate-middle-y p-3 rounded-4 shadow-lg d-none d-lg-block floating-badge"
@@ -145,20 +152,31 @@
 </div>
 
 <script>
-    // Hide Spline Logo
-    document.addEventListener('DOMContentLoaded', () => {
-        const hideLogo = () => {
-            const viewers = document.querySelectorAll('spline-viewer');
-            viewers.forEach(v => {
-                if (v.shadowRoot) {
-                    const style = document.createElement('style');
-                    style.textContent = '#logo { display: none !important; visibility: hidden !important; opacity: 0 !important; }';
-                    v.shadowRoot.appendChild(style);
-                }
-            });
-        };
-        setTimeout(hideLogo, 1000);
-        setTimeout(hideLogo, 3000);
+    // PERFORMANCE: Lazy-load Spline 3D model after page is interactive
+    window.addEventListener('load', () => {
+        // Wait for page to be fully loaded before loading heavy 3D model
+        requestIdleCallback(() => {
+            const splineModel = document.getElementById('spline-3d-model');
+            const placeholder = document.getElementById('spline-placeholder');
+
+            if (splineModel && placeholder) {
+                // Show model, hide placeholder
+                splineModel.style.display = 'block';
+                placeholder.style.display = 'none';
+
+                // Hide Spline Logo after model loads
+                setTimeout(() => {
+                    const viewers = document.querySelectorAll('spline-viewer');
+                    viewers.forEach(v => {
+                        if (v.shadowRoot) {
+                            const style = document.createElement('style');
+                            style.textContent = '#logo { display: none !important; visibility: hidden !important; opacity: 0 !important; }';
+                            v.shadowRoot.appendChild(style);
+                        }
+                    });
+                }, 2000);
+            }
+        }, { timeout: 3000 });
     });
 </script>
 

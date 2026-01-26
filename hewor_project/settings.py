@@ -95,6 +95,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",  # Enabled for production static files
+    "django.middleware.gzip.GZipMiddleware",  # PERFORMANCE: Enable GZIP compression
+    "django.middleware.http.ConditionalGetMiddleware",  # PERFORMANCE: Enable 304 responses
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -376,3 +378,19 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Google Analytics ID (set in environment)
 GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')
+
+# --- CACHING CONFIGURATION FOR PERFORMANCE ---
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
+        'TIMEOUT': 300,
+        'OPTIONS': {
+            'MAX_ENTRIES': 1000,
+            'CULL_FREQUENCY': 3,
+        }
+    }
+}
+
+# WhiteNoise optimizations
+WHITENOISE_MAX_AGE = 31536000
