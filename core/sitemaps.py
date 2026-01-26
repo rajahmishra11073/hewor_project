@@ -1,10 +1,11 @@
-from django.contrib import sitemaps
+from django.contrib.sitemaps import Sitemap
 from django.urls import reverse
 
-class StaticViewSitemap(sitemaps.Sitemap):
+class StaticViewSitemap(Sitemap):
     """Main static pages with highest priority"""
     priority = 1.0
     changefreq = 'weekly'
+    protocol = 'https'  # Force HTTPS for sitemaps
 
     def items(self):
         return ['home', 'services', 'about', 'contact']
@@ -13,10 +14,11 @@ class StaticViewSitemap(sitemaps.Sitemap):
         return reverse(item)
 
 
-class ToolsSitemap(sitemaps.Sitemap):
+class ToolsSitemap(Sitemap):
     """PDF Tools pages - important for SEO"""
     priority = 0.9
     changefreq = 'weekly'
+    protocol = 'https'  # Force HTTPS for sitemaps
 
     def items(self):
         return [
@@ -48,10 +50,11 @@ class ToolsSitemap(sitemaps.Sitemap):
         return reverse(item)
 
 
-class SecondaryPagesSitemap(sitemaps.Sitemap):
+class SecondaryPagesSitemap(Sitemap):
     """Secondary pages with lower priority"""
     priority = 0.6
     changefreq = 'monthly'
+    protocol = 'https'  # Force HTTPS for sitemaps
 
     def items(self):
         return ['signup', 'login', 'faqs', 'case_studies', 'terms', 'privacy']
