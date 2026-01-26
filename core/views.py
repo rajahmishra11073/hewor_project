@@ -2759,3 +2759,36 @@ def order_panel_send_notification(request):
         return redirect(request.META.get('HTTP_REFERER', 'order_panel_freelancers'))
     
     return redirect('order_panel_freelancers')
+
+
+# ============================================
+# BLOG VIEWS (Content Marketing & SEO)
+# ============================================
+
+def blog_list(request):
+    """Display list of published blog posts"""
+    from .models import BlogPost
+    
+    category = request.GET.get('category', None)
+    posts = BlogPost.objects.filter(is_published=True)
+    
+    if category:
+        posts = posts.filter(category=category)
+    
+    return render(request, 'core/blog/blog_list.html', {
+        'posts': posts,
+        'category': category
+    })
+
+
+def blog_detail(request, slug):
+    """Display single blog post and increment view count"""
+    from .models import BlogPost
+    
+    post = get_object_or_404(BlogPost, slug=slug, is_published=True)
+    
+    # Increment view count
+    post.views += 1
+    post.save(update_fields=['views'])
+    
+    return render(request, 'core/blog/blog_detail.html', {'post': post})

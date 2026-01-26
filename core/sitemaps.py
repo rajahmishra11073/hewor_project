@@ -61,3 +61,20 @@ class SecondaryPagesSitemap(Sitemap):
 
     def location(self, item):
         return reverse(item)
+
+
+class BlogSitemap(Sitemap):
+    """Blog posts for content marketing SEO"""
+    priority = 0.8
+    changefreq = 'weekly'
+    protocol = 'https'
+
+    def items(self):
+        from core.models import BlogPost
+        return BlogPost.objects.filter(is_published=True)
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+    def location(self, obj):
+        return obj.get_absolute_url()

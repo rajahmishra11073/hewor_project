@@ -136,9 +136,27 @@ class AgencyStatAdmin(admin.ModelAdmin):
     list_editable = ('value', 'order', 'icon_color')
 
 # --- Team Member Admin ---
-from .models import TeamMember
+from .models import TeamMember, BlogPost
 @admin.register(TeamMember)
 class TeamMemberAdmin(admin.ModelAdmin):
     list_display = ('name', 'role', 'order')
     list_editable = ('order',)
     search_fields = ('name', 'role', 'quote')
+
+
+# --- Blog Post Admin (Content Marketing & SEO) ---
+@admin.register(BlogPost)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'is_published', 'is_ai_generated', 'views', 'created_at')
+    list_filter = ('is_published', 'category', 'is_ai_generated', 'created_at')
+    list_editable = ('is_published',)
+    search_fields = ('title', 'excerpt', 'content', 'tags')
+    prepopulated_fields = {'slug': ('title',)}
+    readonly_fields = ('views', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Content', {'fields': ('title', 'slug', 'excerpt', 'content', 'featured_image')}),
+        ('Categorization', {'fields': ('category', 'tags')}),
+        ('Publishing', {'fields': ('author', 'is_published', 'is_ai_generated')}),
+        ('Stats', {'fields': ('views', 'created_at', 'updated_at'), 'classes': ('collapse',)}),
+    )

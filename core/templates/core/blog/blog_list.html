@@ -1,0 +1,101 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Blog - PDF Tips, Tutorials & More | Hewor{% endblock %}
+
+{% block meta_description %}Explore our blog for PDF tips, tutorials, productivity hacks, and the latest news. Learn how
+to convert, merge, compress PDFs and more.{% endblock %}
+
+{% block meta_keywords %}pdf tips, pdf tutorials, convert pdf, merge pdf tips, hewor blog{% endblock %}
+
+{% block content %}
+<div class="py-5" style="background: var(--pt-page-bg); min-height: 100vh;">
+    <div class="container">
+        <!-- Header -->
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h1 class="display-4 fw-bold mb-3">
+                <span class="text-gradient">Hewor Blog</span>
+            </h1>
+            <p class="lead text-muted">PDF Tips, Tutorials & Productivity Hacks</p>
+        </div>
+
+        <!-- Category Filter -->
+        <div class="d-flex flex-wrap justify-content-center gap-2 mb-5" data-aos="fade-up" data-aos-delay="100">
+            <a href="{% url 'blog_list' %}"
+                class="btn btn-sm {% if not category %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-4">All</a>
+            <a href="{% url 'blog_list' %}?category=pdf-tips"
+                class="btn btn-sm {% if category == 'pdf-tips' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-4">PDF
+                Tips</a>
+            <a href="{% url 'blog_list' %}?category=tutorials"
+                class="btn btn-sm {% if category == 'tutorials' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-4">Tutorials</a>
+            <a href="{% url 'blog_list' %}?category=productivity"
+                class="btn btn-sm {% if category == 'productivity' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-4">Productivity</a>
+            <a href="{% url 'blog_list' %}?category=tools"
+                class="btn btn-sm {% if category == 'tools' %}btn-primary{% else %}btn-outline-secondary{% endif %} rounded-pill px-4">Tool
+                Guides</a>
+        </div>
+
+        <!-- Blog Grid -->
+        <div class="row g-4">
+            {% for post in posts %}
+            <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ forloop.counter0|add:100 }}">
+                <a href="{% url 'blog_detail' post.slug %}" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm hover-lift"
+                        style="border-radius: 16px; overflow: hidden;">
+                        {% if post.featured_image %}
+                        <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}"
+                            style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="card-img-top bg-gradient d-flex align-items-center justify-content-center"
+                            style="height: 200px; background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                            <i class="fas fa-newspaper fa-3x text-white opacity-50"></i>
+                        </div>
+                        {% endif %}
+
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 small">{{
+                                    post.get_category_display }}</span>
+                                <small class="text-muted">{{ post.created_at|date:"M d, Y" }}</small>
+                            </div>
+                            <h5 class="card-title fw-bold text-dark mb-2">{{ post.title }}</h5>
+                            <p class="card-text text-muted small">{{ post.excerpt|truncatechars:100 }}</p>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 p-4 pt-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-primary fw-bold small">Read More <i
+                                        class="fas fa-arrow-right ms-1"></i></span>
+                                <span class="text-muted small"><i class="fas fa-eye me-1"></i>{{ post.views }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-newspaper fa-4x text-muted opacity-50"></i>
+                </div>
+                <h3 class="text-muted">No blog posts yet</h3>
+                <p class="text-muted">Check back soon for PDF tips, tutorials, and more!</p>
+                <a href="{% url 'home' %}" class="btn btn-primary rounded-pill px-4 mt-3">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Home
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lift {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+    }
+</style>
+{% endblock %}

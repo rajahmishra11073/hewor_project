@@ -284,3 +284,41 @@ class FreelancerNotification(models.Model):
         if self.is_broadcast:
             return f"[BROADCAST] {self.title}"
         return f"{self.title} - {self.freelancer.name if self.freelancer else 'N/A'}"
+
+
+# --- 10. BLOG POST MODEL (For Content Marketing & SEO) ---
+class BlogPost(models.Model):
+    CATEGORY_CHOICES = [
+        ('pdf-tips', 'PDF Tips & Tricks'),
+        ('tutorials', 'Tutorials'),
+        ('productivity', 'Productivity'),
+        ('tools', 'Tool Guides'),
+        ('news', 'News & Updates'),
+    ]
+    
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(unique=True, max_length=200)
+    excerpt = models.TextField(max_length=300, help_text="Short summary for listings and SEO")
+    content = models.TextField(help_text="HTML content of the blog post")
+    featured_image = models.ImageField(upload_to='blog/', blank=True, null=True)
+    
+    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='pdf-tips')
+    tags = models.CharField(max_length=200, blank=True, help_text="Comma-separated tags")
+    
+    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    is_published = models.BooleanField(default=False)
+    is_ai_generated = models.BooleanField(default=False, help_text="Content was AI-assisted")
+    
+    views = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse('blog_detail', kwargs={'slug': self.slug})

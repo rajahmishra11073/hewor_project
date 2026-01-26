@@ -65,6 +65,10 @@ urlpatterns = [
     path('tools/remove-pages/', views.remove_pages_tool, name='remove_pages_tool'),
     path('tools/extract-pages/', views.extract_pages_tool, name='extract_pages_tool'),
     path('tools/whiteboard/', views.whiteboard_tool, name='whiteboard_tool'),
+    
+    # Blog (Content Marketing & SEO)
+    path('blog/', views.blog_list, name='blog_list'),
+    path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
 ]
 
 

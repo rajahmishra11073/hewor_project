@@ -21,7 +21,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
-from core.sitemaps import StaticViewSitemap, ToolsSitemap, SecondaryPagesSitemap
+from core.sitemaps import StaticViewSitemap, ToolsSitemap, SecondaryPagesSitemap, BlogSitemap
 
 from django.http import JsonResponse, HttpResponse
 
@@ -34,6 +34,7 @@ sitemaps = {
     'static': StaticViewSitemap,
     'tools': ToolsSitemap,
     'secondary': SecondaryPagesSitemap,
+    'blog': BlogSitemap,
 }
 
 urlpatterns = [
