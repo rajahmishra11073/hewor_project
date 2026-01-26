@@ -3,9 +3,11 @@
 
 {% block title %}Free PDF Compressor | Hewor Agency{% endblock %}
 
-{% block meta_description %}Compress PDF files online for free. Reduce file size while maintaining quality. No signup required. Fast and secure compression.{% endblock %}
+{% block meta_description %}Compress PDF files online for free. Reduce file size while maintaining quality. No signup
+required. Fast and secure compression.{% endblock %}
 
-{% block meta_keywords %}compress pdf, reduce pdf size, pdf compressor, shrink pdf, free pdf compression, hewor{% endblock %}
+{% block meta_keywords %}compress pdf, reduce pdf size, pdf compressor, shrink pdf, free pdf compression, hewor{%
+endblock %}
 
 {% block og_title %}Free PDF Compressor - Reduce PDF File Size Online | Hewor{% endblock %}
 
@@ -85,65 +87,27 @@
 
 <style>
     /* Premium Styles */
+</style>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dropZone = document.getElementById('dropZone');
+        const pdfInput = document.getElementById('pdfInput');
 
-    <script>document.addEventListener('DOMContentLoaded', ()=> {
-            const dropZone=document.getElementById('dropZone');
-            const pdfInput=document.getElementById('pdfInput');
+        const compressBtn = document.getElementById('compressBtn');
+        const fileList = document.getElementById('fileList');
+        const fileListUl = document.getElementById('fileListUl');
+        const fileCountSpan = document.getElementById('fileCount');
+        const totalSizeSpan = document.getElementById('totalSize');
 
-            const compressBtn=document.getElementById('compressBtn');
-            const fileList=document.getElementById('fileList');
-            const fileListUl=document.getElementById('fileListUl');
-            const fileCountSpan=document.getElementById('fileCount');
-            const totalSizeSpan=document.getElementById('totalSize');
-
-            ['dragenter', 'dragover'].forEach(eventName=> {
-                    dropZone.addEventListener(eventName, ()=> dropZone.classList.add('dragover'), false);
-                });
-
-            ['dragleave', 'drop'].forEach(eventName=> {
-                    dropZone.addEventListener(eventName, ()=> dropZone.classList.remove('dragover'), false);
-                });
-
-            pdfInput.addEventListener('change', handleFiles);
-
-            function handleFiles() {
-                const files=Array.from(pdfInput.files);
-
-                if (files.length > 0) {
-                    fileList.classList.remove('d-none');
-                    fileListUl.innerHTML='';
-                    let totalSizeInBytes=0;
-
-                    files.forEach((file)=> {
-                            totalSizeInBytes +=file.size;
-                            const li=document.createElement('li');
-                            li.className='d-flex justify-content-between align-items-center mb-2 p-3 bg-white rounded shadow-sm border';
-
-                            li.innerHTML=` <div class="d-flex align-items-center overflow-hidden" > <div class="rounded p-2 bg-success-subtle me-3 text-success" ><i class="fas fa-file-pdf" ></i></div> <div> <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;" >$ {
-                                file.name
-                            }
-
-                            </h6> <small class="text-muted" >$ {
-                                (file.size / (1024 * 1024)).toFixed(2)
-                            }
-
-                            MB</small> </div> </div> <i class="fas fa-check-circle text-success" ></i> `;
-                            fileListUl.appendChild(li);
-                        });
-
-                    fileCountSpan.textContent=files.length;
-                    totalSizeSpan.textContent=(totalSizeInBytes / (1024 * 1024)).toFixed(2) + ' MB';
-                    compressBtn.disabled=false;
-                }
-
-                else {
-                    fileList.classList.add('d-none');
-                    compressBtn.disabled=true;
-                }
-            }
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('dragover'), false);
         });
 
-    </script> {
-        % endblock %
-    }
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('dragover'), false);
+        });
+
+        pdfInput.addEventListener('change', handleFiles);
+
+        function handleFiles()
