@@ -1652,33 +1652,59 @@
 
     <!-- OPTIMIZED SCRIPTS LOCATED IN FOOTER -->
 
-    <!-- Spline 3D Viewer -->
-    <script type="module" src="https://unpkg.com/@splinetool/viewer@latest/build/spline-viewer.js"></script>
+    <!-- Spline 3D Viewer - Removed for performance -->
+    <!-- Can be re-added on specific pages if needed -->
 
-    <!-- GSAP Animation Library (Core + ScrollTrigger) -->
-    <!-- NOT deferred - inline script calls gsap.registerPlugin() -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <!-- GSAP & Firebase - Async Loaded (No Render Blocking) -->
     <script>
-        // Register ScrollTrigger ensuring GSAP is loaded
-        gsap.registerPlugin(ScrollTrigger);
-    </script>
+        // Async load GSAP to prevent render blocking
+        (function () {
+            const gsapScript = document.createElement('script');
+            gsapScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js';
+            gsapScript.async = true;
+            gsapScript.onload = function () {
+                const scrollTriggerScript = document.createElement('script');
+                scrollTriggerScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js';
+                scrollTriggerScript.async = true;
+                scrollTriggerScript.onload = function () {
+                    if (typeof gsap !== 'undefined') {
+                        gsap.registerPlugin(ScrollTrigger);
+                        // Trigger custom event for components that need GSAP
+                        window.dispatchEvent(new Event('gsap-loaded'));
+                    }
+                };
+                document.head.appendChild(scrollTriggerScript);
+            };
+            document.head.appendChild(gsapScript);
+        })();
 
-    <!-- Firebase SDKs (Required for Google Auth) -->
-    <!-- NOT deferred - inline script calls firebase.initializeApp() -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBd0xV6JVdIYM18OkyTN3oiyqnm_GA-xG8",
-            authDomain: "hewor-project-auth.firebaseapp.com",
-            projectId: "hewor-project-auth",
-            storageBucket: "hewor-project-auth.firebasestorage.app",
-            messagingSenderId: "34381627864",
-            appId: "1:34381627864:web:9f31b0bdc798ddacb172ad"
-        };
-        firebase.initializeApp(firebaseConfig);
+        // Async load Firebase to prevent render blocking
+        (function () {
+            const firebaseApp = document.createElement('script');
+            firebaseApp.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js';
+            firebaseApp.async = true;
+            firebaseApp.onload = function () {
+                const firebaseAuth = document.createElement('script');
+                firebaseAuth.src = 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js';
+                firebaseAuth.async = true;
+                firebaseAuth.onload = function () {
+                    if (typeof firebase !== 'undefined') {
+                        const firebaseConfig = {
+                            apiKey: "AIzaSyBd0xV6JVdIYM18OkyTN3oiyqnm_GA-xG8",
+                            authDomain: "hewor-project-auth.firebaseapp.com",
+                            projectId: "hewor-project-auth",
+                            storageBucket: "hewor-project-auth.firebasestorage.app",
+                            messagingSenderId: "34381627864",
+                            appId: "1:34381627864:web:9f31b0bdc798ddacb172ad"
+                        };
+                        firebase.initializeApp(firebaseConfig);
+                        window.dispatchEvent(new Event('firebase-loaded'));
+                    }
+                };
+                document.head.appendChild(firebaseAuth);
+            };
+            document.head.appendChild(firebaseApp);
+        })();
     </script>
 
     <!-- JS -->
