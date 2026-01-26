@@ -875,6 +875,36 @@ def freelancer_dashboard(request):
     
     return render(request, 'core/freelancer_dashboard.html', context)
 
+@login_required(login_url='freelancer_login')
+def freelancer_dashboard_orders_partial(request):
+    try:
+        freelancer = request.user.freelancer
+    except Freelancer.DoesNotExist:
+        return HttpResponse("Unauthorized", status=401)
+        
+    filter_status = request.GET.get('filter', 'all')
+    orders_query = ServiceOrder.objects.filter(freelancer=freelancer)
+    
+    if filter_status == 'pending':
+        orders = orders_query.filter(freelancer_status='pending_acceptance')
+    elif filter_status == 'active':
+        orders = orders_query.filter(freelancer_status='accepted', status='in_progress')
+    elif filter_status == 'due_soon':
+        three_days_later = timezone.now() + datetime.timedelta(days=3)
+        orders = orders_query.filter(
+            freelancer_status='accepted',
+            freelancer_deadline__lte=three_days_later,
+            status='in_progress'
+        )
+    elif filter_status == 'completed':
+        orders = orders_query.filter(status='completed')
+    else:
+        orders = orders_query
+        
+    orders = orders.order_by('-created_at')
+    
+    return render(request, 'core/partials/freelancer_orders_list.html', {'orders': orders})
+
 @login_required(login_url='order_panel_login')
 def order_panel_pay_freelancer(request, order_id):
     order = get_object_or_404(ServiceOrder, pk=order_id)

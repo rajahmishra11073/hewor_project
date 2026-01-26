@@ -115,6 +115,15 @@ All fixes were tested and verified:
 - Added `animate-pulse` to the countdown timer icon.
 **Status:** ✅ **Urgent orders are visually distinct and price is clear.**
 
+### 11. Real-time Dashboard Updates (Auto-Refresh) - ✅ ADDED
+**Problem:** Freelancers had to manually refresh the page to see new orders.
+**Solution:** 
+- Implemented **HTMX Polling** on the dashboard.
+- Created `freelancer_dashboard_orders_partial` view.
+- Dashboard now auto-refreshes the order list every **5 seconds**.
+- New orders appear instantly with the Alert Ring effect.
+**Status:** ✅ **Dashboard is now Real-Time.**
+
 ---
 
 ## 🧪 Verification Testing
@@ -130,6 +139,7 @@ All fixes were tested and verified:
 | **PDF to Word** | ✅ Fixed | Backend logic implemented with library support |
 | **Add Freelancer Btn** | ✅ Fixed | Corrected JS variable scope mismatch |
 | **Order Price/Alert** | ✅ Fixed | Added Price badge & Visual Glow effects |
+| **Real-time Updates** | ✅ Added | Implemented HTMX polling (5s interval) |
 | **Dashboard Greeting** | ✅ Fixed | Template updated with fallback to username |
 | **Favicon** | ✅ Fixed | No console 404 errors, favicon displays correctly |
 | **About Page** | ✅ Fixed | Professional text confirmed via browser inspection |
@@ -146,7 +156,7 @@ All fixes were tested and verified:
 ✅ Dashboard with proper greeting  
 ✅ Service Orders & File Upload  
 ✅ Freelancer System (**Management Panel Fixed**)  
-✅ Freelancer Dashboard (**Cards Improved**)  
+✅ Freelancer Dashboard (**Real-time & Improved UI**)  
 ✅ Chatbot (Oisa)  
 ✅ Mobile Responsive Design  
 ✅ All Main Pages (Home, Services, About, Contact, FAQs, Case Studies)  

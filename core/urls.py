@@ -37,6 +37,7 @@ urlpatterns = [
     # Freelancer Portal
     path('freelancer/login/', views.freelancer_login, name='freelancer_login'),
     path('freelancer/dashboard/', views.freelancer_dashboard, name='freelancer_dashboard'),
+    path('freelancer/dashboard/orders/', views.freelancer_dashboard_orders_partial, name='freelancer_dashboard_orders_partial'),
     path('freelancer/profile/', views.freelancer_profile, name='freelancer_profile'),
     path('freelancer/project/<int:order_id>/', views.freelancer_order_detail, name='freelancer_order_detail'),
     path('freelancer/order/<int:order_id>/accept/', views.freelancer_accept_order, name='freelancer_accept_order'),

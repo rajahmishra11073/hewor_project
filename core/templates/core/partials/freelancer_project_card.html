@@ -25,7 +25,7 @@
         }
     }
 }" :class="{
-        'border-yellow-500/50 shadow-[0_0_15px_rgba(234,179,8,0.3)]': status === 'pending_acceptance' && !expired,
+        'border-yellow-500 ring-2 ring-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.4)]': status === 'pending_acceptance' && !expired,
         'border-slate-700': status !== 'pending_acceptance'
     }"
     class="bg-slate-800/50 backdrop-blur border rounded-xl p-6 hover:border-blue-500/30 transition shadow-lg relative overflow-hidden">
@@ -42,8 +42,8 @@
                 <!-- Price Display -->
                 <span
                     class="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded border border-green-500/20">
-                    <i class="fas fa-rupee-sign mr-1"></i>{% if order.freelancer_payment %}₹{{
-                    order.freelancer_payment|floatformat:0 }}{% else %}Price TBD{% endif %}
+                    <i class="fas fa-rupee-sign mr-1"></i>{% if order.freelancer_payment %}{{
+                    order.freelancer_payment|floatformat:0 }}{% else %}TBD{% endif %}
                 </span>
             </div>
         </div>

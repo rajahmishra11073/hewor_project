@@ -1,0 +1,8 @@
+{% for order in orders %}
+{% include 'core/partials/freelancer_project_card.html' with order=order %}
+{% empty %}
+<div class="text-center py-20 bg-slate-800/30 border border-slate-700 rounded-xl">
+    <i class="fas fa-box-open text-4xl mb-4 text-slate-600"></i>
+    <p class="text-slate-400">No projects found in this filter.</p>
+</div>
+{% endfor %}
