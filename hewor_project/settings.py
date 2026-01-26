@@ -350,3 +350,27 @@ FILE_CLEANUP_ON_COMPLETION = os.environ.get('FILE_CLEANUP_ON_COMPLETION', 'True'
 
 # Time-to-live for completed order files (used by cleanup_old_orders management command)
 FILE_TTL_DAYS = int(os.environ.get('FILE_TTL_DAYS', '30'))  # Delete files after 30 days
+
+# --- SECURITY HEADERS FOR PAGESPEED ---
+# HSTS (HTTP Strict Transport Security)
+if not DEBUG:
+    SECURE_HSTS_SECONDS = 31536000  # 1 year
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Content Security Policy (CSP) - Basic implementation
+# For full CSP, install django-csp: pip install django-csp
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'", 'cdn.jsdelivr.net', 'unpkg.com', 'cdnjs.cloudflare.com', 'www.gstatic.com', "'unsafe-inline'")
+# CSP_STYLE_SRC = ("'self'", 'fonts.googleapis.com', 'cdn.jsdelivr.net', 'cdnjs.cloudflare.com', "'unsafe-inline'")
+# CSP_FONT_SRC = ("'self'", 'fonts.gstatic.com', 'cdnjs.cloudflare.com')
+# CSP_IMG_SRC = ("'self'", 'data:')
+
+# Enable GZIP Compression
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
+# Google Analytics ID (set in environment)
+GOOGLE_ANALYTICS_ID = os.environ.get('GOOGLE_ANALYTICS_ID', '')

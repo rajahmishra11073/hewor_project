@@ -30,15 +30,30 @@
         content="{% block twitter_description %}Premium academic and professional services.{% endblock %}">
     <meta name="twitter:image" content="{% static 'core/img/logo-social.png' %}">
 
-    <!-- CSS Links -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CSS Links - Optimized for PageSpeed -->
+    <!-- Preload critical CSS for faster rendering -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+
+    <!-- Google Fonts with font-display:swap for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Outfit:wght@300;500;700;800&display=swap"
         rel="stylesheet">
-    <!-- Font Awesome 6.5.1 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- AOS Animation Library -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- AOS Animation - Lazy loaded -->
+    <link rel="preload" href="https://unpkg.com/aos@2.3.1/dist/aos.css" as="style"
+        onload="this.onload=null;this.rel='stylesheet'">
+
+    <!-- Fallback for browsers that don't support preload -->
+    <noscript>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+        <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    </noscript>
     <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1074,11 +1089,11 @@
 
             <!-- Mobile Toggles -->
             <div class="d-flex align-items-center d-lg-none gap-2">
-                <button onclick="toggleTheme()" class="theme-toggle-btn">
+                <button onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle dark/light theme">
                     <i class="fas fa-moon" id="theme-icon-mobile"></i>
                 </button>
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarNav">
+                    aria-label="Toggle navigation menu" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
             </div>
@@ -1273,7 +1288,8 @@
                     {% endif %}
 
                     <!-- Theme Toggle (Desktop) -->
-                    <button onclick="toggleTheme()" class="theme-toggle-btn d-none d-lg-block ms-2">
+                    <button onclick="toggleTheme()" class="theme-toggle-btn d-none d-lg-block ms-2"
+                        aria-label="Toggle dark/light theme">
                         <i class="fas fa-moon" id="theme-icon-desktop"></i>
                     </button>
                 </div>
@@ -1287,12 +1303,15 @@
         {% for message in messages %}
         <div class="alert alert-info alert-dismissible fade show">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close alert"></button>
         </div>
         {% endfor %}
         {% endif %}
 
-        {% block content %}{% endblock %}
+        <!-- Main landmark for accessibility -->
+        <main>
+            {% block content %}{% endblock %}
+        </main>
     </div>
 
     <!-- Modern Glass Footer -->
@@ -1399,7 +1418,7 @@
                     <span class="status-dot"></span> <small>Online</small>
                 </div>
             </div>
-            <button onclick="toggleChat()" class="btn-close btn-close-white"></button>
+            <button onclick="toggleChat()" class="btn-close btn-close-white" aria-label="Close chat"></button>
         </div>
         <div class="chat-body" id="chat-body">
             <div class="message bot-message">
@@ -1409,12 +1428,13 @@
         <div class="chat-footer">
             <input type="text" id="chat-input" class="form-control" placeholder="Type a message..."
                 onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()" class="btn btn-primary"><i class="fas fa-paper-plane"></i></button>
+            <button onclick="sendMessage()" class="btn btn-primary" aria-label="Send message"><i
+                    class="fas fa-paper-plane"></i></button>
         </div>
     </div>
 
     <!-- Chat Toggle Button -->
-    <button class="chat-toggle-btn" onclick="toggleChat()">
+    <button class="chat-toggle-btn" onclick="toggleChat()" aria-label="Open chat support">
         <i class="fas fa-comment-dots"></i>
     </button>
 
