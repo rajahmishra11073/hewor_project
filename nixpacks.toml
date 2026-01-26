@@ -1,11 +1,8 @@
 [phases.setup]
-nixPkgs = ["python312", "gcc", "mysql-client", "pkg-config", "mysql-dev", "ffmpeg", "libsm", "libxext", "libxcb", "libxrender", "libgl", "glib", "cairo", "pango", "gdk-pixbuf"]
+nixPkgs = ["xorg.libxcb", "libglvnd", "glib", "poppler_utils", "zlib"]
 
 [phases.build]
-cmds = [
-    "pip install -r requirements.txt",
-    "python manage.py collectstatic --noinput --clear"
-]
+cmds = ["python manage.py collectstatic --noinput", "python manage.py migrate"]
 
 [start]
-cmd = "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn hewor_project.wsgi --workers 1 --threads 8 --timeout 120 --bind 0.0.0.0:$PORT"
+cmd = "gunicorn hewor_project.wsgi:application"
