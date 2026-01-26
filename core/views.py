@@ -1,5 +1,6 @@
 import re
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.cache import cache_page
 import zipfile
 import io
 from django.http import HttpResponse
@@ -68,11 +69,15 @@ def validate_input(email, phone):
 
 # --- VIEWS ---
 
+@cache_page(60 * 15)
 def home(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
-    reviews = Review.objects.all().order_by('-created_at')
+    reviews = Review.objects.all().order_by('-created_at')[:6]
     return render(request, 'core/home.html', {'reviews': reviews})
+
+def robots_txt(request):
+    return HttpResponse("User-agent: *\nDisallow: /admin/\nAllow: /", content_type="text/plain")
 
 def tools_list(request):
     return render(request, 'core/tools_list.html')

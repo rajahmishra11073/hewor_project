@@ -24,6 +24,7 @@ from django.contrib.sitemaps.views import sitemap
 from core.sitemaps import StaticViewSitemap, ToolsSitemap, SecondaryPagesSitemap, BlogSitemap
 
 from django.http import JsonResponse, HttpResponse
+from core.views import robots_txt
 
 from django.shortcuts import redirect
 
@@ -39,7 +40,7 @@ sitemaps = {
 
 urlpatterns = [
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
-    path('robots.txt', lambda r: HttpResponse(open('static/robots.txt').read(), content_type='text/plain')),
+    path('robots.txt', robots_txt),
     path('health/', health),
     path('accounts/profile/', lambda request: redirect('dashboard')), # Fix for default login redirect
     path('admin/', admin.site.urls),
