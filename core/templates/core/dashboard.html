@@ -3,7 +3,7 @@
 <!-- Welcome Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="fw-bold">Hello, {{ user.first_name }}! 👋</h2>
+        <h2 class="fw-bold">Hello, {{ user.first_name|default:user.username }}! 👋</h2>
         <p class="text-muted">Here is the status of your projects.</p>
     </div>
     <a href="{% url 'create_order' %}" class="btn btn-primary btn-lg"><i class="fas fa-plus me-2"></i>New Project</a>

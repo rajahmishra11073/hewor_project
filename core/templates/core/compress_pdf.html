@@ -6,8 +6,8 @@
 {% block meta_description %}Compress PDF files online for free. Reduce file size while maintaining quality. No signup
 required. Fast and secure compression.{% endblock %}
 
-{% block meta_keywords %}compress pdf, reduce pdf size, pdf compressor, shrink pdf, free pdf compression, hewor{%
-endblock %}
+{% block meta_keywords %}compress pdf, reduce pdf size, pdf compressor, shrink pdf, free pdf compression, hewor{% endblock %}
+
 
 {% block og_title %}Free PDF Compressor - Reduce PDF File Size Online | Hewor{% endblock %}
 
@@ -17,7 +17,7 @@ endblock %}
 <div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: var(--pt-page-bg);">
 
     <div class="container" style="max-width: 900px;">
-        <div class="card premium-card bg-white text-center p-5 mb-4" data-aos="fade-up">
+        <div class="card premium-card text-center p-5 mb-4" data-aos="fade-up">
 
             <!-- Header -->
             <div class="mb-5">
@@ -110,4 +110,36 @@ endblock %}
 
         pdfInput.addEventListener('change', handleFiles);
 
-        function handleFiles()
+        function handleFiles() {
+            const files = Array.from(pdfInput.files);
+            if (files.length > 0) {
+                fileList.classList.remove('d-none');
+                fileCountSpan.textContent = files.length;
+                let total = 0;
+                fileListUl.innerHTML = '';
+                files.forEach((file) => {
+                    total += file.size;
+                    const li = document.createElement('li');
+                    li.className = 'd-flex justify-content-between align-items-center mb-2 p-3 bg-white rounded shadow-sm border';
+                    li.innerHTML = `
+                        <div class="d-flex align-items-center overflow-hidden">
+                            <div class="rounded p-2 bg-danger-subtle me-3 text-danger"><i class="fas fa-file-pdf"></i></div>
+                            <div>
+                                <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;">${file.name}</h6>
+                                <small class="text-muted">${(file.size / (1024 * 1024)).toFixed(2)} MB</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-check-circle text-success"></i>
+                    `;
+                    fileListUl.appendChild(li);
+                });
+                totalSizeSpan.textContent = (total / (1024 * 1024)).toFixed(2) + ' MB';
+                compressBtn.disabled = false;
+            } else {
+                fileList.classList.add('d-none');
+                compressBtn.disabled = true;
+            }
+        }
+    });
+</script>
+{% endblock %}

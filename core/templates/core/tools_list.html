@@ -316,5 +316,25 @@
     .tool-card-modern:hover .icon-modern {
         transform: scale(1.05);
     }
+
+    /* Dark Mode Support for Cards */
+    [data-theme="dark"] .tool-card-modern {
+        background: var(--pt-card-bg, #1e293b);
+        border-color: var(--pt-card-border, rgba(255, 255, 255, 0.05));
+    }
+
+    [data-theme="dark"] .tool-card-modern:hover {
+        box-shadow: 0 10px 30px -3px rgba(0, 0, 0, 0.5);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    [data-theme="dark"] .tool-card-modern h6 {
+        color: var(--pt-text-main, #f8fafc) !important;
+    }
+
+    [data-theme="dark"] .tool-card-modern p,
+    [data-theme="dark"] .tool-card-modern .text-muted {
+        color: var(--pt-text-muted, #94a3b8) !important;
+    }
 </style>
 {% endblock %}
