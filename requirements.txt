@@ -20,3 +20,4 @@ django-cleanup
 firebase-admin
 dj-database-url
 google-genai
+pdf2docx

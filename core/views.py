@@ -1232,8 +1232,91 @@ def pdf_to_word_tool(request):
     This tool is temporarily disabled.
     """
     if request.method == 'POST':
-        messages.error(request, "PDF to Word conversion is temporarily unavailable. Please try Word to PDF instead!")
-        return redirect('pdf_to_word_tool')
+        files = request.FILES.getlist('pdf_files')
+        
+        if not files:
+            messages.error(request, "Please upload a PDF file.")
+            return redirect('pdf_to_word_tool')
+
+        temp_files_to_clean = []
+        
+        try:
+            from pdf2docx import Converter
+
+            def convert_single_pdf_to_word(pdf_file, output_docx_path):
+                # Save input PDF to temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as tmp_pdf:
+                    for chunk in pdf_file.chunks():
+                        tmp_pdf.write(chunk)
+                    temp_pdf_path = tmp_pdf.name
+                    temp_files_to_clean.append(temp_pdf_path)
+
+                # Convert using pdf2docx
+                cv = Converter(temp_pdf_path)
+                cv.convert(output_docx_path)
+                cv.close()
+
+            if len(files) == 1:
+                uploaded_file = files[0]
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp_out:
+                    output_path = tmp_out.name
+                    temp_files_to_clean.append(output_path)
+                
+                convert_single_pdf_to_word(uploaded_file, output_path)
+                
+                with open(output_path, 'rb') as f:
+                    file_data = f.read()
+                    
+                response = HttpResponse(file_data, content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
+                response['Content-Disposition'] = f'attachment; filename="{uploaded_file.name.replace(".pdf", "")}.docx"'
+                
+                # Cleanup
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                        
+                return response
+            
+            else:
+                # Batch Processing
+                zip_filename = "hewor_converted_word_files.zip"
+                with tempfile.NamedTemporaryFile(delete=False, suffix='.zip') as tmp_zip:
+                    zip_path = tmp_zip.name
+                    temp_files_to_clean.append(zip_path)
+                
+                with zipfile.ZipFile(zip_path, 'w') as zipf:
+                    for uploaded_file in files:
+                        with tempfile.NamedTemporaryFile(delete=False, suffix='.docx') as tmp_out:
+                            output_path = tmp_out.name
+                            temp_files_to_clean.append(output_path)
+                        
+                        try:
+                            convert_single_pdf_to_word(uploaded_file, output_path)
+                            zipf.write(output_path, arcname=f"{uploaded_file.name.replace('.pdf', '')}.docx")
+                        except Exception as e:
+                            logger.error(f"Failed to convert {uploaded_file.name}: {e}")
+
+                with open(zip_path, 'rb') as f:
+                    zip_data = f.read()
+                    
+                response = HttpResponse(zip_data, content_type='application/zip')
+                response['Content-Disposition'] = f'attachment; filename="{zip_filename}"'
+                
+                for path in temp_files_to_clean:
+                    if os.path.exists(path):
+                        os.remove(path)
+                        
+                return response
+
+        except Exception as e:
+            logger.error(f"Error converting PDF to Word: {e}")
+            messages.error(request, f"Error processing file: {str(e)}")
+            # Clean up on error
+            for path in temp_files_to_clean:
+                if os.path.exists(path):
+                    try: os.remove(path)
+                    except: pass
+            return redirect('pdf_to_word_tool')
 
     return render(request, 'core/pdf_to_word.html')
         
@@ -1398,26 +1481,30 @@ def pdf_to_excel_tool(request):
                     temp_files_to_clean.append(temp_pdf_path)
 
                 # Extract and write to Excel
-                has_tables = False
+                # Extract all tables first
+                all_tables_data = []
                 with pdfplumber.open(temp_pdf_path) as pdf:
-                    with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
-                        for i, page in enumerate(pdf.pages):
-                            tables = page.extract_tables()
-                            for j, table in enumerate(tables):
-                                if table:
-                                    has_tables = True
-                                    # Create DataFrame. defaulting to no header to preserve exact structure
-                                    df = pd.DataFrame(table)
-                                    sheet_name = f'Page_{i+1}_Table_{j+1}'
-                                    # Sheet name limit is 31 chars
-                                    if len(sheet_name) > 31:
-                                        sheet_name = sheet_name[:31]
-                                    df.to_excel(writer, sheet_name=sheet_name, index=False, header=False)
+                    for i, page in enumerate(pdf.pages):
+                        tables = page.extract_tables()
+                        for j, table in enumerate(tables):
+                            if table:
+                                all_tables_data.append({
+                                    'sheet_name': f'Page_{i+1}_Table_{j+1}',
+                                    'data': table
+                                })
                 
-                if not has_tables:
+                # Write to Excel
+                if not all_tables_data:
                     # Create a dummy sheet if no tables found to avoid error
                     with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
                         pd.DataFrame(["No tables found in this PDF"]).to_excel(writer, sheet_name="Info", index=False, header=False)
+                else:
+                    with pd.ExcelWriter(output_excel_path, engine='openpyxl') as writer:
+                        for item in all_tables_data:
+                            sheet_name = item['sheet_name']
+                            if len(sheet_name) > 31:
+                                sheet_name = sheet_name[:31]
+                            pd.DataFrame(item['data']).to_excel(writer, sheet_name=sheet_name, index=False, header=False)
 
             results = []
             
