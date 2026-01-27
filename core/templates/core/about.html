@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-2">
     <!-- Hero Section -->
     <div class="row align-items-center mb-5">
         <div class="col-lg-6 mb-5 mb-lg-0">
@@ -27,7 +27,7 @@
     </div>
 
     <!-- Trust Section -->
-    <div class="row text-center mt-5 bg-white shadow-sm py-5 rounded-4 mb-5" data-aos="fade-up">
+    <div class="row text-center mt-2 bg-white shadow-sm py-2 rounded-4 mb-5" >
         <div class="col-md-4">
             <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
             <h4>Trusted & Secure</h4>
@@ -46,13 +46,13 @@
     </div>
 
     <!-- Leadership Section -->
-    <div class="text-center mb-5" data-aos="fade-up">
+    <div class="text-center mb-5" >
         <h2 class="fw-bold">{{ setting.about_leadership_title|default:"Meet Our Leadership" }}</h2>
         <p class="text-muted">{{ setting.about_leadership_subtitle|default:"The minds behind Hewor." }}</p>
     </div>
     <div class="row justify-content-center text-center">
         {% for member in team_members %}
-        <div class="col-md-6 col-lg-4 mb-4" data-aos="zoom-in" data-aos-delay="{{ forloop.counter|add:'1' }}00">
+        <div class="col-md-6 col-lg-4 mb-4"  data-aos-delay="{{ forloop.counter|add:'1' }}00">
             <div class="card glass-card no-tilt border-0 h-100 hover-up">
                 <div class="card-body p-5">
                     <div class="mb-4">

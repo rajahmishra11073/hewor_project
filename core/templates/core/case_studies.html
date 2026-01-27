@@ -6,8 +6,8 @@
 and PPT design services.{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row text-center mb-5" data-aos="fade-up">
+<div class="container py-2">
+    <div class="row text-center mb-5" >
         <div class="col-lg-8 mx-auto">
             <h1 class="display-4 fw-bold mb-3 premium-heading">{{ setting.case_studies_title }}</h1>
             <h5 class="text-primary mb-3">{{ setting.case_studies_subtitle }}</h5>
@@ -17,7 +17,7 @@ and PPT design services.{% endblock %}
 
     <!-- Dynamic Case Studies Loop -->
     {% for case in case_studies %}
-    <div class="glass-card mb-5 p-4" data-aos="fade-up">
+    <div class="glass-card mb-5 p-4" >
         <div class="row align-items-center {% if forloop.counter|divisibleby:2 %}flex-md-row-reverse{% endif %}">
             <div class="col-md-5 mb-4 mb-md-0">
                 <div class="rounded-4 overflow-hidden" style="height: 250px;">
@@ -53,13 +53,13 @@ and PPT design services.{% endblock %}
         </div>
     </div>
     {% empty %}
-    <div class="text-center py-5">
+    <div class="text-center py-2">
         <p class="text-muted">No case studies added yet.</p>
     </div>
     {% endfor %}
 
     <!-- Dynamic Stats Section -->
-    <div class="row g-4 mt-5" data-aos="fade-up" data-aos-delay="200">
+    <div class="row g-4 mt-2"  >
         {% for stat in agency_stats %}
         <div class="col-md-4">
             <div class="glass-card p-4 text-center hover-up">
@@ -72,7 +72,7 @@ and PPT design services.{% endblock %}
         {% endfor %}
     </div>
 
-    <div class="text-center mt-5 pt-4">
+    <div class="text-center mt-2 pt-4">
         <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">Start Your Success Story</a>
     </div>
 

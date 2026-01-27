@@ -1062,111 +1062,113 @@ def freelancer_profile(request):
 
 def merge_pdf_tool(request):
     """
-    View to handle Free PDF Merge tool.
-    Limits: Max 200MB total payload.
+    Highly optimized PDF Merging logic.
+    Addresses user reports of 'useless' logic and 'slowness'.
     """
     try:
         if request.method == 'POST':
-            # ... (omitted for brevity, will use multi_replace if needed but I'll use the precise target)
             files = request.FILES.getlist('pdf_files')
-            if not files:
+            if not files or len(files) < 1:
                 messages.error(request, "Please select at least one PDF file.")
                 return redirect('merge_pdf_tool')
 
-            # 1. Size Validation (Max 100MB)
-            MAX_SIZE_MB = 100
-            total_size = sum(f.size for f in files)
-            if total_size > MAX_SIZE_MB * 1024 * 1024:
-                messages.error(request, f"Total file size exceeds {MAX_SIZE_MB}MB limit.")
+            # 1. Size Validation (Max 200MB total)
+            MAX_TOTAL_SIZE_MB = 200
+            total_size_bytes = sum(f.size for f in files)
+            if total_size_bytes > MAX_TOTAL_SIZE_MB * 1024 * 1024:
+                messages.error(request, f"Total payload exceeds {MAX_TOTAL_SIZE_MB}MB limit.")
                 return redirect('merge_pdf_tool')
 
-            # 2. Merge Logic
-            merged_pdf = fitz.open()
-            for f in files:
-                file_stream = f.read()
-                with fitz.open(stream=file_stream, filetype="pdf") as pdf_doc:
-                    merged_pdf.insert_pdf(pdf_doc)
+            # 2. Optimized Merge Logic using PyMuPDF (fitz)
+            merged_doc = fitz.open()
+            try:
+                for f in files:
+                    # Reset stream position just in case
+                    f.seek(0)
+                    with fitz.open(stream=f.read(), filetype="pdf") as part_doc:
+                        merged_doc.insert_pdf(part_doc)
+                
+                # Use optimized write for smaller output and faster download
+                # garbage=4: deduplicate objects, deflate=True: compress streams
+                pdf_bytes = merged_doc.write(garbage=4, deflate=True)
+            finally:
+                merged_doc.close()
 
-            # 3. Return Response
-            pdf_bytes = merged_pdf.tobytes()
-            merged_pdf.close()
-
+            # 3. Stream response to user
             response = HttpResponse(pdf_bytes, content_type='application/pdf')
-            response['Content-Disposition'] = 'attachment; filename="hewor_merged.pdf"'
+            response['Content-Disposition'] = 'attachment; filename="hewor_combined_document.pdf"'
             return response
 
         return render(request, 'core/merge_pdf.html')
     except Exception as e:
-        logger.error(f"FATAL ERROR in merge_pdf_tool: {e}")
-        return HttpResponse(f"System Error: {str(e)}. Please contact support.", status=500)
+        logger.error(f"ENGINE ERROR in merge_pdf_tool: {str(e)}")
+        messages.error(request, f"Processing failed: {str(e)}. Try a smaller file.")
+        return redirect('merge_pdf_tool')
 
 def split_pdf_tool(request):
     """
-    View to handle Free Split PDF tool.
-    Supports single or multiple files.
-    Input: PDF file(s) + comma-separated page numbers.
-    Output: ZIP file of split parts.
+    Optimized PDF Splitting logic.
+    Addresses user reports of tool not working in production.
     """
     try:
         if request.method == 'POST':
-            # ... (logic remains same, just indenting)
             files = request.FILES.getlist('pdf_files')
             split_pages_str = request.POST.get('split_pages', '')
 
             if not files:
-                messages.error(request, "Please upload at least one PDF file.")
+                messages.error(request, "Please select a PDF file.")
                 return redirect('split_pdf_tool')
 
-            # Parse split pages
-            split_at_pages = [int(p.strip()) for p in split_pages_str.split(',') if p.strip().isdigit()]
-            split_at_pages.sort()
+            # Parse and sanitize split points
+            try:
+                split_at_pages = sorted(list(set([int(p.strip()) for p in split_pages_str.split(',') if p.strip().isdigit() and int(p.strip()) > 0])))
+            except ValueError:
+                messages.error(request, "Invalid page numbers provided.")
+                return redirect('split_pdf_tool')
             
             if not split_at_pages:
-                messages.error(request, "Please enter valid page numbers.")
+                messages.error(request, "Please enter valid page numbers (e.g., 5, 10).")
                 return redirect('split_pdf_tool')
 
-            # Prepare ZIP buffer for output
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                for file_idx, file in enumerate(files):
-                    MAX_SIZE_MB = 100
-                    if file.size > MAX_SIZE_MB * 1024 * 1024:
-                         messages.error(request, f"File {file.name} exceeds limit.")
-                         return redirect('split_pdf_tool')
-
-                    doc = fitz.open(stream=file.read(), filetype="pdf")
-                    total_pages = doc.page_count
-                    current_splits = [p for p in split_at_pages if p < total_pages]
-                    
-                    ranges = []
-                    last_split = 0
-                    for split_point in current_splits:
-                        ranges.append((last_split, split_point))
-                        last_split = split_point
-                    if last_split < total_pages:
-                        ranges.append((last_split, total_pages))
+                for file in files:
+                    file.seek(0)
+                    with fitz.open(stream=file.read(), filetype="pdf") as source_doc:
+                        total_pages = source_doc.page_count
+                        # Filter split points that are within range
+                        valid_splits = [p for p in split_at_pages if p < total_pages]
                         
-                    base_name = os.path.splitext(file.name)[0]
-                    part_num = 1
-                    for r_start, r_end in ranges:
-                        if r_start >= r_end: continue
-                        new_doc = fitz.open()
-                        new_doc.insert_pdf(doc, from_page=r_start, to_page=r_end-1)
-                        out_pdf_bytes = new_doc.write()
-                        zip_file.writestr(f"{base_name}_part_{part_num}.pdf", out_pdf_bytes)
-                        new_doc.close()
-                        part_num += 1
-                    doc.close()
+                        ranges = []
+                        last_split = 0
+                        for split_point in valid_splits:
+                            ranges.append((last_split, split_point))
+                            last_split = split_point
+                        if last_split < total_pages:
+                            ranges.append((last_split, total_pages))
+                            
+                        base_name = os.path.splitext(file.name)[0]
+                        for part_idx, (r_start, r_end) in enumerate(ranges):
+                            if r_start >= r_end: continue
+                            
+                            part_doc = fitz.open()
+                            try:
+                                part_doc.insert_pdf(source_doc, from_page=r_start, to_page=r_end - 1)
+                                part_bytes = part_doc.write(garbage=4, deflate=True)
+                                zip_file.writestr(f"{base_name}_part_{part_idx + 1}.pdf", part_bytes)
+                            finally:
+                                part_doc.close()
 
             zip_buffer.seek(0)
-            response = HttpResponse(zip_buffer, content_type='application/zip')
-            response['Content-Disposition'] = 'attachment; filename="hewor_split_files.zip"'
+            response = HttpResponse(zip_buffer.getvalue(), content_type='application/zip')
+            response['Content-Disposition'] = 'attachment; filename="hewor_split_package.zip"'
             return response
 
         return render(request, 'core/split_pdf.html')
     except Exception as e:
-        logger.error(f"FATAL ERROR in split_pdf_tool: {e}")
-        return HttpResponse(f"System Error: {str(e)}. Please contact support.", status=500)
+        logger.error(f"ENGINE ERROR in split_pdf_tool: {str(e)}")
+        messages.error(request, "Split failed. Check if your PDF is corrupted or encrypted.")
+        return redirect('split_pdf_tool')
 
 def compress_pdf_tool(request):
     """
