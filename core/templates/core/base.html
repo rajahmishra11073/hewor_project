@@ -206,8 +206,7 @@
             color: var(--text-main);
             overflow-x: hidden;
             transition: all 0.4s ease;
-            cursor: none;
-            /* Enable custom cursor */
+            /* cursor: none; managed by JS */
         }
 
         /* Custom Cursor Styles */
@@ -231,13 +230,15 @@
             width: 8px;
             height: 8px;
             background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            /* Better visibility on white */
         }
 
         .cursor-dot-outline {
-            width: 32px;
-            height: 32px;
-            border: 2px solid white;
-            transition: opacity 0.5s ease, transform 0.15s ease-out, border-color 0.3s ease;
+            width: 40px;
+            height: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
         }
 
         /* Hover Text Primary */
@@ -1853,48 +1854,81 @@
                 ease: 'power2.out'
             });
 
-            // 3. Custom Cursor Logic (Always Visible)
+            // 3. Custom Cursor Logic (Enhanced Reliability)
             const cursorOutline = document.querySelector('.cursor-dot-outline');
             const cursorDot = document.querySelector('.cursor-dot');
 
-            if (cursorDot && cursorOutline && window.matchMedia("(pointer: fine)").matches) { // Only on desktop
-                // Ensure cursor elements are visible and follow mouse
-                cursorDot.style.display = 'block';
-                cursorOutline.style.display = 'block';
+            if (cursorDot && cursorOutline) {
+                const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-                // Show cursor after first move
-                window.addEventListener('mousemove', (e) => {
-                    const posX = e.clientX;
-                    const posY = e.clientY;
+                if (!isTouchDevice && window.matchMedia("(pointer: fine)").matches) {
+                    // Initialize: Hide dots until first move
+                    gsap.set([cursorDot, cursorOutline], { opacity: 0 });
 
-                    cursorDot.style.opacity = '1';
-                    cursorOutline.style.opacity = '1';
+                    const onMouseMove = (e) => {
+                        const { clientX: x, clientY: y } = e;
 
-                    // Using simple style updates for better performance/reliability
-                    requestAnimationFrame(() => {
-                        cursorDot.style.left = posX + 'px';
-                        cursorDot.style.top = posY + 'px';
-                        cursorOutline.style.left = posX + 'px';
-                        cursorOutline.style.top = posY + 'px';
+                        // Show cursors and hide system cursor on first move
+                        if (!window.cursorInitialized) {
+                            gsap.to([cursorDot, cursorOutline], { opacity: 1, duration: 0.3 });
+
+                            // Ultimate system cursor hiding: inject style tag
+                            const hideStyle = document.createElement('style');
+                            hideStyle.id = 'hide-system-cursor';
+                            hideStyle.innerHTML = '* { cursor: none !important; }';
+                            document.head.appendChild(hideStyle);
+
+                            window.cursorInitialized = true;
+                        }
+
+                        // Follow mouse
+                        cursorDot.style.left = `${x}px`;
+                        cursorDot.style.top = `${y}px`;
+
+                        // Outline follows with a slight delay for "premium" feel
+                        gsap.to(cursorOutline, {
+                            left: x,
+                            top: y,
+                            duration: 0.15,
+                            ease: 'power2.out'
+                        });
+                    };
+
+                    window.addEventListener('mousemove', onMouseMove, { passive: true });
+
+                    // Hover effects for all interactive elements
+                    const handleHover = (isEnter) => {
+                        gsap.to(cursorOutline, {
+                            scale: isEnter ? 1.5 : 1,
+                            backgroundColor: isEnter ? 'rgba(67, 97, 238, 0.1)' : 'transparent',
+                            borderColor: isEnter ? 'var(--primary-color)' : 'rgba(67, 97, 238, 0.5)',
+                            duration: 0.3
+                        });
+                        gsap.to(cursorDot, {
+                            scale: isEnter ? 0.5 : 1,
+                            duration: 0.3
+                        });
+                    };
+
+                    document.body.addEventListener('mouseover', (e) => {
+                        if (e.target.closest('a, button, .glass-card, input, textarea, select')) {
+                            handleHover(true);
+                        }
                     });
-                }, { passive: true });
 
-                // Hover effects
-                document.querySelectorAll('a, button, .glass-card, input, textarea, select').forEach(el => {
-                    el.addEventListener('mouseenter', () => {
-                        cursorOutline.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                        cursorOutline.style.borderColor = 'var(--primary-color)';
+                    document.body.addEventListener('mouseout', (e) => {
+                        if (e.target.closest('a, button, .glass-card, input, textarea, select')) {
+                            handleHover(false);
+                        }
                     });
-                    el.addEventListener('mouseleave', () => {
-                        cursorOutline.style.transform = 'translate(-50%, -50%) scale(1)';
-                        cursorOutline.style.borderColor = 'rgba(67, 97, 238, 0.5)';
-                    });
-                });
-            } else if (cursorDot && cursorOutline) {
-                // Hide custom cursor on touch devices and restore default cursor
-                cursorOutline.style.display = 'none';
-                cursorDot.style.display = 'none';
-                document.body.style.cursor = 'auto'; // Restore default cursor on mobile
+
+                } else {
+                    // Mobile/Touch fallback: Ensure system cursor is visible and hide custom dots
+                    cursorDot.style.display = 'none';
+                    cursorOutline.style.display = 'none';
+                    document.documentElement.style.cursor = 'auto';
+                    document.body.style.cursor = 'auto';
+                }
             }
 
             // Navbar Scroll Effect
