@@ -1644,7 +1644,8 @@ def word_to_pdf_tool(request):
                     # Method 2: python-docx -> HTML -> xhtml2pdf
                     try:
                         import docx
-                        from xhtml2pdf import pisa
+                        # from xhtml2pdf import pisa
+                        raise Exception("PDF conversion is temporarily handling high load. Please try again later.")
                         
                         doc = docx.Document(temp_docx_path)
                         html_content = "<html><head><style>body { font-family: Helvetica, sans-serif; }</style></head><body>"
@@ -1758,7 +1759,9 @@ def excel_to_pdf_tool(request):
 
                 try:
                     import pandas as pd
-                    from xhtml2pdf import pisa
+                    # from xhtml2pdf import pisa
+                    raise Exception("PDF conversion is temporarily maintenance. Please try again later.")
+
                     
                     # Read all sheets
                     xls = pd.ExcelFile(temp_xlsx_path)
