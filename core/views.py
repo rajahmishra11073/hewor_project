@@ -1107,15 +1107,16 @@ def split_pdf_tool(request):
     Input: PDF file(s) + comma-separated page numbers.
     Output: ZIP file of split parts.
     """
-    if request.method == 'POST':
-        files = request.FILES.getlist('pdf_files')
-        split_pages_str = request.POST.get('split_pages', '')
+    try:
+        if request.method == 'POST':
+            # ... (logic remains same, just indenting)
+            files = request.FILES.getlist('pdf_files')
+            split_pages_str = request.POST.get('split_pages', '')
 
-        if not files:
-            messages.error(request, "Please upload at least one PDF file.")
-            return redirect('split_pdf_tool')
+            if not files:
+                messages.error(request, "Please upload at least one PDF file.")
+                return redirect('split_pdf_tool')
 
-        try:
             # Parse split pages
             split_at_pages = [int(p.strip()) for p in split_pages_str.split(',') if p.strip().isdigit()]
             split_at_pages.sort()
@@ -1127,9 +1128,7 @@ def split_pdf_tool(request):
             # Prepare ZIP buffer for output
             zip_buffer = io.BytesIO()
             with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-                
                 for file_idx, file in enumerate(files):
-                    # Check Limit
                     MAX_SIZE_MB = 100
                     if file.size > MAX_SIZE_MB * 1024 * 1024:
                          messages.error(request, f"File {file.name} exceeds limit.")
@@ -1137,54 +1136,26 @@ def split_pdf_tool(request):
 
                     doc = fitz.open(stream=file.read(), filetype="pdf")
                     total_pages = doc.page_count
-                    
-                    # Determine split ranges
-                    start_page = 0
-                    part_num = 1
-                    
-                    # Logic to handle splits
-                    # e.g. split at 5, 10 -> [0-4], [5-9], [10-end]
-                    
                     current_splits = [p for p in split_at_pages if p < total_pages]
-                    
-                    # Logic: If split page is 5, it means split AFTER page 5 (pages 1-5 in output).
-                    # fitz uses 0-indexed. So split point 5 means page index 5 is start of NEXT doc.
-                    # Range 1: 0 to 4.
                     
                     ranges = []
                     last_split = 0
-                    
                     for split_point in current_splits:
-                        # User enters "5" -> they probably mean page 5 (visual). 
-                        # Code usually interprets "split after page 5".
-                        # So range is 0 to 4 (5 pages).
-                        # p index = 5 is the 6th page.
-                        # Wait, let's stick to standard PDF logic:
-                        # Input: "5" -> File 1: Pages 1-5. File 2: Pages 6-end.
-                        # Index range: [0, 5) and [5, total)
-                        
                         ranges.append((last_split, split_point))
                         last_split = split_point
-                        
-                    # Add final range
                     if last_split < total_pages:
                         ranges.append((last_split, total_pages))
                         
                     base_name = os.path.splitext(file.name)[0]
-                    
+                    part_num = 1
                     for r_start, r_end in ranges:
                         if r_start >= r_end: continue
-                        
                         new_doc = fitz.open()
                         new_doc.insert_pdf(doc, from_page=r_start, to_page=r_end-1)
-                        
-                        # Save to ZIP
                         out_pdf_bytes = new_doc.write()
                         zip_file.writestr(f"{base_name}_part_{part_num}.pdf", out_pdf_bytes)
-                        
                         new_doc.close()
                         part_num += 1
-                        
                     doc.close()
 
             zip_buffer.seek(0)
@@ -1192,12 +1163,10 @@ def split_pdf_tool(request):
             response['Content-Disposition'] = 'attachment; filename="hewor_split_files.zip"'
             return response
 
-        except Exception as e:
-            logger.error(f"Error splitting PDF: {e}")
-            messages.error(request, f"Error processing file: {str(e)}")
-            return redirect('split_pdf_tool')
-
-    return render(request, 'core/split_pdf.html')
+        return render(request, 'core/split_pdf.html')
+    except Exception as e:
+        logger.error(f"FATAL ERROR in split_pdf_tool: {e}")
+        return HttpResponse(f"System Error: {str(e)}. Please contact support.", status=500)
 
 def compress_pdf_tool(request):
     """
