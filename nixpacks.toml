@@ -1,8 +1,4 @@
+providers = ["python"]
+
 [phases.setup]
-nixPkgs = ["xorg.libxcb", "libglvnd", "glib", "poppler_utils", "zlib"]
-
-[phases.build]
-cmds = ["python manage.py collectstatic --noinput", "python manage.py migrate"]
-
-[start]
-cmd = "gunicorn hewor_project.wsgi:application"
+nixPkgs = ["cairo", "pkg-config", "gobject-introspection", "mariadb-connector-c"]
