@@ -218,21 +218,24 @@
             left: 0;
             transform: translate(-50%, -50%);
             border-radius: 50%;
-            z-index: 9999;
-            pointer-events: none;
+            z-index: 2147483647 !important;
+            pointer-events: none !important;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            mix-blend-mode: exclusion;
         }
 
         .cursor-dot {
             width: 8px;
             height: 8px;
-            background-color: var(--primary-color);
+            background-color: white;
         }
 
         .cursor-dot-outline {
-            width: 40px;
-            height: 40px;
-            border: 1px solid rgba(67, 97, 238, 0.5);
-            transition: transform 0.2s ease-out;
+            width: 32px;
+            height: 32px;
+            border: 2px solid white;
+            transition: opacity 0.5s ease, transform 0.15s ease-out, border-color 0.3s ease;
         }
 
         /* Hover Text Primary */
@@ -1109,10 +1112,6 @@
 </head>
 
 <body>
-    <!-- Custom Cursor Element (Always Visible) -->
-    <div class="cursor-dot-outline"></div>
-    <div class="cursor-dot"></div>
-
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg sticky-top"
         style="background-color: transparent !important; backdrop-filter: blur(5px);">
@@ -1856,25 +1855,26 @@
             const cursorDot = document.querySelector('.cursor-dot');
 
             if (cursorDot && cursorOutline && window.matchMedia("(pointer: fine)").matches) { // Only on desktop
-                // Ensure cursor elements are visible
+                // Ensure cursor elements are visible and follow mouse
                 cursorDot.style.display = 'block';
                 cursorOutline.style.display = 'block';
 
+                // Show cursor after first move
                 window.addEventListener('mousemove', (e) => {
                     const posX = e.clientX;
                     const posY = e.clientY;
 
-                    // Dot follows instantly
-                    cursorDot.style.left = `${posX}px`;
-                    cursorDot.style.top = `${posY}px`;
+                    cursorDot.style.opacity = '1';
+                    cursorOutline.style.opacity = '1';
 
-                    // Outline follows with lag (managed by CSS transition or GSAP)
-                    // Using animate() for smoother performance
-                    cursorOutline.animate({
-                        left: `${posX}px`,
-                        top: `${posY}px`
-                    }, { duration: 500, fill: "forwards" });
-                });
+                    // Using simple style updates for better performance/reliability
+                    requestAnimationFrame(() => {
+                        cursorDot.style.left = posX + 'px';
+                        cursorDot.style.top = posY + 'px';
+                        cursorOutline.style.left = posX + 'px';
+                        cursorOutline.style.top = posY + 'px';
+                    });
+                }, { passive: true });
 
                 // Hover effects
                 document.querySelectorAll('a, button, .glass-card, input, textarea, select').forEach(el => {
@@ -1905,6 +1905,10 @@
             });
         });
     </script>
+
+    <!-- Custom Cursor at EOF for maximal z-index stacking -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-dot-outline"></div>
 
     <!-- Spline 3D Viewer - Lazy Loaded for Performance -->
     <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.28/build/spline-viewer.js" defer></script>
