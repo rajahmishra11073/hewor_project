@@ -3,13 +3,16 @@
 
 {% block title %}Free PDF Splitter | Hewor Agency{% endblock %}
 
-{% block meta_description %}Split PDF files into separate pages online for free. No signup required. Extract specific pages from your PDF documents easily.{% endblock %}
+{% block meta_description %}Split PDF files into separate pages online for free. No signup required. Extract specific
+pages from your PDF documents easily.{% endblock %}
 
-{% block meta_keywords %}split pdf, pdf splitter, separate pdf pages, extract pdf pages, free pdf splitter, hewor{% endblock %}
+{% block meta_keywords %}split pdf, pdf splitter, separate pdf pages, extract pdf pages, free pdf splitter, hewor{%
+endblock %}
 
 {% block og_title %}Free PDF Splitter - Split PDF into Pages Online | Hewor{% endblock %}
 
-{% block og_description %}Split your PDF into separate pages instantly. 100% free, no registration required.{% endblock %}
+{% block og_description %}Split your PDF into separate pages instantly. 100% free, no registration required.{% endblock
+%}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: var(--pt-page-bg);">
@@ -125,15 +128,18 @@
                     const li = document.createElement('li');
                     li.className = 'd-flex justify-content-between align-items-center mb-2 p-3 bg-white rounded shadow-sm border';
 
-                    li.innerHTML = ` <div class="d-flex align-items-center overflow-hidden" > <div class="rounded p-2 bg-warning-subtle me-3 text-warning" ><i class="fas fa-file-pdf" ></i></div> <div> <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;" >$ {
-                                file.name
-                            }
-
-                            </h6> <small class="text-muted" >$ {
-                                (file.size / (1024 * 1024)).toFixed(2)
-                            }
-
-                            MB</small> </div> </div> <i class="fas fa-check-circle text-success" ></i> `;
+                    li.innerHTML = `
+                        <div class="d-flex align-items-center overflow-hidden">
+                            <div class="rounded p-2 bg-warning-subtle me-3 text-warning">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;">${file.name}</h6>
+                                <small class="text-muted">${(file.size / (1024 * 1024)).toFixed(2)} MB</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-check-circle text-success"></i>
+                    `;
                     fileListUl.appendChild(li);
                 });
 

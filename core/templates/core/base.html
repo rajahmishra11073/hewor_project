@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Hewor | Premium Service Agency{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{% static 'favicon.ico' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'core/img/favicon.svg' %}">
 
     <!-- SEO Meta Tags -->
     <meta name="description"
@@ -207,7 +207,7 @@
             overflow-x: hidden;
             transition: all 0.4s ease;
             cursor: none;
-            /* Hide default cursor */
+            /* Enable custom cursor */
         }
 
         /* Custom Cursor Styles */
@@ -370,6 +370,15 @@
         /* Remove default link underlined */
         a {
             text-decoration: none !important;
+            cursor: pointer;
+            /* Always show pointer for links */
+        }
+
+        /* Ensure buttons show pointer cursor */
+        button,
+        .btn,
+        [role="button"] {
+            cursor: pointer !important;
         }
 
         /* Utility overrides for Dark Mode */
@@ -487,16 +496,28 @@
         }
 
         /* Form Inputs */
-        .form-control {
+        .form-control,
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        textarea,
+        select {
             background-color: var(--input-bg);
             border-color: var(--input-border);
             color: var(--input-text);
+            cursor: text;
+            /* Show text cursor in input fields */
         }
 
-        .form-control:focus {
+        .form-control:focus,
+        input:focus,
+        textarea:focus {
             background-color: var(--input-bg);
             color: var(--input-text);
             border-color: var(--primary-color);
+            cursor: text;
+            /* Ensure text cursor visible when focused */
         }
 
         /* Theme Toggle Button */
@@ -1088,7 +1109,7 @@
 </head>
 
 <body>
-    <!-- Custom Cursor Element -->
+    <!-- Custom Cursor Element (Always Visible) -->
     <div class="cursor-dot-outline"></div>
     <div class="cursor-dot"></div>
 
@@ -1572,6 +1593,23 @@
             border-radius: 50%;
             display: inline-block;
         }
+
+        /* Mobile Responsive Chat */
+        @media (max-width: 480px) {
+            .chat-widget {
+                width: 90vw;
+                right: 5vw;
+                bottom: 100px;
+                height: 60vh;
+                z-index: 10002;
+                /* Ensure above everything */
+            }
+
+            .chat-toggle-btn {
+                right: 20px;
+                bottom: 20px;
+            }
+        }
     </style>
 
     <script>
@@ -1813,11 +1851,15 @@
                 ease: 'power3.out'
             });
 
-            // 3. Custom Cursor Logic
+            // 3. Custom Cursor Logic (Always Visible)
             const cursorOutline = document.querySelector('.cursor-dot-outline');
             const cursorDot = document.querySelector('.cursor-dot');
 
-            if (window.matchMedia("(pointer: fine)").matches) { // Only on desktop
+            if (cursorDot && cursorOutline && window.matchMedia("(pointer: fine)").matches) { // Only on desktop
+                // Ensure cursor elements are visible
+                cursorDot.style.display = 'block';
+                cursorOutline.style.display = 'block';
+
                 window.addEventListener('mousemove', (e) => {
                     const posX = e.clientX;
                     const posY = e.clientY;
@@ -1835,7 +1877,7 @@
                 });
 
                 // Hover effects
-                document.querySelectorAll('a, button, .glass-card').forEach(el => {
+                document.querySelectorAll('a, button, .glass-card, input, textarea, select').forEach(el => {
                     el.addEventListener('mouseenter', () => {
                         cursorOutline.style.transform = 'translate(-50%, -50%) scale(1.5)';
                         cursorOutline.style.borderColor = 'var(--primary-color)';
@@ -1845,10 +1887,11 @@
                         cursorOutline.style.borderColor = 'rgba(67, 97, 238, 0.5)';
                     });
                 });
-            } else {
-                // Hide on touch devices
+            } else if (cursorDot && cursorOutline) {
+                // Hide custom cursor on touch devices and restore default cursor
                 cursorOutline.style.display = 'none';
                 cursorDot.style.display = 'none';
+                document.body.style.cursor = 'auto'; // Restore default cursor on mobile
             }
 
             // Navbar Scroll Effect

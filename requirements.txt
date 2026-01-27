@@ -15,9 +15,11 @@ python-pptx
 reportlab
 pikepdf
 opencv-python-headless
-PyMuPDF
+PyMuPDF==1.25.1
 django-cleanup
 firebase-admin
 dj-database-url
 google-genai
 pdf2docx
+xhtml2pdf
+img2pdf

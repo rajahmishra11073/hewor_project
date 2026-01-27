@@ -3,13 +3,16 @@
 
 {% block title %}Free PDF Merger | Hewor Agency{% endblock %}
 
-{% block meta_description %}Merge multiple PDF files into one document online for free. No signup required. Fast, secure PDF combining tool. Drag and drop interface.{% endblock %}
+{% block meta_description %}Merge multiple PDF files into one document online for free. No signup required. Fast, secure
+PDF combining tool. Drag and drop interface.{% endblock %}
 
-{% block meta_keywords %}merge pdf, combine pdf, join pdf files, pdf merger, free pdf combiner, online merge pdf, hewor{% endblock %}
+{% block meta_keywords %}merge pdf, combine pdf, join pdf files, pdf merger, free pdf combiner, online merge pdf,
+hewor{% endblock %}
 
 {% block og_title %}Free PDF Merger - Combine Multiple PDFs Online | Hewor{% endblock %}
 
-{% block og_description %}Merge your PDF files into one document instantly. 100% free, no registration required.{% endblock %}
+{% block og_description %}Merge your PDF files into one document instantly. 100% free, no registration required.{%
+endblock %}
 
 {% block content %}
 <div class="d-flex align-items-center justify-content-center min-vh-100 py-5" style="background: var(--pt-page-bg);">
@@ -126,15 +129,18 @@
                     const li = document.createElement('li');
                     li.className = 'file-item d-flex justify-content-between align-items-center mb-2 p-3 bg-white rounded shadow-sm border';
 
-                    li.innerHTML = ` <div class="d-flex align-items-center overflow-hidden" > <div class="rounded p-2 bg-danger-subtle me-3 text-danger" > <i class="fas fa-file-pdf" ></i> </div> <div class="text-truncate" > <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;" >$ {
-                                file.name
-                            }
-
-                            </h6> <small class="text-muted x-small" >$ {
-                                (file.size / (1024 * 1024)).toFixed(2)
-                            }
-
-                            MB</small> </div> </div> <i class="fas fa-check-circle text-success fs-5" ></i> `;
+                    li.innerHTML = `
+                        <div class="d-flex align-items-center overflow-hidden">
+                            <div class="rounded p-2 bg-danger-subtle me-3 text-danger">
+                                <i class="fas fa-file-pdf"></i>
+                            </div>
+                            <div class="text-truncate">
+                                <h6 class="mb-0 fw-bold small text-dark text-truncate" style="max-width: 200px;">${file.name}</h6>
+                                <small class="text-muted x-small">${(file.size / (1024 * 1024)).toFixed(2)} MB</small>
+                            </div>
+                        </div>
+                        <i class="fas fa-check-circle text-success fs-5"></i>
+                    `;
                     fileListUl.appendChild(li);
                 });
 
